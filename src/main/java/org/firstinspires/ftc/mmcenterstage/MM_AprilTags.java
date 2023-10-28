@@ -62,9 +62,9 @@ public class MM_AprilTags {
         VisionPortal.Builder builder = new VisionPortal.Builder();
 
 
-            builder.setCamera(opMode.hardwareMap.get(WebcamName.class, "Webcam 1"));
+        builder.setCamera(opMode.hardwareMap.get(WebcamName.class, "Webcam 1"));
 
-        builder.setCameraResolution(new Size(640, 480));
+        builder.setCameraResolution(new Size(1920, 1080));
 
         // Set and enable the processor.
         builder.addProcessor(aprilTagProcessor);

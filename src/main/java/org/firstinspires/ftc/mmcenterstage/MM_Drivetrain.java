@@ -1,18 +1,27 @@
 package org.firstinspires.ftc.mmcenterstage;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
 
 public class MM_Drivetrain {
     private final LinearOpMode opMode;
-    private final double APRIL_TAG_THRESHOLD = 2;
-    private final double DRIVE_P_COEFF = .09654;
-    private final double MAX_DRIVE_POWER = .7;
+    private ElapsedTime timer = new ElapsedTime();
+
+    @Config
+    public static class DrivePower {
+        public static double MAX_DRIVE_POWER = .7;
+        public static double APRIL_TAG_THRESHOLD = 2;
+        public static double DRIVE_P_COEFF = .09654;
+        public static double RAMP_WAIT_TIME = .1;
+    }
 
     private DcMotorEx flMotor = null;
     private DcMotorEx frMotor = null;
@@ -23,12 +32,14 @@ public class MM_Drivetrain {
 
     private Gamepad currentGamepad1;
     private Gamepad previousGamepad1;
+    private Telemetry dashboardTelemetry;
     boolean isSlow = false;
 
-    public MM_Drivetrain(LinearOpMode opMode, Gamepad currentGamepad1, Gamepad previousGamepad1) {
+    public MM_Drivetrain(LinearOpMode opMode, Gamepad currentGamepad1, Gamepad previousGamepad1, Telemetry dashboardTelemetry) {
         this.opMode = opMode;
         this.currentGamepad1 = currentGamepad1;
         this.previousGamepad1 = previousGamepad1;
+        this.dashboardTelemetry = dashboardTelemetry;
         init();
     }
 
@@ -73,42 +84,77 @@ public class MM_Drivetrain {
     }
 
     public void driveToAprilTag() {
-        opMode.telemetry.addData("error", getError("y",3, 2));
+        boolean rampedUp = false;
 
-        while (opMode.opModeIsActive() && getError("y", 3, 2) > APRIL_TAG_THRESHOLD){
-            double power = Math.abs(getError("y", 3, 2) * DRIVE_P_COEFF * MAX_DRIVE_POWER);
-            opMode.telemetry.addData("power", power);
-            opMode.telemetry.update();
-            flMotor.setPower(power);
-            frMotor.setPower(power);
-            blMotor.setPower(power);
-            brMotor.setPower(power);
+        timer.reset();
+        while (opMode.opModeIsActive() && getError("y", 3, 9) > DrivePower.APRIL_TAG_THRESHOLD) {
+            double power = Math.abs(getError("y", 3, 2) * DrivePower.DRIVE_P_COEFF * DrivePower.MAX_DRIVE_POWER);
+
+            if (!rampedUp) {
+                for (double i = 0; i < DrivePower.MAX_DRIVE_POWER; i += .1) {
+                    opMode.telemetry.addData("power", power);
+                    opMode.telemetry.update();
+                    flMotor.setPower(i);
+                    frMotor.setPower(i);
+                    blMotor.setPower(i);
+                    brMotor.setPower(i);
+
+                    timer.reset();
+
+                    while(opMode.opModeIsActive() && timer.time() < DrivePower.RAMP_WAIT_TIME ){
+                        dashboardTelemetry.addData("time", timer.time());
+                        dashboardTelemetry.addData("error", getError("y", 6, 9));
+                        dashboardTelemetry.addData("i", i);
+                        dashboardTelemetry.update();
+
+                        if(getError("y", 6, 9) <= DrivePower.APRIL_TAG_THRESHOLD){
+                            break;
+                        }
+                    }
+                    if(getError("y", 6, 9) <= DrivePower.APRIL_TAG_THRESHOLD){
+                        break;
+                    }
+
+                }
+                rampedUp = true;
+            }
+
+            flMotor.setPower(0);
+            frMotor.setPower(0);
+            blMotor.setPower(0);
+            brMotor.setPower(0);
+
         }
+        while (opMode.opModeIsActive()){
+
+        }
+
     }
 
+
     private double getError(String axis, double target, int targetId) {
-       double error = 0;
+        double error = 0;
 
         AprilTagDetection tagId = getId(targetId);
 
-        if (axis.equals("y") && tagId != null)  {
-           error = target - tagId.ftcPose.y;
-           return Math.abs(error);
-       } else {
-           opMode.telemetry.addData("no aprilTags", "detected");
-       }
-       if(axis.equals("x")){
-           error = target - tagId.ftcPose.x;
-       }
-       return Math.abs(error);
+        if (axis.equals("y") && tagId != null) {
+            error = target - tagId.ftcPose.y;
+            return Math.abs(error);
+        } else {
+            opMode.telemetry.addData("no aprilTags", "detected");
+        }
+        if (axis.equals("x")) {
+            error = target - tagId.ftcPose.x;
+        }
+        return Math.abs(error);
     }
 
     public AprilTagDetection getId(int id) {
         List<AprilTagDetection> currentDetections = aprilTags.aprilTagProcessor.getDetections();
         opMode.telemetry.addData("list size", currentDetections.size());
 
-        for(AprilTagDetection detection : currentDetections) {
-            if(detection.id == id){
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.id == id) {
                 opMode.telemetry.addData("id", detection.id);
                 return detection;
             }
@@ -119,7 +165,7 @@ public class MM_Drivetrain {
     }
 
 
-    public void init(){
+    public void init() {
         flMotor = opMode.hardwareMap.get(DcMotorEx.class, "flMotor");
         frMotor = opMode.hardwareMap.get(DcMotorEx.class, "frMotor");
         blMotor = opMode.hardwareMap.get(DcMotorEx.class, "blMotor");
