@@ -19,7 +19,7 @@ public class MM_Drivetrain {
     public static class DrivePower {
         public static double MAX_DRIVE_POWER = .7;
         public static double APRIL_TAG_THRESHOLD = 2;
-        public static double DRIVE_P_COEFF = .09654;
+        public static double DRIVE_P_COEFF = .0166;
         public static double RAMP_WAIT_TIME = .1;
     }
 
@@ -87,13 +87,12 @@ public class MM_Drivetrain {
         boolean rampedUp = false;
 
         timer.reset();
-        while (opMode.opModeIsActive() && getError("y", 3, 9) > DrivePower.APRIL_TAG_THRESHOLD) {
-            double power = Math.abs(getError("y", 3, 2) * DrivePower.DRIVE_P_COEFF * DrivePower.MAX_DRIVE_POWER);
+        while (opMode.opModeIsActive() && getError("y", 9, 9) > DrivePower.APRIL_TAG_THRESHOLD) {
+
 
             if (!rampedUp) {
                 for (double i = 0; i < DrivePower.MAX_DRIVE_POWER; i += .1) {
-                    opMode.telemetry.addData("power", power);
-                    opMode.telemetry.update();
+
                     flMotor.setPower(i);
                     frMotor.setPower(i);
                     blMotor.setPower(i);
@@ -119,15 +118,19 @@ public class MM_Drivetrain {
                 rampedUp = true;
             }
 
-            flMotor.setPower(0);
-            frMotor.setPower(0);
-            blMotor.setPower(0);
-            brMotor.setPower(0);
+            double power = Math.abs(getError("y", 10, 2) * DrivePower.DRIVE_P_COEFF * DrivePower.MAX_DRIVE_POWER);
+            power = Math.min(power, DrivePower.MAX_DRIVE_POWER);
+
+            flMotor.setPower(power);
+            frMotor.setPower(power);
+            blMotor.setPower(power);
+            brMotor.setPower(power);
 
         }
-        while (opMode.opModeIsActive()){
-
-        }
+        flMotor.setPower(0);
+        frMotor.setPower(0);
+        blMotor.setPower(0);
+        brMotor.setPower(0);
 
     }
 
