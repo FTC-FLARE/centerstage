@@ -1,9 +1,11 @@
-#Sat Oct 28 14:11:25 EDT 2023
+#Thu Nov 02 19:38:19 EDT 2023
 base.0=C\:\\Users\\ftc12\\Documents\\FTC_SDK\\centerstage\\TeamCode\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=C\:\\Users\\ftc12\\Documents\\FTC_SDK\\centerstage\\TeamCode\\build\\intermediates\\dex\\debug\\mergeLibDexDebug\\10\\classes.dex
 base.10=C\:\\Users\\ftc12\\Documents\\FTC_SDK\\centerstage\\TeamCode\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\15\\classes.dex
 base.11=C\:\\Users\\ftc12\\Documents\\FTC_SDK\\centerstage\\TeamCode\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\1\\classes.dex
 base.12=C\:\\Users\\ftc12\\Documents\\FTC_SDK\\centerstage\\TeamCode\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
+base.13=C\:\\Users\\ftc12\\Documents\\FTC_SDK\\centerstage\\TeamCode\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\12\\classes.dex
+base.14=C\:\\Users\\ftc12\\Documents\\FTC_SDK\\centerstage\\TeamCode\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\7\\classes.dex
 base.2=C\:\\Users\\ftc12\\Documents\\FTC_SDK\\centerstage\\TeamCode\\build\\intermediates\\dex\\debug\\mergeLibDexDebug\\11\\classes.dex
 base.3=C\:\\Users\\ftc12\\Documents\\FTC_SDK\\centerstage\\TeamCode\\build\\intermediates\\dex\\debug\\mergeLibDexDebug\\2\\classes.dex
 base.4=C\:\\Users\\ftc12\\Documents\\FTC_SDK\\centerstage\\TeamCode\\build\\intermediates\\dex\\debug\\mergeLibDexDebug\\3\\classes.dex
@@ -17,6 +19,8 @@ path.1=10/classes.dex
 path.10=15/classes.dex
 path.11=1/classes.dex
 path.12=classes2.dex
+path.13=12/classes.dex
+path.14=7/classes.dex
 path.2=11/classes.dex
 path.3=2/classes.dex
 path.4=3/classes.dex
@@ -30,6 +34,8 @@ renamed.1=classes2.dex
 renamed.10=classes11.dex
 renamed.11=classes12.dex
 renamed.12=classes13.dex
+renamed.13=classes14.dex
+renamed.14=classes15.dex
 renamed.2=classes3.dex
 renamed.3=classes4.dex
 renamed.4=classes5.dex

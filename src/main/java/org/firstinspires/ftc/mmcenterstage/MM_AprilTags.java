@@ -88,7 +88,7 @@ public class MM_AprilTags {
         opMode.telemetry.addData(">", "Touch Play to start OpMode");
         opMode.telemetry.update();
 
-        opMode.sleep(5000);
+        opMode.sleep(1000);
     }   // end method initAprilTag()
 
     /**

@@ -21,6 +21,7 @@ public class MM_Drivetrain {
         public static double APRIL_TAG_THRESHOLD = 2;
         public static double DRIVE_P_COEFF = .0166;
         public static double RAMP_WAIT_TIME = .1;
+        public static double MIN_DRIVE_POWER = .14;
     }
 
     private DcMotorEx flMotor = null;
@@ -88,44 +89,44 @@ public class MM_Drivetrain {
         boolean rampedUp = false;
 
         timer.reset();
-        while (opMode.opModeIsActive() && getError("y", 9, 9) > DrivePower.APRIL_TAG_THRESHOLD) {
-
-
+        while (opMode.opModeIsActive() && getError("y", 6, 2) > DrivePower.APRIL_TAG_THRESHOLD) {
             if (!rampedUp) {
                 for (double i = 0; i < DrivePower.MAX_DRIVE_POWER; i += .1) {
-
                     flMotor.setPower(i);
                     frMotor.setPower(i);
                     blMotor.setPower(i);
                     brMotor.setPower(i);
 
                     timer.reset();
-
                     while(opMode.opModeIsActive() && timer.time() < DrivePower.RAMP_WAIT_TIME ){
                         dashboardTelemetry.addData("time", timer.time());
-                        dashboardTelemetry.addData("error", getError("y", 6, 9));
+                        dashboardTelemetry.addData("error", getError("y", 6, 2));
                         dashboardTelemetry.addData("i", i);
                         dashboardTelemetry.update();
-
-                        if(getError("y", 6, 9) <= DrivePower.APRIL_TAG_THRESHOLD){
+                        if(getError("y", 6, 2) <= DrivePower.APRIL_TAG_THRESHOLD){
                             break;
                         }
                     }
-                    if(getError("y", 6, 9) <= DrivePower.APRIL_TAG_THRESHOLD){
+                    if(getError("y", 6, 2) <= DrivePower.APRIL_TAG_THRESHOLD){
                         break;
                     }
-
                 }
                 rampedUp = true;
             }
 
-            double power = Math.abs(getError("y", 10, 2) * DrivePower.DRIVE_P_COEFF * DrivePower.MAX_DRIVE_POWER);
+            double power = Math.abs(getError("y", 6, 2) * DrivePower.DRIVE_P_COEFF * DrivePower.MAX_DRIVE_POWER);
             power = Math.min(power, DrivePower.MAX_DRIVE_POWER);
+            power = Math.max(power, DrivePower.MIN_DRIVE_POWER);
 
             flMotor.setPower(power);
             frMotor.setPower(power);
             blMotor.setPower(power);
             brMotor.setPower(power);
+
+            dashboardTelemetry.addData("distance", getId(2).ftcPose.y);
+            dashboardTelemetry.addData("error", getError("y", 6, 2));
+            dashboardTelemetry.addData("power", power);
+            dashboardTelemetry.update();
 
         }
         flMotor.setPower(0);
@@ -133,6 +134,12 @@ public class MM_Drivetrain {
         blMotor.setPower(0);
         brMotor.setPower(0);
 
+        timer.reset();
+        while (opMode.opModeIsActive() && timer.time() < 6) {
+            dashboardTelemetry.addData("distance", getId(2).ftcPose.y);
+            dashboardTelemetry.addData("error", getError("y", 5, 2));
+            dashboardTelemetry.update();
+        }
     }
 
 
