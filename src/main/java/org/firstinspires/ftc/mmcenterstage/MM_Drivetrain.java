@@ -47,6 +47,7 @@ public class MM_Drivetrain {
         double drivePower = -opMode.gamepad1.left_stick_y;
         double strafePower = opMode.gamepad1.left_stick_x;
         double rotatePower = opMode.gamepad1.right_stick_x;
+        opMode.telemetry.addData("test", "push");
 
         double FLPower = drivePower + strafePower + rotatePower;
         double FRPower = drivePower - strafePower - rotatePower;
