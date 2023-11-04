@@ -117,12 +117,15 @@ public class MM_Drivetrain {
                 }
                 rampedUp = true;
             }
+
             double error = getError("y", 6, 2);
             if (error == 9999) {
                 detectAttemptCount++;
             } else {
                 detectAttemptCount = 0;
             }
+            dashboardTelemetry.addData("detect attempts", detectAttemptCount);
+            dashboardTelemetry.update();
 
             if (error <= DashboardConstants.APRIL_TAG_THRESHOLD || (error == 9999 && detectAttemptCount > DashboardConstants.MAX_DETECT_ATTEMPTS)) {
                 keepGoing = false;
@@ -137,10 +140,10 @@ public class MM_Drivetrain {
             blMotor.setPower(power);
             brMotor.setPower(power);
 
-            dashboardTelemetry.addData("distance", getId(2).ftcPose.y);
+            //dashboardTelemetry.addData("distance", getId(2).ftcPose.y);
             dashboardTelemetry.addData("error", getError("y", 6, 2));
             dashboardTelemetry.addData("power", power);
-            dashboardTelemetry.update();
+           // dashboardTelemetry.update();
 
         }
         flMotor.setPower(0);
