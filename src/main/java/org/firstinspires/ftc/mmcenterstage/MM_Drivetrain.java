@@ -16,12 +16,13 @@ public class MM_Drivetrain {
     private ElapsedTime timer = new ElapsedTime();
 
     @Config
-    public static class DrivePower {
+    public static class DashboardConstants {
         public static double MAX_DRIVE_POWER = .7;
         public static double APRIL_TAG_THRESHOLD = 2;
         public static double DRIVE_P_COEFF = .0166;
         public static double RAMP_WAIT_TIME = .1;
         public static double MIN_DRIVE_POWER = .14;
+        public static double MAX_DETECT_ATTEMPTS = 2;
     }
 
     private DcMotorEx flMotor = null;
@@ -88,35 +89,48 @@ public class MM_Drivetrain {
     public void driveToAprilTag() {
         boolean rampedUp = false;
 
+        // getError("y", 6, 2) > DashboardConstants.APRIL_TAG_THRESHOLD;
+        boolean keepGoing = true;
+        int detectAttemptCount = 0;
         timer.reset();
-        while (opMode.opModeIsActive() && getError("y", 6, 2) > DrivePower.APRIL_TAG_THRESHOLD) {
+        while (opMode.opModeIsActive() && keepGoing) {
             if (!rampedUp) {
-                for (double i = 0; i < DrivePower.MAX_DRIVE_POWER; i += .1) {
+                for (double i = 0; i < DashboardConstants.MAX_DRIVE_POWER; i += .1) {
                     flMotor.setPower(i);
                     frMotor.setPower(i);
                     blMotor.setPower(i);
                     brMotor.setPower(i);
 
                     timer.reset();
-                    while(opMode.opModeIsActive() && timer.time() < DrivePower.RAMP_WAIT_TIME ){
+                    while(opMode.opModeIsActive() && timer.time() < DashboardConstants.RAMP_WAIT_TIME ){
                         dashboardTelemetry.addData("time", timer.time());
-                        dashboardTelemetry.addData("error", getError("y", 6, 2));
+//                      dashboardTelemetry.addData("error", getError("y", 6, 2));
                         dashboardTelemetry.addData("i", i);
                         dashboardTelemetry.update();
-                        if(getError("y", 6, 2) <= DrivePower.APRIL_TAG_THRESHOLD){
-                            break;
-                        }
+//                        if(getError("y", 6, 2) <= DashboardConstants.APRIL_TAG_THRESHOLD){
+//                            break;
+//                        }
                     }
-                    if(getError("y", 6, 2) <= DrivePower.APRIL_TAG_THRESHOLD){
-                        break;
-                    }
+//                    if(getError("y", 6, 2) <= DashboardConstants.APRIL_TAG_THRESHOLD){
+//                        break;
+//                    }
                 }
                 rampedUp = true;
             }
+            double error = getError("y", 6, 2);
+            if (error == 9999) {
+                detectAttemptCount++;
+            } else {
+                detectAttemptCount = 0;
+            }
 
-            double power = Math.abs(getError("y", 6, 2) * DrivePower.DRIVE_P_COEFF * DrivePower.MAX_DRIVE_POWER);
-            power = Math.min(power, DrivePower.MAX_DRIVE_POWER);
-            power = Math.max(power, DrivePower.MIN_DRIVE_POWER);
+            if (error <= DashboardConstants.APRIL_TAG_THRESHOLD || (error == 9999 && detectAttemptCount > DashboardConstants.MAX_DETECT_ATTEMPTS)) {
+                keepGoing = false;
+            }
+
+            double power = Math.abs(getError("y", 6, 2) * DashboardConstants.DRIVE_P_COEFF * DashboardConstants.MAX_DRIVE_POWER);
+            power = Math.min(power, DashboardConstants.MAX_DRIVE_POWER);
+            power = Math.max(power, DashboardConstants.MIN_DRIVE_POWER);
 
             flMotor.setPower(power);
             frMotor.setPower(power);
@@ -144,7 +158,7 @@ public class MM_Drivetrain {
 
 
     private double getError(String axis, double target, int targetId) {
-        double error = 0;
+        double error = 9999;
 
         AprilTagDetection tagId = getId(targetId);
 
