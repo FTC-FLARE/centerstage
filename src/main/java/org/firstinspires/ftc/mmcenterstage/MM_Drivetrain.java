@@ -88,26 +88,27 @@ public class MM_Drivetrain {
     }
 
     public void driveToAprilTag() {
-        double error = 9999;
+        double errorY = 9999;
         boolean keepGoing = true;
         detectAttemptCount = 0;
 
         timer.reset();
         while (opMode.opModeIsActive() && keepGoing) {
 
-            error = getError("y", 6, 2);
-            if (error == 9999) {
+
+            errorY = getErrorY(6, 2);
+            if (errorY == 9999) {
                 detectAttemptCount++;
             } else {
                 detectAttemptCount = 0;
             }
             dashboardTelemetry.addData("detect attempts", detectAttemptCount);
 
-            if (error <= DashboardConstants.APRIL_TAG_THRESHOLD || (error == 9999 && detectAttemptCount > DashboardConstants.MAX_DETECT_ATTEMPTS)) {
+            if (errorY <= DashboardConstants.APRIL_TAG_THRESHOLD || (errorY == 9999 && detectAttemptCount > DashboardConstants.MAX_DETECT_ATTEMPTS)) {
                 keepGoing = false;
             }
 
-            double power = Math.abs(getError("y", 6, 2) * DashboardConstants.DRIVE_P_COEFF * DashboardConstants.MAX_DRIVE_POWER);
+            double power = errorY * DashboardConstants.DRIVE_P_COEFF * DashboardConstants.MAX_DRIVE_POWER;
             power = Math.min(power, DashboardConstants.MAX_DRIVE_POWER);
             power = Math.max(power, DashboardConstants.MIN_DRIVE_POWER);
 
@@ -116,60 +117,46 @@ public class MM_Drivetrain {
             blMotor.setPower(power);
             brMotor.setPower(power);
 
-            //dashboardTelemetry.addData("distance", getId(2).ftcPose.y);
-            dashboardTelemetry.addData("error", error);
+            dashboardTelemetry.addData("errorY", errorY);
             dashboardTelemetry.addData("detect attempts", detectAttemptCount);
             dashboardTelemetry.addData("power", power);
             dashboardTelemetry.update();
 
             opMode.sleep(1);
         }//end while keep going
+
         flMotor.setPower(0);
         frMotor.setPower(0);
         blMotor.setPower(0);
         brMotor.setPower(0);
-
-        timer.reset();
-//        while (opMode.opModeIsActive() && timer.time() < 6) {
-//            //dashboardTelemetry.addData("distance", getId(2).ftcPose.y);
-//            dashboardTelemetry.addData("error", getError("y", 5, 2));
-//            dashboardTelemetry.update();
-//        }
     }
 
-
-    private double getError(String axis, double target, int targetId) {
-        double error = 9999;
-
+    private double getErrorY(double target, int targetId) {
         AprilTagDetection tagId = getId(targetId);
+        if (tagId != null) {
+            return target - tagId.ftcPose.y;
+        }
+        return 9999;
+    }
 
-        if (axis.equals("y") && tagId != null) {
-            error = target - tagId.ftcPose.y;
-            return Math.abs(error);
-        } else {
-            opMode.telemetry.addData("no aprilTags", "detected");
+    private double getErrorX(double target, int targetId) {
+        AprilTagDetection tagId = getId(targetId);
+        if (tagId != null) {
+            return target - tagId.ftcPose.x;
         }
-        if (axis.equals("x")) {
-            error = target - tagId.ftcPose.x;
-        }
-        return Math.abs(error);
+        return 9999;
     }
 
     public AprilTagDetection getId(int id) {
         List<AprilTagDetection> currentDetections = aprilTags.aprilTagProcessor.getDetections();
-        dashboardTelemetry.addData("list size", currentDetections.size());
 
         for (AprilTagDetection detection : currentDetections) {
             if (detection.id == id) {
-                opMode.telemetry.addData("id", detection.id);
                 return detection;
             }
-
         }
-
         return null;
     }
-
 
     public void init() {
         flMotor = opMode.hardwareMap.get(DcMotorEx.class, "flMotor");
