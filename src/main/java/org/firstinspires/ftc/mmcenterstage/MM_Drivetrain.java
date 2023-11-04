@@ -20,9 +20,8 @@ public class MM_Drivetrain {
         public static double MAX_DRIVE_POWER = .7;
         public static double APRIL_TAG_THRESHOLD = 2;
         public static double DRIVE_P_COEFF = .0166;
-        public static double RAMP_WAIT_TIME = .1;
         public static double MIN_DRIVE_POWER = .14;
-        public static double MAX_DETECT_ATTEMPTS = 2;
+        public static double MAX_DETECT_ATTEMPTS = 150;
     }
 
     private DcMotorEx flMotor = null;
@@ -36,6 +35,8 @@ public class MM_Drivetrain {
     private Gamepad previousGamepad1;
     private Telemetry dashboardTelemetry;
     boolean isSlow = false;
+
+    int detectAttemptCount = 0;
 
     public MM_Drivetrain(LinearOpMode opMode, Gamepad currentGamepad1, Gamepad previousGamepad1, Telemetry dashboardTelemetry) {
         this.opMode = opMode;
@@ -87,45 +88,20 @@ public class MM_Drivetrain {
     }
 
     public void driveToAprilTag() {
-        boolean rampedUp = false;
-
-        // getError("y", 6, 2) > DashboardConstants.APRIL_TAG_THRESHOLD;
+        double error = 9999;
         boolean keepGoing = true;
-        int detectAttemptCount = 0;
+        detectAttemptCount = 0;
+
         timer.reset();
         while (opMode.opModeIsActive() && keepGoing) {
-            if (!rampedUp) {
-                for (double i = 0; i < DashboardConstants.MAX_DRIVE_POWER; i += .1) {
-                    flMotor.setPower(i);
-                    frMotor.setPower(i);
-                    blMotor.setPower(i);
-                    brMotor.setPower(i);
 
-                    timer.reset();
-                    while(opMode.opModeIsActive() && timer.time() < DashboardConstants.RAMP_WAIT_TIME ){
-                        dashboardTelemetry.addData("time", timer.time());
-//                      dashboardTelemetry.addData("error", getError("y", 6, 2));
-                        dashboardTelemetry.addData("i", i);
-                        dashboardTelemetry.update();
-//                        if(getError("y", 6, 2) <= DashboardConstants.APRIL_TAG_THRESHOLD){
-//                            break;
-//                        }
-                    }
-//                    if(getError("y", 6, 2) <= DashboardConstants.APRIL_TAG_THRESHOLD){
-//                        break;
-//                    }
-                }
-                rampedUp = true;
-            }
-
-            double error = getError("y", 6, 2);
+            error = getError("y", 6, 2);
             if (error == 9999) {
                 detectAttemptCount++;
             } else {
                 detectAttemptCount = 0;
             }
             dashboardTelemetry.addData("detect attempts", detectAttemptCount);
-            dashboardTelemetry.update();
 
             if (error <= DashboardConstants.APRIL_TAG_THRESHOLD || (error == 9999 && detectAttemptCount > DashboardConstants.MAX_DETECT_ATTEMPTS)) {
                 keepGoing = false;
@@ -141,22 +117,24 @@ public class MM_Drivetrain {
             brMotor.setPower(power);
 
             //dashboardTelemetry.addData("distance", getId(2).ftcPose.y);
-            dashboardTelemetry.addData("error", getError("y", 6, 2));
+            dashboardTelemetry.addData("error", error);
+            dashboardTelemetry.addData("detect attempts", detectAttemptCount);
             dashboardTelemetry.addData("power", power);
-           // dashboardTelemetry.update();
+            dashboardTelemetry.update();
 
-        }
+            opMode.sleep(1);
+        }//end while keep going
         flMotor.setPower(0);
         frMotor.setPower(0);
         blMotor.setPower(0);
         brMotor.setPower(0);
 
         timer.reset();
-        while (opMode.opModeIsActive() && timer.time() < 6) {
-            dashboardTelemetry.addData("distance", getId(2).ftcPose.y);
-            dashboardTelemetry.addData("error", getError("y", 5, 2));
-            dashboardTelemetry.update();
-        }
+//        while (opMode.opModeIsActive() && timer.time() < 6) {
+//            //dashboardTelemetry.addData("distance", getId(2).ftcPose.y);
+//            dashboardTelemetry.addData("error", getError("y", 5, 2));
+//            dashboardTelemetry.update();
+//        }
     }
 
 
@@ -179,7 +157,7 @@ public class MM_Drivetrain {
 
     public AprilTagDetection getId(int id) {
         List<AprilTagDetection> currentDetections = aprilTags.aprilTagProcessor.getDetections();
-        opMode.telemetry.addData("list size", currentDetections.size());
+        dashboardTelemetry.addData("list size", currentDetections.size());
 
         for (AprilTagDetection detection : currentDetections) {
             if (detection.id == id) {
@@ -203,6 +181,9 @@ public class MM_Drivetrain {
         blMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
         aprilTags = new MM_AprilTags(opMode);
+
+        dashboardTelemetry.addData("detect attempts",  detectAttemptCount);
+        dashboardTelemetry.update();
     }
 }
 
