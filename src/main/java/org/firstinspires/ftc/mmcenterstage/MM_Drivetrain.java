@@ -13,7 +13,7 @@ import java.util.List;
 
 public class MM_Drivetrain {
     private final LinearOpMode opMode;
-    private ElapsedTime timer = new ElapsedTime();
+    private final ElapsedTime timer = new ElapsedTime();
 
     @Config
     public static class DashboardConstants {
@@ -31,9 +31,9 @@ public class MM_Drivetrain {
 
     public MM_AprilTags aprilTags;
 
-    private Gamepad currentGamepad1;
-    private Gamepad previousGamepad1;
-    private Telemetry dashboardTelemetry;
+    private final Gamepad currentGamepad1;
+    private final Gamepad previousGamepad1;
+    private final Telemetry dashboardTelemetry;
     boolean isSlow = false;
 
     int detectAttemptCount = 0;
@@ -88,41 +88,44 @@ public class MM_Drivetrain {
     }
 
     public void driveToAprilTag() {
-        double errorY = 9999;
+        double errorY = 0;
+        double errorX = 0;
         boolean keepGoing = true;
         detectAttemptCount = 0;
 
         timer.reset();
         while (opMode.opModeIsActive() && keepGoing) {
+            AprilTagDetection tagId = getId(2);
 
-
-            errorY = getErrorY(6, 2);
-            if (errorY == 9999) {
-                detectAttemptCount++;
-            } else {
+            if(tagId != null){
+                errorY = getErrorY(6, tagId);
+                errorX = getErrorX(0, tagId);
                 detectAttemptCount = 0;
+
+                double power = errorY * DashboardConstants.DRIVE_P_COEFF * DashboardConstants.MAX_DRIVE_POWER;
+                power = Math.min(power, DashboardConstants.MAX_DRIVE_POWER);
+                power = Math.max(power, DashboardConstants.MIN_DRIVE_POWER);
+
+                flMotor.setPower(power);
+                frMotor.setPower(power);
+                blMotor.setPower(power);
+                brMotor.setPower(power);
+
+                if(Math.abs(errorY) <= DashboardConstants.APRIL_TAG_THRESHOLD && Math.abs(errorX) >= DashboardConstants.APRIL_TAG_THRESHOLD) {
+                    keepGoing = false;
+                }
+            } else {
+                detectAttemptCount++;
+                if(detectAttemptCount >= DashboardConstants.MAX_DETECT_ATTEMPTS){
+                    keepGoing = false;
+                }
+                opMode.sleep(1);
             }
-            dashboardTelemetry.addData("detect attempts", detectAttemptCount);
-
-            if (errorY <= DashboardConstants.APRIL_TAG_THRESHOLD || (errorY == 9999 && detectAttemptCount > DashboardConstants.MAX_DETECT_ATTEMPTS)) {
-                keepGoing = false;
-            }
-
-            double power = errorY * DashboardConstants.DRIVE_P_COEFF * DashboardConstants.MAX_DRIVE_POWER;
-            power = Math.min(power, DashboardConstants.MAX_DRIVE_POWER);
-            power = Math.max(power, DashboardConstants.MIN_DRIVE_POWER);
-
-            flMotor.setPower(power);
-            frMotor.setPower(power);
-            blMotor.setPower(power);
-            brMotor.setPower(power);
 
             dashboardTelemetry.addData("errorY", errorY);
             dashboardTelemetry.addData("detect attempts", detectAttemptCount);
-            dashboardTelemetry.addData("power", power);
+//            dashboardTelemetry.addData("power", power);
             dashboardTelemetry.update();
-
-            opMode.sleep(1);
         }//end while keep going
 
         flMotor.setPower(0);
@@ -131,20 +134,12 @@ public class MM_Drivetrain {
         brMotor.setPower(0);
     }
 
-    private double getErrorY(double target, int targetId) {
-        AprilTagDetection tagId = getId(targetId);
-        if (tagId != null) {
-            return target - tagId.ftcPose.y;
+    private double getErrorY(double target, AprilTagDetection tagId) {
+            return  tagId.ftcPose.y - target;
         }
-        return 9999;
-    }
 
-    private double getErrorX(double target, int targetId) {
-        AprilTagDetection tagId = getId(targetId);
-        if (tagId != null) {
-            return target - tagId.ftcPose.x;
-        }
-        return 9999;
+    private double getErrorX(double target, AprilTagDetection tagId) {
+        return target - tagId.ftcPose.x;
     }
 
     public AprilTagDetection getId(int id) {

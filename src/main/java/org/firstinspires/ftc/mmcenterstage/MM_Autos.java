@@ -1,16 +1,14 @@
 package org.firstinspires.ftc.mmcenterstage;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Auto BOB", group = "mm")
+@Autonomous(name = "Auto BOB", group = "mm")
 
 public class MM_Autos extends LinearOpMode {
-    TelemetryPacket packet = new TelemetryPacket();
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
     public Gamepad currentGamepad1 = new Gamepad();

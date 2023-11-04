@@ -6,10 +6,10 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class MM_Robot {
-    private LinearOpMode opMode;
-    private Gamepad currentGamepad1;
-    private Gamepad previousGamepad1;
-    private Telemetry dashboardTelemetry;
+    private final LinearOpMode opMode;
+    private final Gamepad currentGamepad1;
+    private final Gamepad previousGamepad1;
+    private final Telemetry dashboardTelemetry;
 
     public MM_Drivetrain drivetrain;
     //public Collector collector;
