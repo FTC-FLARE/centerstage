@@ -1,28 +1,43 @@
 package org.firstinspires.ftc.mmcenterstage;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.dashboard.VisionPortalStreamingOpMode;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.function.Consumer;
+import org.firstinspires.ftc.robotcore.external.function.Continuation;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
+import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
+@Config
 public class MM_Drivetrain {
     private final LinearOpMode opMode;
     private final ElapsedTime timer = new ElapsedTime();
 
-    @Config
-    public static class DashboardConstants {
-        public static double MAX_DRIVE_POWER = .7;
-        public static double APRIL_TAG_THRESHOLD = 2;
-        public static double DRIVE_P_COEFF = .0166;
-        public static double MIN_DRIVE_POWER = .14;
-        public static double MAX_DETECT_ATTEMPTS = 150;
-    }
+    public static double MAX_DRIVE_POWER = .7;
+    public static double APRIL_TAG_THRESHOLD = 2;
+    public static double DRIVE_P_COEFF = .0166;
+    public static double STRAFE_P_COEFF = .1428;
+    public static double MIN_DRIVE_POWER = .14;
+    public static double MAX_DETECT_ATTEMPTS = 150;
 
     private DcMotorEx flMotor = null;
     private DcMotorEx frMotor = null;
@@ -36,7 +51,14 @@ public class MM_Drivetrain {
     private final Telemetry dashboardTelemetry;
     boolean isSlow = false;
 
+    private double flPower = 0;
+    private double frPower = 0;
+    private double blPower = 0;
+    private double brPower = 0;
+
     int detectAttemptCount = 0;
+    double errorY = 0;
+    double errorX = 0;
 
     public MM_Drivetrain(LinearOpMode opMode, Gamepad currentGamepad1, Gamepad previousGamepad1, Telemetry dashboardTelemetry) {
         this.opMode = opMode;
@@ -52,79 +74,89 @@ public class MM_Drivetrain {
         double rotatePower = opMode.gamepad1.right_stick_x;
         opMode.telemetry.addData("test", "push");
 
-        double FLPower = drivePower + strafePower + rotatePower;
-        double FRPower = drivePower - strafePower - rotatePower;
-        double BLPower = drivePower - strafePower + rotatePower;
-        double BRPower = drivePower + strafePower - rotatePower;
+        flPower = drivePower + strafePower + rotatePower;
+        frPower = drivePower - strafePower - rotatePower;
+        blPower = drivePower - strafePower + rotatePower;
+        brPower = drivePower + strafePower - rotatePower;
 
         if (currentGamepad1.a && !previousGamepad1.a) {
             isSlow = !isSlow;
         }
 
-        double maxMotorPwr = Math.max(Math.max(Math.abs(FLPower), Math.abs(FRPower)),
-                Math.max(Math.abs(BLPower), Math.abs(BRPower)));
-
-        if (maxMotorPwr > 1) {
-            FLPower /= maxMotorPwr;
-            FRPower /= maxMotorPwr;
-            BLPower /= maxMotorPwr;
-            BRPower /= maxMotorPwr;
-        }
+        normalize(1);
 
         if (isSlow) {
-            FLPower *= 0.5;
-            FRPower *= 0.5;
-            BLPower *= 0.5;
-            BRPower *= 0.5;
+            flPower *= 0.5;
+            frPower *= 0.5;
+            blPower *= 0.5;
+            brPower *= 0.5;
         }
 
-        flMotor.setPower(FLPower * 0.7);
-        frMotor.setPower(FRPower * 0.7);
-        blMotor.setPower(BLPower * 0.7);
-        brMotor.setPower(BRPower * 0.7);
+        flMotor.setPower(flPower * 0.7);
+        frMotor.setPower(frPower * 0.7);
+        blMotor.setPower(blPower * 0.7);
+        brMotor.setPower(brPower * 0.7);
 
         previousGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(opMode.gamepad1);
     }
 
     public void driveToAprilTag() {
-        double errorY = 0;
-        double errorX = 0;
         boolean keepGoing = true;
         detectAttemptCount = 0;
+        double drivePower = 0;
+        double strafePower = 0;
+        AprilTagDetection tagId = null;
 
         timer.reset();
         while (opMode.opModeIsActive() && keepGoing) {
-            AprilTagDetection tagId = getId(2);
+            tagId = getId(2);
 
-            if(tagId != null){
+            if (tagId != null) {
                 errorY = getErrorY(6, tagId);
                 errorX = getErrorX(0, tagId);
                 detectAttemptCount = 0;
 
-                double power = errorY * DashboardConstants.DRIVE_P_COEFF * DashboardConstants.MAX_DRIVE_POWER;
-                power = Math.min(power, DashboardConstants.MAX_DRIVE_POWER);
-                power = Math.max(power, DashboardConstants.MIN_DRIVE_POWER);
+                drivePower = errorY * DRIVE_P_COEFF * MAX_DRIVE_POWER;
+                strafePower = errorX * STRAFE_P_COEFF * MAX_DRIVE_POWER;
 
-                flMotor.setPower(power);
-                frMotor.setPower(power);
-                blMotor.setPower(power);
-                brMotor.setPower(power);
+                flPower = drivePower + strafePower;
+                frPower = drivePower - strafePower;
+                blPower = drivePower - strafePower;
+                brPower = drivePower + strafePower;
 
-                if(Math.abs(errorY) <= DashboardConstants.APRIL_TAG_THRESHOLD && Math.abs(errorX) >= DashboardConstants.APRIL_TAG_THRESHOLD) {
+                normalize(MAX_DRIVE_POWER);
+
+                flPower = updateForMinPower(flPower);
+                frPower = updateForMinPower(frPower);
+                blPower = updateForMinPower(blPower);
+                brPower = updateForMinPower(brPower);
+
+//                flPower = Math.max(Math.abs(flPower), MIN_DRIVE_POWER);
+//                frPower = Math.max(frPower, MIN_DRIVE_POWER);
+//                blPower = Math.max(blPower, MIN_DRIVE_POWER);
+//                brPower = Math.max(brPower, MIN_DRIVE_POWER);
+
+                flMotor.setPower(flPower);
+                frMotor.setPower(frPower);
+                blMotor.setPower(blPower);
+                brMotor.setPower(brPower);
+
+                if (Math.abs(errorY) <= APRIL_TAG_THRESHOLD && Math.abs(errorX) >= APRIL_TAG_THRESHOLD) {
                     keepGoing = false;
                 }
             } else {
                 detectAttemptCount++;
-                if(detectAttemptCount >= DashboardConstants.MAX_DETECT_ATTEMPTS){
+                if (detectAttemptCount >= MAX_DETECT_ATTEMPTS) {
                     keepGoing = false;
                 }
                 opMode.sleep(1);
             }
 
             dashboardTelemetry.addData("errorY", errorY);
+            dashboardTelemetry.addData("errorX", errorX);
             dashboardTelemetry.addData("detect attempts", detectAttemptCount);
-//            dashboardTelemetry.addData("power", power);
+            dashboardTelemetry.addData("powers", " drive: %f  :)  strafe: %f", drivePower, strafePower);
             dashboardTelemetry.update();
         }//end while keep going
 
@@ -134,12 +166,36 @@ public class MM_Drivetrain {
         brMotor.setPower(0);
     }
 
-    private double getErrorY(double target, AprilTagDetection tagId) {
-            return  tagId.ftcPose.y - target;
+    private double updateForMinPower(double motorPower) {
+        if (Math.abs(motorPower) < MIN_DRIVE_POWER) {
+            if (motorPower < 0) {
+                return -MIN_DRIVE_POWER;
+            } else {
+                return MIN_DRIVE_POWER;
+            }
+        }
+        return motorPower;
+    }
+
+    private void normalize(double upperPowerLimit) {
+        double rawMaxPower = Math.max(Math.max(Math.abs(flPower), Math.abs(frPower)),
+                Math.max(Math.abs(blPower), Math.abs(brPower)));
+
+        if (rawMaxPower > upperPowerLimit) {
+            flPower /= rawMaxPower;
+            frPower /= rawMaxPower;
+            blPower /= rawMaxPower;
+            brPower /= rawMaxPower;
         }
 
-    private double getErrorX(double target, AprilTagDetection tagId) {
-        return target - tagId.ftcPose.x;
+    }
+
+    private double getErrorY(double targetDistance, AprilTagDetection tagId) {
+        return tagId.ftcPose.y - targetDistance;
+    }
+
+    private double getErrorX(double targetDistance, AprilTagDetection tagId) {
+        return tagId.ftcPose.x - targetDistance;
     }
 
     public AprilTagDetection getId(int id) {
@@ -164,8 +220,47 @@ public class MM_Drivetrain {
 
         aprilTags = new MM_AprilTags(opMode);
 
-        dashboardTelemetry.addData("detect attempts",  detectAttemptCount);
+        dashboardTelemetry.addData("detect attempts", detectAttemptCount);
+        dashboardTelemetry.addData("errorX", errorX);
         dashboardTelemetry.update();
+
+//      from here we add lots of stuff that should be deleted
+        final VisionPortalStreamingOpMode.CameraStreamProcessor processor = new VisionPortalStreamingOpMode.CameraStreamProcessor();
+
+        new VisionPortal.Builder()
+                .addProcessor(processor)
+                .setCamera(opMode.hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .build();
+
+        FtcDashboard.getInstance().startCameraStream(processor, 0);
+
     }
+    public static class CameraStreamProcessor implements VisionProcessor, CameraStreamSource {
+        private final AtomicReference<Bitmap> lastFrame = new AtomicReference<>(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
+
+        @Override
+        public void init(int width, int height, CameraCalibration calibration) {
+            lastFrame.set(Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565));
+        }
+
+        @Override
+        public Object processFrame(Mat frame, long captureTimeNanos) {
+            Bitmap b = Bitmap.createBitmap(frame.width(), frame.height(), Bitmap.Config.RGB_565);
+            Utils.matToBitmap(frame, b);
+            lastFrame.set(b);
+            return null;
+        }
+
+        @Override
+        public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
+            // do nothing
+        }
+
+        @Override
+        public void getFrameBitmap(Continuation<? extends Consumer<Bitmap>> continuation) {
+            continuation.dispatch(bitmapConsumer -> bitmapConsumer.accept(lastFrame.get()));
+        }
+    }
+
 }
 
