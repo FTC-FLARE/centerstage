@@ -18,6 +18,7 @@ import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibra
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
@@ -27,6 +28,7 @@ public class MM_AprilTags {
     private final LinearOpMode opMode;
 
     public AprilTagProcessor aprilTagProcessor;
+    public TfodProcessor tfod;
     public VisionPortal visionPortal;
 
     public MM_AprilTags(LinearOpMode opMode) {
@@ -57,7 +59,27 @@ public class MM_AprilTags {
 
                 .build();
 
-        //      from here we add lots of stuff that should be deleted
+        tfod = new TfodProcessor.Builder()
+
+                // With the following lines commented out, the default TfodProcessor Builder
+                // will load the default model for the season. To define a custom model to load,
+                // choose one of the following:
+                //   Use setModelAssetName() if the custom TF Model is built in as an asset (AS only).
+                //   Use setModelFileName() if you have downloaded a custom team model to the Robot Controller.
+                //.setModelAssetName(TFOD_MODEL_ASSET)
+                //.setModelFileName(TFOD_MODEL_FILE)
+
+                // The following default settings are available to un-comment and edit as needed to
+                // set parameters for custom models.
+                //.setModelLabels(LABELS)
+                //.setIsModelTensorFlow2(true)
+                //.setIsModelQuantized(true)
+                //.setModelInputSize(300)
+                //.setModelAspectRatio(16.0 / 9.0)
+
+                .build();
+
+
         final CameraStreamProcessor cameraStreamProcessor = new CameraStreamProcessor();
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
@@ -67,6 +89,7 @@ public class MM_AprilTags {
 
         // Set and enable the processor.
         builder.addProcessor(aprilTagProcessor);
+        builder.addProcessor(tfod);
         builder.addProcessor(cameraStreamProcessor);
 
         // Build the Vision Portal, using the above settings.

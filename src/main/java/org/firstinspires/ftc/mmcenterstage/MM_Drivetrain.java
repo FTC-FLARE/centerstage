@@ -1,31 +1,16 @@
 package org.firstinspires.ftc.mmcenterstage;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.dashboard.VisionPortalStreamingOpMode;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.function.Consumer;
-import org.firstinspires.ftc.robotcore.external.function.Continuation;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
-import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.VisionProcessor;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.opencv.android.Utils;
-import org.opencv.core.Mat;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Config
 public class MM_Drivetrain {
@@ -110,7 +95,8 @@ public class MM_Drivetrain {
 
         timer.reset();
         while (opMode.opModeIsActive() && keepGoing) {
-            tagId = getId(2);
+            tagId = getAprilTagId(2);
+            getTfodId();
 
             if (tagId != null) {
                 errorY = getErrorY(6, tagId);
@@ -214,16 +200,34 @@ public class MM_Drivetrain {
         return tagId.ftcPose.x - targetDistance;
     }
 
-    public AprilTagDetection getId(int id) {
+    public AprilTagDetection getAprilTagId(int id) {
         List<AprilTagDetection> currentDetections = aprilTags.aprilTagProcessor.getDetections();
 
         for (AprilTagDetection detection : currentDetections) {
+            if (opMode.opModeInInit()) {
+                dashboardTelemetry.addLine(String.format("XY (ID %d) %6.1f %6.1f  (inch)", detection.id, detection.ftcPose.x, detection.ftcPose.y));
+            }
             if (detection.id == id) {
                 return detection;
             }
         }
         return null;
     }
+
+    public void getTfodId() {
+        List<Recognition> currentRecognitions = aprilTags.tfod.getRecognitions();
+        // Step through the list of recognitions and display info for each one.
+        for (Recognition recognition : currentRecognitions) {
+            double x = (recognition.getLeft() + recognition.getRight()) / 2;
+            double y = (recognition.getTop() + recognition.getBottom()) / 2;
+
+            if (opMode.opModeInInit()) {
+                dashboardTelemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+                dashboardTelemetry.addData("- Position", "%.0f / %.0f", x, y);
+            }
+        }   // end for() loop
+    }
+
 
     public void init() {
         flMotor = opMode.hardwareMap.get(DcMotorEx.class, "flMotor");

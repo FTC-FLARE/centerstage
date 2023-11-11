@@ -23,6 +23,12 @@ public class MM_Autos extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
+        while (opModeInInit()) {
+            robot.drivetrain.getAprilTagId(1);
+            robot.drivetrain.getTfodId();
+            dashboardTelemetry.update();
+        }
+
         waitForStart();
 
         robot.drivetrain.driveToAprilTag();
