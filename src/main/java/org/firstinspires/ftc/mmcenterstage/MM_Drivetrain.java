@@ -35,8 +35,8 @@ public class MM_Drivetrain {
     public static double MAX_DRIVE_POWER = .7;
     public static double APRIL_TAG_THRESHOLD = 2;
     public static double DRIVE_P_COEFF = .0166;
-    public static double STRAFE_P_COEFF = .1428;
-    public static double MIN_DRIVE_POWER = .14;
+    public static double STRAFE_P_COEFF = .05;
+    public static double MIN_DRIVE_POWER = .28;
     public static double MAX_DETECT_ATTEMPTS = 150;
 
     private DcMotorEx flMotor = null;
@@ -126,11 +126,12 @@ public class MM_Drivetrain {
                 brPower = drivePower + strafePower;
 
                 normalize(MAX_DRIVE_POWER);
-
-                flPower = updateForMinPower(flPower);
-                frPower = updateForMinPower(frPower);
-                blPower = updateForMinPower(blPower);
-                brPower = updateForMinPower(brPower);
+                normalizeForMin();
+//
+//                flPower = updateForMinPower(flPower);
+//                frPower = updateForMinPower(frPower);
+//                blPower = updateForMinPower(blPower);
+//                brPower = updateForMinPower(brPower);
 
 //                flPower = Math.max(Math.abs(flPower), MIN_DRIVE_POWER);
 //                frPower = Math.max(frPower, MIN_DRIVE_POWER);
@@ -142,7 +143,7 @@ public class MM_Drivetrain {
                 blMotor.setPower(blPower);
                 brMotor.setPower(brPower);
 
-                if (Math.abs(errorY) <= APRIL_TAG_THRESHOLD && Math.abs(errorX) >= APRIL_TAG_THRESHOLD) {
+                if (Math.abs(errorY) <= APRIL_TAG_THRESHOLD && Math.abs(errorX) <= APRIL_TAG_THRESHOLD) {
                     keepGoing = false;
                 }
             } else {
@@ -156,7 +157,11 @@ public class MM_Drivetrain {
             dashboardTelemetry.addData("errorY", errorY);
             dashboardTelemetry.addData("errorX", errorX);
             dashboardTelemetry.addData("detect attempts", detectAttemptCount);
-            dashboardTelemetry.addData("powers", " drive: %f  :)  strafe: %f", drivePower, strafePower);
+            dashboardTelemetry.addData("powers", " drive: %.2f  :)  strafe: %.2f", drivePower, strafePower);
+            dashboardTelemetry.addData("aa fl normalize powers", flPower);
+            dashboardTelemetry.addData("ab fr normalize powers", frPower);
+            dashboardTelemetry.addData("ac bl normalize powers", blPower);
+            dashboardTelemetry.addData("ad br normalize powers", brPower);
             dashboardTelemetry.update();
         }//end while keep going
 
@@ -166,6 +171,17 @@ public class MM_Drivetrain {
         brMotor.setPower(0);
     }
 
+    private void normalizeForMin() {
+        if (flPower < MIN_DRIVE_POWER && frPower < MIN_DRIVE_POWER && blPower < MIN_DRIVE_POWER && brPower < MIN_DRIVE_POWER) {
+            double rawMaxPower = Math.max(Math.max(Math.abs(flPower), Math.abs(frPower)),
+                    Math.max(Math.abs(blPower), Math.abs(brPower)));
+            double multiplier = MIN_DRIVE_POWER / rawMaxPower;
+            flPower *= multiplier;
+            frPower *= multiplier;
+            blPower *= multiplier;
+            brPower *= multiplier;
+        }
+    }
     private double updateForMinPower(double motorPower) {
         if (Math.abs(motorPower) < MIN_DRIVE_POWER) {
             if (motorPower < 0) {
@@ -223,44 +239,6 @@ public class MM_Drivetrain {
         dashboardTelemetry.addData("detect attempts", detectAttemptCount);
         dashboardTelemetry.addData("errorX", errorX);
         dashboardTelemetry.update();
-
-//      from here we add lots of stuff that should be deleted
-        final VisionPortalStreamingOpMode.CameraStreamProcessor processor = new VisionPortalStreamingOpMode.CameraStreamProcessor();
-
-        new VisionPortal.Builder()
-                .addProcessor(processor)
-                .setCamera(opMode.hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .build();
-
-        FtcDashboard.getInstance().startCameraStream(processor, 0);
-
     }
-    public static class CameraStreamProcessor implements VisionProcessor, CameraStreamSource {
-        private final AtomicReference<Bitmap> lastFrame = new AtomicReference<>(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
-
-        @Override
-        public void init(int width, int height, CameraCalibration calibration) {
-            lastFrame.set(Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565));
-        }
-
-        @Override
-        public Object processFrame(Mat frame, long captureTimeNanos) {
-            Bitmap b = Bitmap.createBitmap(frame.width(), frame.height(), Bitmap.Config.RGB_565);
-            Utils.matToBitmap(frame, b);
-            lastFrame.set(b);
-            return null;
-        }
-
-        @Override
-        public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
-            // do nothing
-        }
-
-        @Override
-        public void getFrameBitmap(Continuation<? extends Consumer<Bitmap>> continuation) {
-            continuation.dispatch(bitmapConsumer -> bitmapConsumer.accept(lastFrame.get()));
-        }
-    }
-
 }
 
