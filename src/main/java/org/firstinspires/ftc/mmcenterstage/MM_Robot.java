@@ -15,6 +15,7 @@ public class MM_Robot {
 
     public MM_Drivetrain drivetrain;
     public MM_Collector collector;
+    public MM_Transport transport;
 
     public MM_Robot(LinearOpMode opMode, Gamepad currentGamepad1, Gamepad previousGamepad1,
                     Gamepad currentGamepad2Collect, Gamepad previousGamepad2Collect, Telemetry dashboardTelemetry) {
@@ -30,6 +31,7 @@ public class MM_Robot {
     public void init() {
         drivetrain = new MM_Drivetrain(opMode, currentGamepad1, previousGamepad1, dashboardTelemetry);
         collector = new MM_Collector(opMode, currentGamepad2Collect, previousGamepad2Collect);
+        transport = new MM_Transport(opMode);
     }
 
 }

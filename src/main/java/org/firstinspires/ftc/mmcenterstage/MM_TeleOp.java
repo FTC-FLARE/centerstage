@@ -31,6 +31,7 @@ public class MM_TeleOp extends LinearOpMode {
         while(opModeIsActive()){
             robot.drivetrain.driveWithSticks();
             robot.collector.collect();
+            robot.transport.transport();
             telemetry.update();
         }
         robot.drivetrain.aprilTags.visionPortal.close();
