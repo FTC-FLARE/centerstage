@@ -12,9 +12,12 @@ public class MM_TeleOp extends LinearOpMode {
 
     public Gamepad currentGamepad1 = new Gamepad();
     public Gamepad previousGamepad1 = new Gamepad();
+    public Gamepad currentGamepad2Collect = new Gamepad();
+    public Gamepad previousGamepad2Collect = new Gamepad();
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
-    public MM_Robot robot = new MM_Robot(this, currentGamepad1, previousGamepad1, dashboardTelemetry);
+    public MM_Robot robot = new MM_Robot(this, currentGamepad1, previousGamepad1, currentGamepad2Collect,
+            previousGamepad2Collect, dashboardTelemetry);
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initializing... Please Wait");
@@ -27,7 +30,7 @@ public class MM_TeleOp extends LinearOpMode {
 
         while(opModeIsActive()){
             robot.drivetrain.driveWithSticks();
-            //robot.collector.collect()
+            robot.collector.collect();
             telemetry.update();
         }
         robot.drivetrain.aprilTags.visionPortal.close();

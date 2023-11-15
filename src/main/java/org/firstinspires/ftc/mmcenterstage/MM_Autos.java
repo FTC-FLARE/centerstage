@@ -13,7 +13,9 @@ public class MM_Autos extends LinearOpMode {
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
     public Gamepad currentGamepad1 = new Gamepad();
     public Gamepad previousGamepad1 = new Gamepad();
-    public MM_Robot robot = new MM_Robot(this, currentGamepad1, previousGamepad1, dashboardTelemetry);
+    public Gamepad currentGamepad2Collect = new Gamepad();
+    public Gamepad previousGamepad2Collect =  new Gamepad();
+    public MM_Robot robot = new MM_Robot(this, currentGamepad1, previousGamepad1, currentGamepad2Collect, previousGamepad2Collect, dashboardTelemetry);
 
     @Override
     public void runOpMode() {
