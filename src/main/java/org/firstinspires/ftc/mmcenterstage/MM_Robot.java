@@ -31,7 +31,7 @@ public class MM_Robot {
     public void init() {
         drivetrain = new MM_Drivetrain(opMode, currentGamepad1, previousGamepad1, dashboardTelemetry);
         collector = new MM_Collector(opMode, currentGamepad2Collect, previousGamepad2Collect);
-        transport = new MM_Transport(opMode);
+        transport = new MM_Transport(opMode, dashboardTelemetry);
     }
 
 }
