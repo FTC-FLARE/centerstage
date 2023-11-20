@@ -31,8 +31,6 @@ public class MM_Drivetrain {
 
     public MM_AprilTags aprilTags;
 
-    private final Gamepad currentGamepad1;
-    private final Gamepad previousGamepad1;
     private final Telemetry dashboardTelemetry;
     boolean isSlow = false;
 
@@ -45,10 +43,8 @@ public class MM_Drivetrain {
     double errorY = 0;
     double errorX = 0;
 
-    public MM_Drivetrain(LinearOpMode opMode, Gamepad currentGamepad1, Gamepad previousGamepad1, Telemetry dashboardTelemetry) {
+    public MM_Drivetrain(LinearOpMode opMode, Telemetry dashboardTelemetry) {
         this.opMode = opMode;
-        this.currentGamepad1 = currentGamepad1;
-        this.previousGamepad1 = previousGamepad1;
         this.dashboardTelemetry = dashboardTelemetry;
         init();
     }
@@ -64,7 +60,7 @@ public class MM_Drivetrain {
         blPower = drivePower - strafePower + rotatePower;
         brPower = drivePower + strafePower - rotatePower;
 
-        if (currentGamepad1.a && !previousGamepad1.a) {
+        if (MM_TeleOp.currentGamepad1.a && !MM_TeleOp.previousGamepad1.a && !opMode.gamepad1.start) {
             isSlow = !isSlow;
         }
 
@@ -82,8 +78,7 @@ public class MM_Drivetrain {
         blMotor.setPower(blPower * 0.7);
         brMotor.setPower(brPower * 0.7);
 
-        previousGamepad1.copy(currentGamepad1);
-        currentGamepad1.copy(opMode.gamepad1);
+
     }
 
     public void driveToAprilTag() {
