@@ -33,16 +33,16 @@ public class MM_Collector {
         if (opMode.gamepad2.left_bumper || opMode.gamepad2.right_bumper) {
             if (opMode.gamepad2.left_bumper) {
                 leftWheel.setPower(LEFT_WHEEL_POWER);
-                pixelPrecisionWheel.setPower(PIXEL_PRECISION_WHEEL_POWER);
+                pixelPrecisionWheel.setPower(-PIXEL_PRECISION_WHEEL_POWER);
             }
             if (opMode.gamepad2.right_bumper) {
                 rightWheel.setPower(RIGHT_WHEEL_POWER);
-                pixelPrecisionWheel.setPower(PIXEL_PRECISION_WHEEL_POWER);
+                pixelPrecisionWheel.setPower(-PIXEL_PRECISION_WHEEL_POWER);
             }
         } else if (opMode.gamepad2.left_trigger > 0.1) {
             leftWheel.setPower(-LEFT_WHEEL_POWER);
             rightWheel.setPower(-RIGHT_WHEEL_POWER);
-            pixelPrecisionWheel.setPower(-PIXEL_PRECISION_WHEEL_POWER);
+            pixelPrecisionWheel.setPower(PIXEL_PRECISION_WHEEL_POWER);
         } else {
             leftWheel.setPower(0);
             rightWheel.setPower(0);

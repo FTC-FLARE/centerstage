@@ -3,7 +3,6 @@ package org.firstinspires.ftc.mmcenterstage;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -23,13 +22,18 @@ public class MM_Drivetrain {
     public static double STRAFE_P_COEFF = .05;
     public static double MIN_DRIVE_POWER = .28;
     public static double MAX_DETECT_ATTEMPTS = 150;
+    public final double WHEEL_DIAMETER = 4;
+    public final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
+    public final double TICKS_PER_REVELUTION = 753.2; // for drivetrain only(5202-0002-0027), change for the real robot
+    public final double TICKS_PER_INCH = TICKS_PER_REVELUTION / WHEEL_CIRCUMFERENCE;
+    public static double inchesToDrive = 48;
 
     private DcMotorEx flMotor = null;
     private DcMotorEx frMotor = null;
     private DcMotorEx blMotor = null;
     private DcMotorEx brMotor = null;
 
-    public MM_AprilTags aprilTags;
+    //public MM_AprilTags aprilTags;
 
     private final Telemetry dashboardTelemetry;
     boolean isSlow = false;
@@ -90,8 +94,8 @@ public class MM_Drivetrain {
 
         timer.reset();
         while (opMode.opModeIsActive() && keepGoing) {
-            tagId = getAprilTagId(2);
-            getTfodId();
+            //tagId = getAprilTagId(2);
+            //getTfodId();
 
             if (tagId != null) {
                 errorY = getErrorY(6, tagId);
@@ -152,6 +156,28 @@ public class MM_Drivetrain {
         brMotor.setPower(0);
     }
 
+    public void driveInches(double inches, double power){
+        int ticks = (int) (TICKS_PER_INCH * inches);
+        
+        flMotor.setTargetPosition(ticks + flMotor.getCurrentPosition());
+        frMotor.setTargetPosition(ticks + frMotor.getCurrentPosition());
+        blMotor.setTargetPosition(ticks + blMotor.getCurrentPosition());
+        brMotor.setTargetPosition(ticks + brMotor.getCurrentPosition());
+
+        flMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        frMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        blMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        brMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        flMotor.setPower(power);
+        frMotor.setPower(power);
+        blMotor.setPower(power);
+        brMotor.setPower(power);
+        while(opMode.opModeIsActive() && (flMotor.isBusy() || brMotor.isBusy())){
+
+        }
+    }
+
     private void normalizeForMin() {
         if (flPower < MIN_DRIVE_POWER && frPower < MIN_DRIVE_POWER && blPower < MIN_DRIVE_POWER && brPower < MIN_DRIVE_POWER) {
             double rawMaxPower = Math.max(Math.max(Math.abs(flPower), Math.abs(frPower)),
@@ -195,33 +221,33 @@ public class MM_Drivetrain {
         return tagId.ftcPose.x - targetDistance;
     }
 
-    public AprilTagDetection getAprilTagId(int id) {
-        List<AprilTagDetection> currentDetections = aprilTags.aprilTagProcessor.getDetections();
+//    public AprilTagDetection getAprilTagId(int id) {
+//        List<AprilTagDetection> currentDetections = aprilTags.aprilTagProcessor.getDetections();
+//
+//        for (AprilTagDetection detection : currentDetections) {
+//            if (opMode.opModeInInit()) {
+//                dashboardTelemetry.addLine(String.format("XY (ID %d) %6.1f %6.1f  (inch)", detection.id, detection.ftcPose.x, detection.ftcPose.y));
+//            }
+//            if (detection.id == id) {
+//                return detection;
+//            }
+//        }
+//        return null;
+//    }
 
-        for (AprilTagDetection detection : currentDetections) {
-            if (opMode.opModeInInit()) {
-                dashboardTelemetry.addLine(String.format("XY (ID %d) %6.1f %6.1f  (inch)", detection.id, detection.ftcPose.x, detection.ftcPose.y));
-            }
-            if (detection.id == id) {
-                return detection;
-            }
-        }
-        return null;
-    }
-
-    public void getTfodId() {
-        List<Recognition> currentRecognitions = aprilTags.tfod.getRecognitions();
-        // Step through the list of recognitions and display info for each one.
-        for (Recognition recognition : currentRecognitions) {
-            double x = (recognition.getLeft() + recognition.getRight()) / 2;
-            double y = (recognition.getTop() + recognition.getBottom()) / 2;
-
-            if (opMode.opModeInInit()) {
-                dashboardTelemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-                dashboardTelemetry.addData("- Position", "%.0f / %.0f", x, y);
-            }
-        }   // end for() loop
-    }
+//    public void getTfodId() {
+//        List<Recognition> currentRecognitions = aprilTags.tfod.getRecognitions();
+//        // Step through the list of recognitions and display info for each one.
+//        for (Recognition recognition : currentRecognitions) {
+//            double x = (recognition.getLeft() + recognition.getRight()) / 2;
+//            double y = (recognition.getTop() + recognition.getBottom()) / 2;
+//
+//            if (opMode.opModeInInit()) {
+//                dashboardTelemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+//                dashboardTelemetry.addData("- Position", "%.0f / %.0f", x, y);
+//            }
+//        }   // end for() loop
+//    }
 
 
     public void init() {
@@ -233,7 +259,9 @@ public class MM_Drivetrain {
         flMotor.setDirection(DcMotorEx.Direction.REVERSE);
         blMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
-        aprilTags = new MM_AprilTags(opMode);
+        //aprilTags = new MM_AprilTags(opMode);
+
+
 
         dashboardTelemetry.addData("detect attempts", detectAttemptCount);
         dashboardTelemetry.addData("errorX", errorX);

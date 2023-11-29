@@ -26,16 +26,17 @@ public class MM_Autos extends LinearOpMode {
         telemetry.update();
 
         while (opModeInInit()) {
-            robot.drivetrain.getAprilTagId(1);
-            robot.drivetrain.getTfodId();
-            dashboardTelemetry.update();
+//            robot.drivetrain.getAprilTagId(1);
+//            robot.drivetrain.getTfodId();
+//            dashboardTelemetry.update();
         }
 
         waitForStart();
 
-        robot.drivetrain.driveToAprilTag();
+        //robot.drivetrain.driveToAprilTag();
+        robot.drivetrain.driveInches(MM_Drivetrain.inchesToDrive, .3);
 
-        robot.drivetrain.aprilTags.visionPortal.close();
+        //robot.drivetrain.aprilTags.visionPortal.close();
     }
 }
 
