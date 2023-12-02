@@ -35,8 +35,8 @@ public class MM_TeleOp extends LinearOpMode {
 
         while(opModeIsActive()){
             robot.drivetrain.driveWithSticks();
-//            robot.collector.collect();
-//            robot.transport.transport();
+            robot.collector.collect();
+            robot.transport.transport();
             //robot.liftLift.liftLift();
             previousGamepad1.copy(currentGamepad1);
             currentGamepad1.copy(gamepad1);
@@ -46,7 +46,7 @@ public class MM_TeleOp extends LinearOpMode {
             telemetry.update();
             dashboardTelemetry.update();
         }
-        //robot.drivetrain.aprilTags.visionPortal.close();
+        robot.drivetrain.aprilTags.visionPortal.close();
     }
 }
 

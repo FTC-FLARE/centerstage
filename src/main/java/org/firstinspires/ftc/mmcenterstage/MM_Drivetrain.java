@@ -1,11 +1,17 @@
 package org.firstinspires.ftc.mmcenterstage;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
@@ -16,10 +22,17 @@ public class MM_Drivetrain {
     private final LinearOpMode opMode;
     private final ElapsedTime timer = new ElapsedTime();
 
+    private DcMotorEx flMotor = null;
+    private DcMotorEx frMotor = null;
+    private DcMotorEx blMotor = null;
+    private DcMotorEx brMotor = null;
+    private BNO055IMU imu;
+
     public static double MAX_DRIVE_POWER = .7;
     public static double APRIL_TAG_THRESHOLD = 2;
     public static double DRIVE_P_COEFF = .0166;
     public static double STRAFE_P_COEFF = .05;
+    public static double TURN_P_COEFF = .011;
     public static double MIN_DRIVE_POWER = .28;
     public static double MAX_DETECT_ATTEMPTS = 150;
     public final double WHEEL_DIAMETER = 4;
@@ -27,13 +40,10 @@ public class MM_Drivetrain {
     public final double TICKS_PER_REVELUTION = 753.2; // for drivetrain only(5202-0002-0027), change for the real robot
     public final double TICKS_PER_INCH = TICKS_PER_REVELUTION / WHEEL_CIRCUMFERENCE;
     public static double inchesToDrive = 48;
+    static final int TURN_THRESHOLD = 7;
 
-    private DcMotorEx flMotor = null;
-    private DcMotorEx frMotor = null;
-    private DcMotorEx blMotor = null;
-    private DcMotorEx brMotor = null;
-
-    //public MM_AprilTags aprilTags;
+    public MM_AprilTags aprilTags;
+    Orientation angles;
 
     private final Telemetry dashboardTelemetry;
     boolean isSlow = false;
@@ -221,34 +231,60 @@ public class MM_Drivetrain {
         return tagId.ftcPose.x - targetDistance;
     }
 
-//    public AprilTagDetection getAprilTagId(int id) {
-//        List<AprilTagDetection> currentDetections = aprilTags.aprilTagProcessor.getDetections();
-//
-//        for (AprilTagDetection detection : currentDetections) {
-//            if (opMode.opModeInInit()) {
-//                dashboardTelemetry.addLine(String.format("XY (ID %d) %6.1f %6.1f  (inch)", detection.id, detection.ftcPose.x, detection.ftcPose.y));
-//            }
-//            if (detection.id == id) {
-//                return detection;
-//            }
-//        }
-//        return null;
-//    }
+    public AprilTagDetection getAprilTagId(int id) {
+        List<AprilTagDetection> currentDetections = aprilTags.aprilTagProcessor.getDetections();
 
-//    public void getTfodId() {
-//        List<Recognition> currentRecognitions = aprilTags.tfod.getRecognitions();
-//        // Step through the list of recognitions and display info for each one.
-//        for (Recognition recognition : currentRecognitions) {
-//            double x = (recognition.getLeft() + recognition.getRight()) / 2;
-//            double y = (recognition.getTop() + recognition.getBottom()) / 2;
-//
-//            if (opMode.opModeInInit()) {
-//                dashboardTelemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-//                dashboardTelemetry.addData("- Position", "%.0f / %.0f", x, y);
-//            }
-//        }   // end for() loop
-//    }
+        for (AprilTagDetection detection : currentDetections) {
+            if (opMode.opModeInInit()) {
+                dashboardTelemetry.addLine(String.format("XY (ID %d) %6.1f %6.1f  (inch)", detection.id, detection.ftcPose.x, detection.ftcPose.y));
+            }
+            if (detection.id == id) {
+                return detection;
+            }
+        }
+        return null;
+    }
 
+    public void getTfodId() {
+        List<Recognition> currentRecognitions = aprilTags.tfod.getRecognitions();
+        // Step through the list of recognitions and display info for each one.
+        for (Recognition recognition : currentRecognitions) {
+            double x = (recognition.getLeft() + recognition.getRight()) / 2;
+            double y = (recognition.getTop() + recognition.getBottom()) / 2;
+
+            if (opMode.opModeInInit()) {
+                dashboardTelemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+                dashboardTelemetry.addData("- Position", "%.0f / %.0f", x, y);
+            }
+        }   // end for() loop
+    }
+
+    private void rotateToAngle(int targetAngle) {
+        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+        dashboardTelemetry.addData("current angle", angles.firstAngle);
+        dashboardTelemetry.update();
+
+        double error = getYawError(targetAngle, angles.firstAngle);
+
+        while (opMode.opModeIsActive() && Math.abs(error) > TURN_THRESHOLD) {
+            error = getYawError(targetAngle, angles.firstAngle);
+            double power = targetAngle * error * TURN_P_COEFF;
+
+            flMotor.setPower(power);
+            frMotor.setPower(-power);
+            blMotor.setPower(power);
+            brMotor.setPower(-power);
+
+        }
+    }
+
+    private double getYawError(int targetAngle, double currentAngle) {
+        double error = targetAngle - currentAngle;
+
+        error = (error > 180) ? error - 360 : (error = (error <= -180) ? error + 360 : error); // a nested ternary to determine error
+        return error;
+    }
 
     public void init() {
         flMotor = opMode.hardwareMap.get(DcMotorEx.class, "flMotor");
@@ -259,7 +295,14 @@ public class MM_Drivetrain {
         flMotor.setDirection(DcMotorEx.Direction.REVERSE);
         blMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
-        //aprilTags = new MM_AprilTags(opMode);
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        //parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample OpMode
+
+        imu = opMode.hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
+
+        aprilTags = new MM_AprilTags(opMode);
 
 
 
