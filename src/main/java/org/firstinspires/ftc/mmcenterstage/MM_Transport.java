@@ -18,9 +18,9 @@ public class MM_Transport {
     public Servo boxFlip = null;
     private TouchSensor bottomLimit = null;
 
-    public static int TICK_INCREMENT = 20;
-    public static double BOX_COLLECT = .38;
-    public static double BOX_SCORE = 63;
+    public static int TICK_INCREMENT = 30;
+    public static double BOX_COLLECT = .375;
+    public static double BOX_SCORE = 639;
     public static double BOX_TRANSPORT = .357;
     public static final int UPPER_LIMIT = 2900;
     public static final int MIN_SCORE_HEIGHT = 1560;
