@@ -19,8 +19,9 @@ public class MM_Transport {
     private TouchSensor bottomLimit = null;
 
     public static int TICK_INCREMENT = 20;
-    public static double BOX_COLLECT = .42;
-    public static double BOX_SCORE = 1;
+    public static double BOX_COLLECT = .38;
+    public static double BOX_SCORE = 63;
+    public static double BOX_TRANSPORT = .357;
     public static final int UPPER_LIMIT = 2900;
     public static final int MIN_SCORE_HEIGHT = 1560;
     public static final int MAX_COLLECT_HEIGHT = 350;
@@ -85,10 +86,10 @@ public class MM_Transport {
         if (slide.getCurrentPosition() > MIN_SCORE_HEIGHT) {
             if (!MM_TeleOp.previousGamepad2.right_stick_button && MM_TeleOp.currentGamepad2.right_stick_button) {
                 readyToScore = !readyToScore;
-                boxFlip.setPosition((readyToScore) ? BOX_SCORE : 0);
+                boxFlip.setPosition((readyToScore) ? BOX_SCORE : BOX_TRANSPORT);
             }
         } else {
-            boxFlip.setPosition((slide.getCurrentPosition() > MAX_COLLECT_HEIGHT) ? 0 : BOX_COLLECT);
+            boxFlip.setPosition((slide.getCurrentPosition() > MAX_COLLECT_HEIGHT) ? BOX_TRANSPORT : BOX_COLLECT);
         }
 
     }
