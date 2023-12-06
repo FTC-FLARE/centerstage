@@ -19,9 +19,9 @@ public class MM_Transport {
     private TouchSensor bottomLimit = null;
 
     public static int TICK_INCREMENT = 30;
-    public static double BOX_COLLECT = .375;
-    public static double BOX_SCORE = 639;
-    public static double BOX_TRANSPORT = .357;
+    public static double BOX_COLLECT = .135;
+    public static double BOX_SCORE = .41;
+    public static double BOX_TRANSPORT = .1256;
     public static final int UPPER_LIMIT = 2900;
     public static final int MIN_SCORE_HEIGHT = 1560;
     public static final int MAX_COLLECT_HEIGHT = 350;
