@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -28,19 +29,21 @@ public class MM_Drivetrain {
     private DcMotorEx brMotor = null;
     private BNO055IMU imu;
 
-    public static double MAX_DRIVE_POWER = .7;
+    public static double MAX_DRIVE_POWER = .5;
+    public static double MAX_TURN_POWER = .5;
     public static double APRIL_TAG_THRESHOLD = 2;
     public static double DRIVE_P_COEFF = .0166;
     public static double STRAFE_P_COEFF = .05;
-    public static double TURN_P_COEFF = .011;
+    public static double TURN_P_COEFF = .016;
     public static double MIN_DRIVE_POWER = .28;
     public static double MAX_DETECT_ATTEMPTS = 150;
+    public static  double MIN_TURN_POWER = .15;
     public final double WHEEL_DIAMETER = 4;
     public final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
     public final double TICKS_PER_REVELUTION = 753.2; // for drivetrain only(5202-0002-0027), change for the real robot
     public final double TICKS_PER_INCH = TICKS_PER_REVELUTION / WHEEL_CIRCUMFERENCE;
     public static double inchesToDrive = 48;
-    static final int TURN_THRESHOLD = 7;
+    public static int TURN_THRESHOLD = 2;
 
     public MM_AprilTags aprilTags;
     Orientation angles;
@@ -87,15 +90,23 @@ public class MM_Drivetrain {
             brPower *= 0.5;
         }
 
-        flMotor.setPower(flPower * 0.7);
-        frMotor.setPower(frPower * 0.7);
-        blMotor.setPower(blPower * 0.7);
-        brMotor.setPower(brPower * 0.7);
-
-
+        flMotor.setPower(flPower);
+        frMotor.setPower(frPower);
+        blMotor.setPower(blPower);
+        brMotor.setPower(brPower);
     }
 
-    public void driveToAprilTag() {
+    public void driveToAprilTag(int tagToFind) {
+        flMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        frMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        blMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        brMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+        flMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        frMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        blMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        brMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
         boolean keepGoing = true;
         detectAttemptCount = 0;
         double drivePower = 0;
@@ -104,12 +115,12 @@ public class MM_Drivetrain {
 
         timer.reset();
         while (opMode.opModeIsActive() && keepGoing) {
-            //tagId = getAprilTagId(2);
-            //getTfodId();
+            tagId = getAprilTagId(tagToFind);
+            getTfodId();
 
             if (tagId != null) {
-                errorY = getErrorY(6, tagId);
-                errorX = getErrorX(0, tagId);
+                errorY = -getErrorY(6, tagId);
+                errorX = -getErrorX(0, tagId);
                 detectAttemptCount = 0;
 
                 drivePower = errorY * DRIVE_P_COEFF * MAX_DRIVE_POWER;
@@ -121,7 +132,7 @@ public class MM_Drivetrain {
                 brPower = drivePower + strafePower;
 
                 normalize(MAX_DRIVE_POWER);
-                normalizeForMin();
+                normalizeForMin(MIN_DRIVE_POWER);
 //
 //                flPower = updateForMinPower(flPower);
 //                frPower = updateForMinPower(frPower);
@@ -188,11 +199,11 @@ public class MM_Drivetrain {
         }
     }
 
-    private void normalizeForMin() {
-        if (flPower < MIN_DRIVE_POWER && frPower < MIN_DRIVE_POWER && blPower < MIN_DRIVE_POWER && brPower < MIN_DRIVE_POWER) {
+    private void normalizeForMin(double minPower) {
+        if (flPower < minPower && frPower < minPower && blPower < minPower && brPower < minPower) {
             double rawMaxPower = Math.max(Math.max(Math.abs(flPower), Math.abs(frPower)),
                     Math.max(Math.abs(blPower), Math.abs(brPower)));
-            double multiplier = MIN_DRIVE_POWER / rawMaxPower;
+            double multiplier = minPower / rawMaxPower;
             flPower *= multiplier;
             frPower *= multiplier;
             blPower *= multiplier;
@@ -259,8 +270,18 @@ public class MM_Drivetrain {
         }   // end for() loop
     }
 
-    private void rotateToAngle(int targetAngle) {
-        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+    public void rotateToAngle(int targetAngle) {
+        flMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        frMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        blMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        brMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+        flMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        frMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        blMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        brMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
         dashboardTelemetry.addData("current angle", angles.firstAngle);
         dashboardTelemetry.update();
@@ -268,21 +289,41 @@ public class MM_Drivetrain {
         double error = getYawError(targetAngle, angles.firstAngle);
 
         while (opMode.opModeIsActive() && Math.abs(error) > TURN_THRESHOLD) {
+            double power = error * TURN_P_COEFF * MAX_TURN_POWER;
+
+            flPower = -(power);
+            frPower = power;
+            blPower = -(power);
+            brPower = power;
+
+            //
+
+            normalizeForMin(MIN_TURN_POWER);
+            normalize(MAX_TURN_POWER);
+
+            flMotor.setPower(flPower);
+            frMotor.setPower(frPower);
+            blMotor.setPower(blPower);
+            brMotor.setPower(brPower);
+
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
             error = getYawError(targetAngle, angles.firstAngle);
-            double power = targetAngle * error * TURN_P_COEFF;
 
-            flMotor.setPower(power);
-            frMotor.setPower(-power);
-            blMotor.setPower(power);
-            brMotor.setPower(-power);
-
+            opMode.telemetry.addData("error", error);
+            opMode.telemetry.addData("Z", angles.firstAngle);
+            opMode.telemetry.update();
         }
+        flMotor.setPower(0);
+        frMotor.setPower(0);
+        blMotor.setPower(0);
+        brMotor.setPower(0);
     }
 
     private double getYawError(int targetAngle, double currentAngle) {
         double error = targetAngle - currentAngle;
 
-        error = (error > 180) ? error - 360 : (error = (error <= -180) ? error + 360 : error); // a nested ternary to determine error
+        error = (error > 180) ? error - 360 : ((error <= -180) ? error + 360 : error); // a nested ternary to determine error
         return error;
     }
 
@@ -303,8 +344,6 @@ public class MM_Drivetrain {
         imu.initialize(parameters);
 
         aprilTags = new MM_AprilTags(opMode);
-
-
 
         dashboardTelemetry.addData("detect attempts", detectAttemptCount);
         dashboardTelemetry.addData("errorX", errorX);

@@ -2,8 +2,10 @@ package org.firstinspires.ftc.mmcenterstage;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
@@ -17,9 +19,10 @@ public class MM_Transport {
     private DcMotorEx slide = null;
     public Servo boxFlip = null;
     private TouchSensor bottomLimit = null;
+//    private DistanceSensor boxSensor = null;
 
     public static int TICK_INCREMENT = 30;
-    public static double BOX_COLLECT = .135;
+    public static double BOX_COLLECT = .14;
     public static double BOX_SCORE = .41;
     public static double BOX_TRANSPORT = .1256;
     public static final int UPPER_LIMIT = 2900;
@@ -28,6 +31,7 @@ public class MM_Transport {
 
     boolean readyToScore = false;
     boolean isLimitHandled = false;
+    boolean isHoming = false;
     double rightStickPower = 0;
     int targetTicks = 0;
 
@@ -43,33 +47,23 @@ public class MM_Transport {
 
         rightStickPower = -opMode.gamepad2.right_stick_y;
 
+        if(rightStickPower > .1){
+            isHoming = false;
+        }
 
-//        if (rightStickPower > 0.1) {
-//            targetTicks = Math.min(targetTicks + TICK_INCREMENT, UPPER_LIMIT);
-//
-//        }
-//        } else if(bottomLimit.isPressed() && !isLimitHandled) {
-//
-//            slide.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-//            slide.setPower(0);
-//            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//            isLimitHandled = true;
-//        } else if (!bottomLimit.isPressed()) {
-//            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            slide.setPower(1);
-//            isLimitHandled = !isLimitHandled;
-//
-//        }
-//        slide.setTargetPosition(targetTicks);
-//        slide.setPower(1);
-
-        if (bottomLimit.isPressed() && !isLimitHandled){
+        if (bottomLimit.isPressed() && !isLimitHandled) {
             slide.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
             slide.setPower(0);
-            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            slide.setTargetPosition(0);
+            slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+            targetTicks = 0;
             isLimitHandled = true;
-        } else if (!bottomLimit.isPressed() || rightStickPower > 0.1) {
+            isHoming = false;
+        }  else if ((MM_TeleOp.currentGamepad2.a && !MM_TeleOp.previousGamepad2.a) && !bottomLimit.isPressed()) {
+            isHoming = true;
+
+            slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+            slide.setPower(-.6);
+        } else if ((!bottomLimit.isPressed() || rightStickPower > 0.1) && !isHoming) {// not trigger or i'm trying to go up
             if (rightStickPower < -0.1) {
                 targetTicks = Math.max(targetTicks - TICK_INCREMENT, 0);
             } else if (rightStickPower > 0.1) {
@@ -77,11 +71,12 @@ public class MM_Transport {
             }
 
             slide.setTargetPosition(targetTicks);
-            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            slide.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             slide.setPower(1);
 
             isLimitHandled = false;
         }
+
 
         if (slide.getCurrentPosition() > MIN_SCORE_HEIGHT) {
             if (!MM_TeleOp.previousGamepad2.right_stick_button && MM_TeleOp.currentGamepad2.right_stick_button) {
@@ -97,7 +92,9 @@ public class MM_Transport {
     public void init() {
         slide = opMode.hardwareMap.get(DcMotorEx.class, "slide");
         boxFlip = opMode.hardwareMap.get(Servo.class, "boxFlip");
+
         bottomLimit = opMode.hardwareMap.get(TouchSensor.class, "bottomLimit");
+        //boxSensor = opMode.hardwareMap.get(DistanceSensor.class, "boxSensor");
 
         slide.setDirection(DcMotorEx.Direction.REVERSE);
 

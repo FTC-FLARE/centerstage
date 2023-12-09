@@ -16,7 +16,7 @@ public class MM_Robot {
     public MM_Drivetrain drivetrain;
     public MM_Collector collector;
     public MM_Transport transport;
-    //public MM_LiftLift liftLift;
+    public MM_LiftLift liftLift;
 
     public MM_Robot(LinearOpMode opMode, Gamepad currentGamepad1, Gamepad previousGamepad1,
                     Gamepad currentGamepad2, Gamepad previousGamepad2, Telemetry dashboardTelemetry) {
@@ -33,7 +33,7 @@ public class MM_Robot {
         drivetrain = new MM_Drivetrain(opMode, dashboardTelemetry);
         collector = new MM_Collector(opMode);
         transport = new MM_Transport(opMode, dashboardTelemetry);
-        //liftLift = new MM_LiftLift(opMode, dashboardTelemetry);
+        liftLift = new MM_LiftLift(opMode, dashboardTelemetry);
     }
 
 }

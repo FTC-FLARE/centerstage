@@ -37,7 +37,7 @@ public class MM_TeleOp extends LinearOpMode {
             robot.drivetrain.driveWithSticks();
             robot.collector.collect();
             robot.transport.transport();
-            //robot.liftLift.liftLift();
+            robot.liftLift.liftLift();
             previousGamepad1.copy(currentGamepad1);
             currentGamepad1.copy(gamepad1);
             previousGamepad2.copy(currentGamepad2);

@@ -34,7 +34,7 @@ public class MM_Autos extends LinearOpMode {
         waitForStart();
 
         //robot.drivetrain.driveToAprilTag();
-        robot.drivetrain.driveInches(MM_Drivetrain.inchesToDrive, .3);
+        robot.drivetrain.rotateToAngle(90);
 
         //robot.drivetrain.aprilTags.visionPortal.close();
     }
