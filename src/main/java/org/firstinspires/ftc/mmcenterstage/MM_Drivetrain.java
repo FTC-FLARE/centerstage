@@ -1,18 +1,15 @@
 package org.firstinspires.ftc.mmcenterstage;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
@@ -27,7 +24,8 @@ public class MM_Drivetrain {
     private DcMotorEx frMotor = null;
     private DcMotorEx blMotor = null;
     private DcMotorEx brMotor = null;
-    private BNO055IMU imu;
+    private IMU imu;
+    double heading;
 
     public static double MAX_DRIVE_POWER = .5;
     public static double MAX_TURN_POWER = .5;
@@ -40,13 +38,12 @@ public class MM_Drivetrain {
     public static  double MIN_TURN_POWER = .15;
     public final double WHEEL_DIAMETER = 4;
     public final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
-    public final double TICKS_PER_REVELUTION = 753.2; // for drivetrain only(5202-0002-0027), change for the real robot
+    public final double TICKS_PER_REVELUTION = 537.7; // for drivetrain only(5202-0002-0027 "753.2" TPR), change for the real robot
     public final double TICKS_PER_INCH = TICKS_PER_REVELUTION / WHEEL_CIRCUMFERENCE;
     public static double inchesToDrive = 48;
     public static int TURN_THRESHOLD = 2;
 
     public MM_AprilTags aprilTags;
-    Orientation angles;
 
     private final Telemetry dashboardTelemetry;
     boolean isSlow = false;
@@ -70,7 +67,6 @@ public class MM_Drivetrain {
         double drivePower = -opMode.gamepad1.left_stick_y;
         double strafePower = opMode.gamepad1.left_stick_x;
         double rotatePower = opMode.gamepad1.right_stick_x;
-        opMode.telemetry.addData("test", "push");
 
         flPower = drivePower + strafePower + rotatePower;
         frPower = drivePower - strafePower - rotatePower;
@@ -81,7 +77,7 @@ public class MM_Drivetrain {
             isSlow = !isSlow;
         }
 
-        normalize(1);
+        normalize(.85);
 
         if (isSlow) {
             flPower *= 0.5;
@@ -281,12 +277,13 @@ public class MM_Drivetrain {
         blMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         brMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
-        dashboardTelemetry.addData("current angle", angles.firstAngle);
+
+        dashboardTelemetry.addData("current angle", heading);
         dashboardTelemetry.update();
 
-        double error = getYawError(targetAngle, angles.firstAngle);
+        double error = getYawError(targetAngle, heading);
 
         while (opMode.opModeIsActive() && Math.abs(error) > TURN_THRESHOLD) {
             double power = error * TURN_P_COEFF * MAX_TURN_POWER;
@@ -306,13 +303,14 @@ public class MM_Drivetrain {
             blMotor.setPower(blPower);
             brMotor.setPower(brPower);
 
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
-            error = getYawError(targetAngle, angles.firstAngle);
+            error = getYawError(targetAngle, heading);
 
-            opMode.telemetry.addData("error", error);
-            opMode.telemetry.addData("Z", angles.firstAngle);
-            opMode.telemetry.update();
+            dashboardTelemetry.addData("power", power);
+            dashboardTelemetry.addData("error", error);
+            dashboardTelemetry.addData("Z", heading);
+            dashboardTelemetry.update();
         }
         flMotor.setPower(0);
         frMotor.setPower(0);
@@ -336,12 +334,15 @@ public class MM_Drivetrain {
         flMotor.setDirection(DcMotorEx.Direction.REVERSE);
         blMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        //parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample OpMode
+        imu = opMode.hardwareMap.get(IMU.class, "imu");
 
-        imu = opMode.hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.RIGHT;
+
+        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
+
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
+        imu.resetYaw();
 
         aprilTags = new MM_AprilTags(opMode);
 

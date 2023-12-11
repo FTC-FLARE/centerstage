@@ -17,7 +17,8 @@ public class MM_Transport {
     private final Telemetry dashboardTelemetry;
 
     private DcMotorEx slide = null;
-    public Servo boxFlip = null;
+//    public Servo boxFlip = null;
+    private DcMotorEx mtrBoxFlip = null;
     private TouchSensor bottomLimit = null;
 //    private DistanceSensor boxSensor = null;
 
@@ -28,6 +29,7 @@ public class MM_Transport {
     public static final int UPPER_LIMIT = 2900;
     public static final int MIN_SCORE_HEIGHT = 1560;
     public static final int MAX_COLLECT_HEIGHT = 350;
+    public static final int MTR_BOX_SCORE = 300;
 
     boolean readyToScore = false;
     boolean isLimitHandled = false;
@@ -58,11 +60,10 @@ public class MM_Transport {
             targetTicks = 0;
             isLimitHandled = true;
             isHoming = false;
-        }  else if ((MM_TeleOp.currentGamepad2.a && !MM_TeleOp.previousGamepad2.a) && !bottomLimit.isPressed()) {
-            isHoming = true;
-
+        }  else if ((MM_TeleOp.currentGamepad2.y && !MM_TeleOp.previousGamepad2.y) && !bottomLimit.isPressed()) {
             slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
             slide.setPower(-.6);
+            isHoming = true;
         } else if ((!bottomLimit.isPressed() || rightStickPower > 0.1) && !isHoming) {// not trigger or i'm trying to go up
             if (rightStickPower < -0.1) {
                 targetTicks = Math.max(targetTicks - TICK_INCREMENT, 0);
@@ -77,21 +78,22 @@ public class MM_Transport {
             isLimitHandled = false;
         }
 
-
         if (slide.getCurrentPosition() > MIN_SCORE_HEIGHT) {
             if (!MM_TeleOp.previousGamepad2.right_stick_button && MM_TeleOp.currentGamepad2.right_stick_button) {
                 readyToScore = !readyToScore;
-                boxFlip.setPosition((readyToScore) ? BOX_SCORE : BOX_TRANSPORT);
+//                boxFlip.setPosition((readyToScore) ? BOX_SCORE : BOX_TRANSPORT);
+                mtrBoxFlip.setTargetPosition((readyToScore) ? MTR_BOX_SCORE : 0);
             }
         } else {
-            boxFlip.setPosition((slide.getCurrentPosition() > MAX_COLLECT_HEIGHT) ? BOX_TRANSPORT : BOX_COLLECT);
+//            boxFlip.setPosition((slide.getCurrentPosition() > MAX_COLLECT_HEIGHT) ? BOX_TRANSPORT : BOX_COLLECT);
+            mtrBoxFlip.setTargetPosition(0);
         }
-
+        dashboardTelemetry.addData("Box pos", mtrBoxFlip.getCurrentPosition());
     }
 
     public void init() {
         slide = opMode.hardwareMap.get(DcMotorEx.class, "slide");
-        boxFlip = opMode.hardwareMap.get(Servo.class, "boxFlip");
+//        boxFlip = opMode.hardwareMap.get(Servo.class, "boxFlip");
 
         bottomLimit = opMode.hardwareMap.get(TouchSensor.class, "bottomLimit");
         //boxSensor = opMode.hardwareMap.get(DistanceSensor.class, "boxSensor");
@@ -101,6 +103,13 @@ public class MM_Transport {
         slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         slide.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-        boxFlip.setPosition(BOX_COLLECT);
+        mtrBoxFlip = opMode.hardwareMap.get(DcMotorEx.class, "mtrBoxFlip");
+        mtrBoxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        mtrBoxFlip.setTargetPosition(0);
+        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        mtrBoxFlip.setPower(.5);
+
+//        boxFlip.setPosition(BOX_COLLECT);
     }
 }
