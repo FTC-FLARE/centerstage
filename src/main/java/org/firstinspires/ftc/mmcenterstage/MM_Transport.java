@@ -2,11 +2,8 @@ package org.firstinspires.ftc.mmcenterstage;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -30,12 +27,14 @@ public class MM_Transport {
     public static final int MIN_SCORE_HEIGHT = 1560;
     public static final int MAX_COLLECT_HEIGHT = 350;
     public static final int MTR_BOX_SCORE = 300;
+    public static final int BOX_MTR_TICK_INCREMENT = 8;
 
     boolean readyToScore = false;
     boolean isLimitHandled = false;
     boolean isHoming = false;
     double rightStickPower = 0;
-    int targetTicks = 0;
+    int slideTargetTicks = 0;
+    int boxFlipTargetTicks = 0;
 
     public MM_Transport(LinearOpMode opMode, Telemetry dashboardTelemetry) {
         this.opMode = opMode;
@@ -57,7 +56,7 @@ public class MM_Transport {
             slide.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
             slide.setPower(0);
             slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-            targetTicks = 0;
+            slideTargetTicks = 0;
             isLimitHandled = true;
             isHoming = false;
         }  else if ((MM_TeleOp.currentGamepad2.y && !MM_TeleOp.previousGamepad2.y) && !bottomLimit.isPressed()) {
@@ -66,28 +65,46 @@ public class MM_Transport {
             isHoming = true;
         } else if ((!bottomLimit.isPressed() || rightStickPower > 0.1) && !isHoming) {// not trigger or i'm trying to go up
             if (rightStickPower < -0.1) {
-                targetTicks = Math.max(targetTicks - TICK_INCREMENT, 0);
+                slideTargetTicks = Math.max(slideTargetTicks - TICK_INCREMENT, 0);
             } else if (rightStickPower > 0.1) {
-                targetTicks = Math.min(targetTicks + TICK_INCREMENT, UPPER_LIMIT);
+                slideTargetTicks = Math.min(slideTargetTicks + TICK_INCREMENT, UPPER_LIMIT);
             }
 
-            slide.setTargetPosition(targetTicks);
+            slide.setTargetPosition(slideTargetTicks);
             slide.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             slide.setPower(1);
 
             isLimitHandled = false;
         }
 
-        if (slide.getCurrentPosition() > MIN_SCORE_HEIGHT) {
-            if (!MM_TeleOp.previousGamepad2.right_stick_button && MM_TeleOp.currentGamepad2.right_stick_button) {
-                readyToScore = !readyToScore;
+//        if (slide.getCurrentPosition() > MIN_SCORE_HEIGHT) {
+//            if (!MM_TeleOp.previousGamepad2.right_stick_button && MM_TeleOp.currentGamepad2.right_stick_button) {
+//                readyToScore = !readyToScore;
 //                boxFlip.setPosition((readyToScore) ? BOX_SCORE : BOX_TRANSPORT);
-                mtrBoxFlip.setTargetPosition((readyToScore) ? MTR_BOX_SCORE : 0);
-            }
-        } else {
+//                mtrBoxFlip.setTargetPosition((readyToScore) ? MTR_BOX_SCORE : 0);
+//            }
+//        } else {
 //            boxFlip.setPosition((slide.getCurrentPosition() > MAX_COLLECT_HEIGHT) ? BOX_TRANSPORT : BOX_COLLECT);
-            mtrBoxFlip.setTargetPosition(0);
+            //mtrBoxFlip.setTargetPosition(0);
+       // }
+        if (slide.getCurrentPosition() > MIN_SCORE_HEIGHT && !MM_TeleOp.previousGamepad2.right_stick_button && MM_TeleOp.currentGamepad2.right_stick_button){
+                readyToScore = !readyToScore;
+                boxFlipTargetTicks = (readyToScore) ? MTR_BOX_SCORE : 0;
         }
+
+        if (opMode.gamepad2.left_stick_y > 0.1){
+            boxFlipTargetTicks += BOX_MTR_TICK_INCREMENT;
+        } else if (opMode.gamepad2.left_stick_y < -0.1) {
+            boxFlipTargetTicks -= BOX_MTR_TICK_INCREMENT;
+        }else if (opMode.gamepad2.left_stick_button) {//reset mtr box flip 0
+            mtrBoxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            boxFlipTargetTicks = 0;
+            mtrBoxFlip.setPower(.5);
+        }
+
+        mtrBoxFlip.setTargetPosition(boxFlipTargetTicks);
+//        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         dashboardTelemetry.addData("Box pos", mtrBoxFlip.getCurrentPosition());
     }
 
