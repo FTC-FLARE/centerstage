@@ -26,7 +26,8 @@ public class MM_LiftLift {
     public static final int HANG_POS_TARGET_TICKS = 200;
     public static final double SAFETY_TIME = 1.5;
     static final int TICK_INCREMENT = 12;
-    static final double LIFT_RELEASE = .5;
+    public static double LIFT_RELEASE = .265;
+    public static double LIFT_LOCK_POS = 0.3;
 
     int LSClickCount = 0;
     public static boolean isInLaunchPos = false;
@@ -99,6 +100,6 @@ public class MM_LiftLift {
         robotLift.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         liftRelease = opMode.hardwareMap.get(Servo.class, "liftRelease");
-//        liftRelease.setPosition(0);  // ***** Temp comment out
+        liftRelease.setPosition(LIFT_LOCK_POS);
     }
 }
