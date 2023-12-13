@@ -14,7 +14,7 @@ public class MM_Transport {
     private final Telemetry dashboardTelemetry;
 
     private DcMotorEx slide = null;
-//    public Servo boxFlip = null;
+    //    public Servo boxFlip = null;
     private DcMotorEx mtrBoxFlip = null;
     private TouchSensor bottomLimit = null;
 //    private DistanceSensor boxSensor = null;
@@ -48,7 +48,7 @@ public class MM_Transport {
 
         rightStickPower = -opMode.gamepad2.right_stick_y;
 
-        if(rightStickPower > .1){
+        if (rightStickPower > .1) {
             isHoming = false;
         }
 
@@ -57,9 +57,14 @@ public class MM_Transport {
             slide.setPower(0);
             slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
             slideTargetTicks = 0;
+            mtrBoxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            mtrBoxFlip.setPower(0);
+            mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+            boxFlipTargetTicks = 0;
+
             isLimitHandled = true;
             isHoming = false;
-        }  else if ((MM_TeleOp.currentGamepad2.y && !MM_TeleOp.previousGamepad2.y) && !bottomLimit.isPressed()) {
+        } else if ((MM_TeleOp.currentGamepad2.y && !MM_TeleOp.previousGamepad2.y) && !bottomLimit.isPressed()) {
             slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
             slide.setPower(-.6);
             isHoming = true;
@@ -73,8 +78,9 @@ public class MM_Transport {
             slide.setTargetPosition(slideTargetTicks);
             slide.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             slide.setPower(1);
-
-            isLimitHandled = false;
+            if (!bottomLimit.isPressed()) {
+                isLimitHandled = false;
+            }
         }
 
 //        if (slide.getCurrentPosition() > MIN_SCORE_HEIGHT) {
@@ -85,25 +91,35 @@ public class MM_Transport {
 //            }
 //        } else {
 //            boxFlip.setPosition((slide.getCurrentPosition() > MAX_COLLECT_HEIGHT) ? BOX_TRANSPORT : BOX_COLLECT);
-            //mtrBoxFlip.setTargetPosition(0);
-       // }
-        if (slide.getCurrentPosition() > MIN_SCORE_HEIGHT && !MM_TeleOp.previousGamepad2.right_stick_button && MM_TeleOp.currentGamepad2.right_stick_button){
-                readyToScore = !readyToScore;
-                boxFlipTargetTicks = (readyToScore) ? MTR_BOX_SCORE : 0;
-        }
+        //mtrBoxFlip.setTargetPosition(0);
+        // }
+//        if (slide.getCurrentPosition() > MAX_COLLECT_HEIGHT) {
 
-        if (opMode.gamepad2.left_stick_y > 0.1){
-            boxFlipTargetTicks += BOX_MTR_TICK_INCREMENT;
-        } else if (opMode.gamepad2.left_stick_y < -0.1) {
-            boxFlipTargetTicks -= BOX_MTR_TICK_INCREMENT;
-        }else if (opMode.gamepad2.left_stick_button) {//reset mtr box flip 0
-            mtrBoxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        if (slide.getCurrentPosition() > MIN_SCORE_HEIGHT && !MM_TeleOp.previousGamepad2.right_stick_button && MM_TeleOp.currentGamepad2.right_stick_button) {
+            readyToScore = !readyToScore;
+            boxFlipTargetTicks = (readyToScore) ? MTR_BOX_SCORE : 0;
+        }
+        if (!bottomLimit.isPressed()) {
+            mtrBoxFlip.setTargetPosition(boxFlipTargetTicks);
             mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            boxFlipTargetTicks = 0;
             mtrBoxFlip.setPower(.5);
-        }
 
-        mtrBoxFlip.setTargetPosition(boxFlipTargetTicks);
+//            if (opMode.gamepad2.left_stick_y > 0.1) {
+//                boxFlipTargetTicks += BOX_MTR_TICK_INCREMENT;
+//            } else if (opMode.gamepad2.left_stick_y < -0.1) {
+//                boxFlipTargetTicks -= BOX_MTR_TICK_INCREMENT;
+//            }
+        } else {
+            mtrBoxFlip.setPower(0);
+        }
+//        else if (opMode.gamepad2.left_stick_button) {//reset mtr box flip 0
+//            mtrBoxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+//            mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+//            boxFlipTargetTicks = 0;
+//            mtrBoxFlip.setPower(1);
+//        }
+
+
 //        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         dashboardTelemetry.addData("Box pos", mtrBoxFlip.getCurrentPosition());
     }
@@ -123,9 +139,9 @@ public class MM_Transport {
         mtrBoxFlip = opMode.hardwareMap.get(DcMotorEx.class, "mtrBoxFlip");
         mtrBoxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        mtrBoxFlip.setTargetPosition(0);
-        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-        mtrBoxFlip.setPower(.5);
+//        mtrBoxFlip.setTargetPosition(0);
+//        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        mtrBoxFlip.setPower(0);
 
 //        boxFlip.setPosition(BOX_COLLECT);
     }
