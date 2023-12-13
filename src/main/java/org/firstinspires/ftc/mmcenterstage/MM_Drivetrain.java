@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
@@ -323,6 +322,35 @@ public class MM_Drivetrain {
 
         error = (error > 180) ? error - 360 : ((error <= -180) ? error + 360 : error); // a nested ternary to determine error
         return error;
+    }
+
+    public void purplePixelLeftBlue(){
+        int propPos = propPosition();
+
+        if (propPos == 0){
+            driveInches(-20, 0.5);
+            rotateToAngle(45);
+            driveInches(-6, 0.5);
+            driveInches(10, 0.5);
+            rotateToAngle(90);
+            driveInches(-24, 0.5);
+        } else if (propPos == 1){
+            driveInches(-30, 0.5);
+            driveInches(10, 0.5);
+            rotateToAngle(90);
+            driveToAprilTag(2);
+        } else {
+            driveInches(-20, 0.5);
+            rotateToAngle(-45);
+            driveInches(-8, 0.5);
+            driveInches(10, 0.5);
+            rotateToAngle(90);
+            driveInches(-24, 0.5);
+        }
+    }
+
+    private int propPosition(){
+        return 2;
     }
 
     public void init() {
