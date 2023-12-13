@@ -26,8 +26,8 @@ public class MM_LiftLift {
     public static final int HANG_POS_TARGET_TICKS = 200;
     public static final double SAFETY_TIME = 1.5;
     static final int TICK_INCREMENT = 12;
-    public static double LIFT_RELEASE = .265;
-    public static double LIFT_LOCK_POS = 0.3;
+    public static double LIFT_RELEASE = 0;
+    public static double LIFT_LOCK_POS = 0.23;
 
     int LSClickCount = 0;
     public static boolean isInLaunchPos = false;

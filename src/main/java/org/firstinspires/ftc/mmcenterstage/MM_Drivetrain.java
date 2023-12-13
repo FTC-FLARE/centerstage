@@ -42,7 +42,7 @@ public class MM_Drivetrain {
     public static double inchesToDrive = 48;
     public static int TURN_THRESHOLD = 2;
 
-    public MM_AprilTags aprilTags;
+    public MM_VisionPortal visionPortal;
 
     private final Telemetry dashboardTelemetry;
     boolean isSlow = false;
@@ -238,7 +238,7 @@ public class MM_Drivetrain {
     }
 
     public AprilTagDetection getAprilTagId(int id) {
-        List<AprilTagDetection> currentDetections = aprilTags.aprilTagProcessor.getDetections();
+        List<AprilTagDetection> currentDetections = visionPortal.aprilTagProcessor.getDetections();
 
         for (AprilTagDetection detection : currentDetections) {
             if (opMode.opModeInInit()) {
@@ -252,7 +252,7 @@ public class MM_Drivetrain {
     }
 
     public void getTfodId() {
-        List<Recognition> currentRecognitions = aprilTags.tfod.getRecognitions();
+        List<Recognition> currentRecognitions = visionPortal.tfod.getRecognitions();
         // Step through the list of recognitions and display info for each one.
         for (Recognition recognition : currentRecognitions) {
             double x = (recognition.getLeft() + recognition.getRight()) / 2;
@@ -324,8 +324,8 @@ public class MM_Drivetrain {
         return error;
     }
 
-    public void purplePixelLeftBlue(){
-        int propPos = propPosition();
+    public void purplePixelLeft(boolean isBlue){
+        int propPos = propPosition(isBlue);
 
         if (propPos == 0){
             driveInches(-20, 0.5);
@@ -333,23 +333,77 @@ public class MM_Drivetrain {
             driveInches(-6, 0.5);
             driveInches(10, 0.5);
             rotateToAngle(90);
-            driveInches(-24, 0.5);
+            if (isBlue){
+                driveInches(-24, 0.5);
+            }
         } else if (propPos == 1){
             driveInches(-30, 0.5);
             driveInches(10, 0.5);
             rotateToAngle(90);
-            driveToAprilTag(2);
+            if (isBlue) {
+                driveToAprilTag(2);
+            }
         } else {
             driveInches(-20, 0.5);
             rotateToAngle(-45);
             driveInches(-8, 0.5);
             driveInches(10, 0.5);
             rotateToAngle(90);
-            driveInches(-24, 0.5);
+            if (isBlue) {
+                driveInches(-24, 0.5);
+            }
         }
     }
 
-    private int propPosition(){
+    public void purplePixelRight(boolean isBlue){
+        int propPos = propPosition(isBlue);
+
+        if (propPos == 0){
+            driveInches(-20, 0.5);
+            rotateToAngle(45);
+            driveInches(-6, 0.5);
+            driveInches(10, 0.5);
+            rotateToAngle(-90);
+            if (!isBlue){
+                driveInches(-24, 0.5);
+            }
+        } else if (propPos == 1){
+            driveInches(-30, 0.5);
+            driveInches(10, 0.5);
+            rotateToAngle(-90);
+            if (!isBlue) {
+                driveToAprilTag(5);
+            }
+        } else {
+            driveInches(-20, 0.5);
+            rotateToAngle(-45);
+            driveInches(-8, 0.5);
+            driveInches(10, 0.5);
+            rotateToAngle(-90);
+            if (!isBlue) {
+                driveInches(-24, 0.5);
+            }
+        }
+    }
+
+    private int propPosition(boolean isBlue){
+        List <Recognition> recognitions = visionPortal.tfod.getRecognitions();
+
+        for (Recognition recognition : recognitions){
+            if (isBlue && recognition.getLabel().equals("blueProp")){
+                if (recognition.getLeft() > 180){
+                    return 1;
+                } else {
+                    return 0;
+                }
+            } else if (!isBlue && recognition.getLabel().equals("redProp")) {
+                if (recognition.getLeft() > 180) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        }
         return 2;
     }
 
@@ -372,7 +426,7 @@ public class MM_Drivetrain {
         imu.initialize(new IMU.Parameters(orientationOnRobot));
         imu.resetYaw();
 
-        aprilTags = new MM_AprilTags(opMode);
+        visionPortal = new MM_VisionPortal(opMode);
 
         dashboardTelemetry.addData("detect attempts", detectAttemptCount);
         dashboardTelemetry.addData("errorX", errorX);

@@ -2,18 +2,17 @@ package org.firstinspires.ftc.mmcenterstage;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.dashboard.VisionPortalStreamingOpMode;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
@@ -22,25 +21,38 @@ import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MM_AprilTags {
+public class MM_VisionPortal {
     private final LinearOpMode opMode;
 
     public AprilTagProcessor aprilTagProcessor;
     public TfodProcessor tfod;
     public VisionPortal visionPortal;
 
-    public MM_AprilTags(LinearOpMode opMode) {
+    private static final String TFOD_MODEL_ASSET = "redBall+BlueBall.tflite";
+
+    private static final String[] LABELS = {
+            "blueProp", "redProp"
+    };
+
+    public MM_VisionPortal(LinearOpMode opMode) {
         this.opMode = opMode;
 
-        initAprilTag();
+        initVisionPortal();
+    }
+
+
+    public List getRecognitions() {
+         List<Recognition> currentRecognitions = tfod.getRecognitions();
+         return currentRecognitions;
     }
 
     /**
      * Initialize the AprilTag processor.
      */
-    private void initAprilTag() {
+    private void initVisionPortal() {
         // Create the AprilTag processor.
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
@@ -71,7 +83,8 @@ public class MM_AprilTags {
 
                 // The following default settings are available to un-comment and edit as needed to
                 // set parameters for custom models.
-                //.setModelLabels(LABELS)
+                .setModelLabels(LABELS)
+                .setModelAssetName(TFOD_MODEL_ASSET)
                 //.setIsModelTensorFlow2(true)
                 //.setIsModelQuantized(true)
                 //.setModelInputSize(300)
@@ -110,7 +123,7 @@ public class MM_AprilTags {
         opMode.telemetry.addData(">", "Touch Play to start OpMode");
         opMode.telemetry.update();
 
-        opMode.sleep(1000);
+        opMode.sleep(2500);
     }
 
     public static class CameraStreamProcessor implements VisionProcessor, CameraStreamSource {

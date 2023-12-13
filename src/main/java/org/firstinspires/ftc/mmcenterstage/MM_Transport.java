@@ -102,7 +102,7 @@ public class MM_Transport {
         if (!bottomLimit.isPressed()) {
             mtrBoxFlip.setTargetPosition(boxFlipTargetTicks);
             mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            mtrBoxFlip.setPower(.5);
+            mtrBoxFlip.setPower(.3);
 
 //            if (opMode.gamepad2.left_stick_y > 0.1) {
 //                boxFlipTargetTicks += BOX_MTR_TICK_INCREMENT;
