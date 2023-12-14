@@ -4,11 +4,12 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-@Autonomous(name = "MM Auto", group = "mm")
+@Autonomous(name = "Blue: Purple Pixel right", group = "Blue")
 
-public class MM_Autos extends LinearOpMode {
+public class MM_rightBluePurplePixel extends LinearOpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
     public Gamepad currentGamepad1 = new Gamepad();
@@ -33,10 +34,7 @@ public class MM_Autos extends LinearOpMode {
 
         waitForStart();
 
-        //robot.drivetrain.driveToAprilTag();
-        robot.drivetrain.rotateToAngle(90);
-
-        //robot.drivetrain.aprilTags.visionPortal.close();
+        robot.drivetrain.purplePixelRight(true);
     }
 }
 

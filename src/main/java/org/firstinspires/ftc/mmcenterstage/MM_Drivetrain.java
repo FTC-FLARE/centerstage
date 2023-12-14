@@ -150,6 +150,7 @@ public class MM_Drivetrain {
             } else {
                 detectAttemptCount++;
                 if (detectAttemptCount >= MAX_DETECT_ATTEMPTS) {
+                    driveInches(-32, .6);
                     keepGoing = false;
                 }
                 opMode.sleep(1);
@@ -325,7 +326,7 @@ public class MM_Drivetrain {
     }
 
     public void purplePixelLeft(boolean isBlue){
-        int propPos = propPosition(isBlue);
+        int propPos = propPositionLeft(isBlue);
 
         if (propPos == 0){
             driveInches(-20, 0.5);
@@ -334,7 +335,7 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (isBlue){
-                driveInches(-24, 0.5);
+                driveInches(-28, 0.5);
             }
         } else if (propPos == 1){
             driveInches(-30, 0.5);
@@ -350,13 +351,13 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (isBlue) {
-                driveInches(-24, 0.5);
+                driveInches(-28, 0.5);
             }
         }
     }
 
     public void purplePixelRight(boolean isBlue){
-        int propPos = propPosition(isBlue);
+        int propPos = propPositionRight(isBlue);
 
         if (propPos == 0){
             driveInches(-20, 0.5);
@@ -365,7 +366,7 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(-90);
             if (!isBlue){
-                driveInches(-24, 0.5);
+                driveInches(-28, 0.5);
             }
         } else if (propPos == 1){
             driveInches(-30, 0.5);
@@ -381,12 +382,33 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(-90);
             if (!isBlue) {
-                driveInches(-24, 0.5);
+                driveInches(-28, 0.5);
             }
         }
     }
 
-    private int propPosition(boolean isBlue){
+    private int propPositionRight(boolean isBlue){
+        List <Recognition> recognitions = visionPortal.tfod.getRecognitions();
+
+        for (Recognition recognition : recognitions){
+            if (isBlue && recognition.getLabel().equals("blueProp")){
+                if (recognition.getLeft() > 450){
+                    return 2;
+                } else {
+                    return 1;
+                }
+            } else if (!isBlue && recognition.getLabel().equals("redProp")) {
+                if (recognition.getLeft() > 450) {
+                    return 2;
+                } else {
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    }
+
+    private int propPositionLeft(boolean isBlue){
         List <Recognition> recognitions = visionPortal.tfod.getRecognitions();
 
         for (Recognition recognition : recognitions){
@@ -406,6 +428,7 @@ public class MM_Drivetrain {
         }
         return 2;
     }
+
 
     public void init() {
         flMotor = opMode.hardwareMap.get(DcMotorEx.class, "flMotor");
