@@ -442,6 +442,11 @@ public class MM_Drivetrain {
         flMotor.setDirection(DcMotorEx.Direction.REVERSE);
         blMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
+        if (MM_Robot.IS_AUTO) {
+            initExtraForAutos();
+        }
+    }
+    public void initExtraForAutos() {
         imu = opMode.hardwareMap.get(IMU.class, "imu");
 
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;

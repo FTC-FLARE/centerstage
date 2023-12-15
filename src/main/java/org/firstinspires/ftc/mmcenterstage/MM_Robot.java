@@ -12,6 +12,7 @@ public class MM_Robot {
     private final Gamepad currentGamepad2;
     private final Gamepad previousGamepad2;
     private final Telemetry dashboardTelemetry;
+    public static boolean IS_AUTO;
 
     public MM_Drivetrain drivetrain;
     public MM_Collector collector;
@@ -19,7 +20,7 @@ public class MM_Robot {
     public MM_LiftLift liftLift;
 
     public MM_Robot(LinearOpMode opMode, Gamepad currentGamepad1, Gamepad previousGamepad1,
-                    Gamepad currentGamepad2, Gamepad previousGamepad2, Telemetry dashboardTelemetry) {
+                    Gamepad currentGamepad2, Gamepad previousGamepad2, Telemetry dashboardTelemetry, boolean isAuto) {
         this.opMode = opMode;
         this.currentGamepad1 = currentGamepad1;
         this.previousGamepad1 = previousGamepad1;
@@ -27,6 +28,7 @@ public class MM_Robot {
         this.previousGamepad2 = previousGamepad2;
         this.dashboardTelemetry = dashboardTelemetry;
 
+        IS_AUTO = isAuto;
     }
 
     public void init() {
@@ -35,5 +37,4 @@ public class MM_Robot {
         transport = new MM_Transport(opMode, dashboardTelemetry);
         liftLift = new MM_LiftLift(opMode, dashboardTelemetry);
     }
-
 }

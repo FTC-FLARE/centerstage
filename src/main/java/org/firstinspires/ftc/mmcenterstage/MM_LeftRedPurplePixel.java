@@ -16,7 +16,7 @@ public class MM_LeftRedPurplePixel extends LinearOpMode {
     public Gamepad previousGamepad1 = new Gamepad();
     public Gamepad currentGamepad2Collect = new Gamepad();
     public Gamepad previousGamepad2Collect =  new Gamepad();
-    public MM_Robot robot = new MM_Robot(this, currentGamepad1, previousGamepad1, currentGamepad2Collect, previousGamepad2Collect, dashboardTelemetry);
+    public MM_Robot robot = new MM_Robot(this, currentGamepad1, previousGamepad1, currentGamepad2Collect, previousGamepad2Collect, dashboardTelemetry, true);
 
     @Override
     public void runOpMode() {

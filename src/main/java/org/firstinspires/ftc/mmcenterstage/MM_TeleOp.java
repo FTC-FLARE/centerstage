@@ -20,7 +20,7 @@ public class MM_TeleOp extends LinearOpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
     public MM_Robot robot = new MM_Robot(this, currentGamepad1, previousGamepad1, currentGamepad2,
-            previousGamepad2, dashboardTelemetry);
+            previousGamepad2, dashboardTelemetry, false);
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initializing... Please Wait");
@@ -46,7 +46,6 @@ public class MM_TeleOp extends LinearOpMode {
             telemetry.update();
             dashboardTelemetry.update();
         }
-        robot.drivetrain.visionPortal.visionPortal.close();
     }
 }
 
