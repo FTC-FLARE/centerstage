@@ -31,10 +31,10 @@ public class MM_VisionPortal {
     public TfodProcessor tfod;
     public VisionPortal visionPortal;
 
-    private static final String TFOD_MODEL_ASSET = "redandBlueBallsFINAL.tflite";
+    private static final String TFOD_MODEL_ASSET = "redBall+BlueBall.tflite";
 
     private static final String[] LABELS = {
-            "blueProp", "r", "redProp"
+            "blueBall", "redBall"
     };
 
     public MM_VisionPortal(LinearOpMode opMode) {

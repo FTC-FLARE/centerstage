@@ -1,23 +1,22 @@
 package org.firstinspires.ftc.mmcenterstage;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-@Autonomous(name = "Blue: Purple Pixel Left", group = "Blue")
+@Autonomous(name = "Blue: Left Score Yellow", group = "Blue")
 
-public class MM_LeftBluePurplePixel extends LinearOpMode {
+public class MM_LeftBlueScoreYellow extends LinearOpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
-    MultipleTelemetry multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
+    Telemetry dashboardTelemetry = dashboard.getTelemetry();
     public Gamepad currentGamepad1 = new Gamepad();
     public Gamepad previousGamepad1 = new Gamepad();
     public Gamepad currentGamepad2Collect = new Gamepad();
     public Gamepad previousGamepad2Collect =  new Gamepad();
-    public MM_Robot robot = new MM_Robot(this, currentGamepad1, previousGamepad1, currentGamepad2Collect, previousGamepad2Collect, multipleTelemetry);
+    public MM_Robot robot = new MM_Robot(this, currentGamepad1, previousGamepad1, currentGamepad2Collect, previousGamepad2Collect, dashboardTelemetry);
 
     @Override
     public void runOpMode() {
@@ -35,7 +34,12 @@ public class MM_LeftBluePurplePixel extends LinearOpMode {
 
         waitForStart();
 
-        robot.drivetrain.purplePixelLeft(true);
+        int propPos = robot.drivetrain.purplePixelLeft(true);
+        if (propPos == 1) {
+            robot.transport.runToScorePos();
+            robot.collector.score();
+            robot.transport.goHome();
+        }
     }
 }
 

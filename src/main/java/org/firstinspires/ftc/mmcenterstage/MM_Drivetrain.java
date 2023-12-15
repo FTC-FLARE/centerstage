@@ -325,7 +325,7 @@ public class MM_Drivetrain {
         return error;
     }
 
-    public void purplePixelLeft(boolean isBlue){
+    public int purplePixelLeft(boolean isBlue){
         int propPos = propPositionLeft(isBlue);
 
         if (propPos == 0){
@@ -351,12 +351,13 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (isBlue) {
-                driveInches(-28, 0.5);
+                driveToAprilTag(3);
             }
         }
+        return propPos;
     }
 
-    public void purplePixelRight(boolean isBlue){
+    public int purplePixelRight(boolean isBlue){
         int propPos = propPositionRight(isBlue);
 
         if (propPos == 0){
@@ -374,6 +375,7 @@ public class MM_Drivetrain {
             rotateToAngle(-90);
             if (!isBlue) {
                 driveToAprilTag(5);
+
             }
         } else {
             driveInches(-20, 0.5);
@@ -385,6 +387,7 @@ public class MM_Drivetrain {
                 driveInches(-28, 0.5);
             }
         }
+        return propPos;
     }
 
     private int propPositionRight(boolean isBlue){
@@ -412,14 +415,14 @@ public class MM_Drivetrain {
         List <Recognition> recognitions = visionPortal.tfod.getRecognitions();
 
         for (Recognition recognition : recognitions){
-            if (isBlue && recognition.getLabel().equals("blueProp")){
-                if (recognition.getLeft() > 180){
+            if (isBlue && recognition.getLabel().equals("blueBall")){
+                if (recognition.getLeft() > 130){
                     return 1;
                 } else {
                     return 0;
                 }
-            } else if (!isBlue && recognition.getLabel().equals("redProp")) {
-                if (recognition.getLeft() > 180) {
+            } else if (!isBlue && recognition.getLabel().equals("redBall")) {
+                if (recognition.getLeft() > 130) {
                     return 1;
                 } else {
                     return 0;

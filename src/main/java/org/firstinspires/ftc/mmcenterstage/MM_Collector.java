@@ -4,11 +4,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Gamepad;
-
-import org.checkerframework.checker.units.qual.C;
-import org.firstinspires.ftc.teamcode.R;
 
 @Config
 public class MM_Collector {
@@ -43,6 +38,12 @@ public class MM_Collector {
             rightWheel.setPower(0);
             pixelPrecisionWheel.setPower(0);
         }
+    }
+
+    public void score(){
+        pixelPrecisionWheel.setPower(-1);
+        opMode.sleep(2000);
+        pixelPrecisionWheel.setPower(0);
     }
 
     public void init() {

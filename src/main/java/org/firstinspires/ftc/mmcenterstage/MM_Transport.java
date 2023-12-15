@@ -65,6 +65,7 @@ public class MM_Transport {
             isLimitHandled = true;
             isHoming = false;
         } else if ((MM_TeleOp.currentGamepad2.y && !MM_TeleOp.previousGamepad2.y) && !bottomLimit.isPressed()) {
+            mtrBoxFlip.setTargetPosition(0);
             slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
             slide.setPower(-.6);
             isHoming = true;
@@ -122,6 +123,29 @@ public class MM_Transport {
 
 //        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         dashboardTelemetry.addData("Box pos", mtrBoxFlip.getCurrentPosition());
+    }
+
+    public void runToScorePos(){
+        mtrBoxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        mtrBoxFlip.setTargetPosition(0);
+        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        mtrBoxFlip.setPower(.3);
+        slide.setTargetPosition(MIN_SCORE_HEIGHT);
+        slide.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        slide.setPower(.5);
+        while (slide.isBusy()){ }
+        mtrBoxFlip.setTargetPosition(MTR_BOX_SCORE);
+        while(mtrBoxFlip.isBusy()){ }
+
+    }
+
+    public void goHome(){
+        mtrBoxFlip.setTargetPosition(0);
+        while (mtrBoxFlip.isBusy()){ }
+        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        slide.setPower(-.7);
+        while(!bottomLimit.isPressed()){ }
+        slide.setPower(0);
     }
 
     public void init() {
