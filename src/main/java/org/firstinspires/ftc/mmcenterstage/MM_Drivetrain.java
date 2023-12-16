@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.mmcenterstage;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -44,7 +46,7 @@ public class MM_Drivetrain {
 
     public MM_VisionPortal visionPortal;
 
-    private final Telemetry dashboardTelemetry;
+    private final MultipleTelemetry dashboardTelemetry;
     boolean isSlow = false;
 
     private double flPower = 0;
@@ -56,9 +58,9 @@ public class MM_Drivetrain {
     double errorY = 0;
     double errorX = 0;
 
-    public MM_Drivetrain(LinearOpMode opMode, Telemetry dashboardTelemetry) {
+    public MM_Drivetrain(LinearOpMode opMode, MultipleTelemetry multipleTelemetry) {
         this.opMode = opMode;
-        this.dashboardTelemetry = dashboardTelemetry;
+        this.dashboardTelemetry = multipleTelemetry;
         init();
     }
 
@@ -114,12 +116,17 @@ public class MM_Drivetrain {
             getTfodId();
 
             if (tagId != null) {
-                errorY = -getErrorY(6, tagId);
+                errorY = -getErrorY(4.5, tagId);
                 errorX = -getErrorX(0, tagId);
                 detectAttemptCount = 0;
 
-                drivePower = errorY * DRIVE_P_COEFF * MAX_DRIVE_POWER;
-                strafePower = errorX * STRAFE_P_COEFF * MAX_DRIVE_POWER;
+                if(opMode.gamepad2.left_stick_x < .3) {
+                    drivePower = errorY * DRIVE_P_COEFF;
+                    strafePower = errorX * STRAFE_P_COEFF;
+                } else {
+                    drivePower = errorY * DRIVE_P_COEFF * MAX_DRIVE_POWER;
+                    strafePower = errorX * STRAFE_P_COEFF * MAX_DRIVE_POWER;
+                }
 
                 flPower = drivePower + strafePower;
                 frPower = drivePower - strafePower;
@@ -139,6 +146,7 @@ public class MM_Drivetrain {
 //                blPower = Math.max(blPower, MIN_DRIVE_POWER);
 //                brPower = Math.max(brPower, MIN_DRIVE_POWER);
 
+
                 flMotor.setPower(flPower);
                 frMotor.setPower(frPower);
                 blMotor.setPower(blPower);
@@ -150,7 +158,7 @@ public class MM_Drivetrain {
             } else {
                 detectAttemptCount++;
                 if (detectAttemptCount >= MAX_DETECT_ATTEMPTS) {
-                    driveInches(-32, .6);
+                    driveInches(-35, .6);
                     keepGoing = false;
                 }
                 opMode.sleep(1);
@@ -326,16 +334,19 @@ public class MM_Drivetrain {
     }
 
     public int purplePixelLeft(boolean isBlue){
-        int propPos = propPositionLeft(isBlue);
+        int propPos = propPositionLeft();
 
         if (propPos == 0){
             driveInches(-20, 0.5);
             rotateToAngle(45);
-            driveInches(-6, 0.5);
+            driveInches(-12, 0.5);
+            rotateToAngle(0);
             driveInches(10, 0.5);
+//            rotateToAngle(0);
+//            driveInches(12, 0.5);
             rotateToAngle(90);
             if (isBlue){
-                driveInches(-28, 0.5);
+                driveToAprilTag(1);
             }
         } else if (propPos == 1){
             driveInches(-30, 0.5);
@@ -347,7 +358,7 @@ public class MM_Drivetrain {
         } else {
             driveInches(-20, 0.5);
             rotateToAngle(-45);
-            driveInches(-8, 0.5);
+            driveInches(-11, 0.5);
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (isBlue) {
@@ -358,7 +369,7 @@ public class MM_Drivetrain {
     }
 
     public int purplePixelRight(boolean isBlue){
-        int propPos = propPositionRight(isBlue);
+        int propPos = propPositionRight();
 
         if (propPos == 0){
             driveInches(-20, 0.5);
@@ -367,7 +378,7 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(-90);
             if (!isBlue){
-                driveInches(-28, 0.5);
+                driveToAprilTag(4);
             }
         } else if (propPos == 1){
             driveInches(-30, 0.5);
@@ -375,33 +386,26 @@ public class MM_Drivetrain {
             rotateToAngle(-90);
             if (!isBlue) {
                 driveToAprilTag(5);
-
             }
         } else {
             driveInches(-20, 0.5);
             rotateToAngle(-45);
             driveInches(-8, 0.5);
-            driveInches(10, 0.5);
+            driveInches(11, 0.5);
             rotateToAngle(-90);
             if (!isBlue) {
-                driveInches(-28, 0.5);
+                driveToAprilTag(6);
             }
         }
         return propPos;
     }
 
-    private int propPositionRight(boolean isBlue){
+    private int propPositionRight(){
         List <Recognition> recognitions = visionPortal.tfod.getRecognitions();
 
         for (Recognition recognition : recognitions){
-            if (isBlue && recognition.getLabel().equals("blueProp")){
+            if (recognition.getImageWidth() < 650 &&  recognition.getImageHeight() <  650){
                 if (recognition.getLeft() > 450){
-                    return 2;
-                } else {
-                    return 1;
-                }
-            } else if (!isBlue && recognition.getLabel().equals("redProp")) {
-                if (recognition.getLeft() > 450) {
                     return 2;
                 } else {
                     return 1;
@@ -411,27 +415,23 @@ public class MM_Drivetrain {
         return 0;
     }
 
-    private int propPositionLeft(boolean isBlue){
+    private int propPositionLeft(){
         List <Recognition> recognitions = visionPortal.tfod.getRecognitions();
 
         for (Recognition recognition : recognitions){
-            if (isBlue && recognition.getLabel().equals("blueBall")){
+            dashboardTelemetry.addData("Prop", "width: %.2f, height: %.2f", recognition.getWidth(), recognition.getHeight());
+            dashboardTelemetry.update();
+            if (recognition.getWidth() < 150 &&  recognition.getHeight() <  180){
                 if (recognition.getLeft() > 130){
                     return 1;
                 } else {
                     return 0;
                 }
-            } else if (!isBlue && recognition.getLabel().equals("redBall")) {
-                if (recognition.getLeft() > 130) {
-                    return 1;
-                } else {
-                    return 0;
-                }
+
             }
         }
         return 2;
     }
-
 
     public void init() {
         flMotor = opMode.hardwareMap.get(DcMotorEx.class, "flMotor");
@@ -443,10 +443,16 @@ public class MM_Drivetrain {
         blMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
         if (MM_Robot.IS_AUTO) {
+
             initExtraForAutos();
         }
     }
     public void initExtraForAutos() {
+        flMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        frMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        blMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        brMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
         imu = opMode.hardwareMap.get(IMU.class, "imu");
 
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
@@ -457,11 +463,12 @@ public class MM_Drivetrain {
         imu.initialize(new IMU.Parameters(orientationOnRobot));
         imu.resetYaw();
 
-        visionPortal = new MM_VisionPortal(opMode);
+        visionPortal = new MM_VisionPortal(opMode, dashboardTelemetry);
 
         dashboardTelemetry.addData("detect attempts", detectAttemptCount);
         dashboardTelemetry.addData("errorX", errorX);
         dashboardTelemetry.update();
+
     }
 }
 

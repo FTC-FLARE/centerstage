@@ -4,8 +4,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -31,14 +33,16 @@ public class MM_VisionPortal {
     public TfodProcessor tfod;
     public VisionPortal visionPortal;
 
-    private static final String TFOD_MODEL_ASSET = "redBall+BlueBall.tflite";
+    private MultipleTelemetry multipleTelemetry = null;
+    private static final String TFOD_MODEL_ASSET = "BallsCombined.tflite";
 
     private static final String[] LABELS = {
-            "blueBall", "redBall"
+            "prop"
     };
 
-    public MM_VisionPortal(LinearOpMode opMode) {
+    public MM_VisionPortal(LinearOpMode opMode, MultipleTelemetry multipleTelemetry) {
         this.opMode = opMode;
+        this.multipleTelemetry = multipleTelemetry;
 
         initVisionPortal();
     }
@@ -121,9 +125,12 @@ public class MM_VisionPortal {
                 "\n" +
                 "No Hardware Detected", "3 dots, Camera Stream");
         opMode.telemetry.addData(">", "Touch Play to start OpMode");
+
         opMode.telemetry.update();
 
         opMode.sleep(2500);
+
+
     }
 
     public static class CameraStreamProcessor implements VisionProcessor, CameraStreamSource {

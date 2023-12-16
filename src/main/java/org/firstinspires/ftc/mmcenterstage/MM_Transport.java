@@ -142,16 +142,22 @@ public class MM_Transport {
         slide.setTargetPosition(MIN_SCORE_HEIGHT);
         slide.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         slide.setPower(.5);
-        while (slide.isBusy()){ }
+        while (slide.isBusy()){
+            opMode.telemetry.addData("Slide running", slide.getCurrentPosition());
+            opMode.telemetry.update();
+        }
         mtrBoxFlip.setTargetPosition(BOX_SCORE_TICKS);
-        while(mtrBoxFlip.isBusy()){ }
 
+        while(mtrBoxFlip.isBusy()){
+            opMode.telemetry.addData("Box Flipping", mtrBoxFlip.getCurrentPosition());
+            opMode.telemetry.update();
+        }
     }
 
     public void goHome(){
         mtrBoxFlip.setTargetPosition(0);
         while (mtrBoxFlip.isBusy()){ }
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         slide.setPower(slide.getCurrentPosition() < SLIDE_SLOW_DOWN_TICKS ? SLIDE_HOME_POWER_SLOW : SLIDE_HOME_POWER);
         while(!bottomLimit.isPressed()){ }
         slide.setPower(0);

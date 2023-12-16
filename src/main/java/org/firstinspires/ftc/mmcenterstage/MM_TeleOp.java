@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.mmcenterstage;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -18,9 +19,9 @@ public class MM_TeleOp extends LinearOpMode {
     public static Gamepad previousGamepad2 = new Gamepad();
     public static ElapsedTime matchTimer = new ElapsedTime();
     FtcDashboard dashboard = FtcDashboard.getInstance();
-    Telemetry dashboardTelemetry = dashboard.getTelemetry();
+    MultipleTelemetry multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
     public MM_Robot robot = new MM_Robot(this, currentGamepad1, previousGamepad1, currentGamepad2,
-            previousGamepad2, dashboardTelemetry, false);
+            previousGamepad2, multipleTelemetry, false);
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initializing... Please Wait");
@@ -44,7 +45,7 @@ public class MM_TeleOp extends LinearOpMode {
             currentGamepad2.copy(gamepad2);
 
             telemetry.update();
-            dashboardTelemetry.update();
+            multipleTelemetry.update();
         }
     }
 }

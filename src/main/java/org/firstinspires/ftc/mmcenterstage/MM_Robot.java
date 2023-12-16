@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.mmcenterstage;
 
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
@@ -11,8 +12,8 @@ public class MM_Robot {
     public final Gamepad previousGamepad1;
     private final Gamepad currentGamepad2;
     private final Gamepad previousGamepad2;
-    private final Telemetry dashboardTelemetry;
-    public static boolean IS_AUTO;
+    private MultipleTelemetry dashboardTelemetry;
+    public static boolean IS_AUTO = true;
 
     public MM_Drivetrain drivetrain;
     public MM_Collector collector;
@@ -20,7 +21,7 @@ public class MM_Robot {
     public MM_LiftLift liftLift;
 
     public MM_Robot(LinearOpMode opMode, Gamepad currentGamepad1, Gamepad previousGamepad1,
-                    Gamepad currentGamepad2, Gamepad previousGamepad2, Telemetry dashboardTelemetry, boolean isAuto) {
+                    Gamepad currentGamepad2, Gamepad previousGamepad2, MultipleTelemetry dashboardTelemetry, boolean isAuto) {
         this.opMode = opMode;
         this.currentGamepad1 = currentGamepad1;
         this.previousGamepad1 = previousGamepad1;
