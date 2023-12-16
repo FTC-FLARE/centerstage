@@ -374,8 +374,10 @@ public class MM_Drivetrain {
         if (propPos == 0){
             driveInches(-20, 0.5);
             rotateToAngle(45);
-            driveInches(-6, 0.5);
-            driveInches(10, 0.5);
+            driveInches(-12, 0.5);
+            driveInches(15, 0.5);
+            rotateToAngle(0);
+            driveInches(-10, 0.5);
             rotateToAngle(-90);
             if (!isBlue){
                 driveToAprilTag(4);
@@ -390,8 +392,9 @@ public class MM_Drivetrain {
         } else {
             driveInches(-20, 0.5);
             rotateToAngle(-45);
-            driveInches(-8, 0.5);
-            driveInches(11, 0.5);
+            driveInches(-12, 0.5);
+            rotateToAngle(0);
+            driveInches(10, 0.5);
             rotateToAngle(-90);
             if (!isBlue) {
                 driveToAprilTag(6);
@@ -404,7 +407,7 @@ public class MM_Drivetrain {
         List <Recognition> recognitions = visionPortal.tfod.getRecognitions();
 
         for (Recognition recognition : recognitions){
-            if (recognition.getImageWidth() < 650 &&  recognition.getImageHeight() <  650){
+            if (recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
                 if (recognition.getLeft() > 450){
                     return 2;
                 } else {
@@ -421,7 +424,7 @@ public class MM_Drivetrain {
         for (Recognition recognition : recognitions){
             dashboardTelemetry.addData("Prop", "width: %.2f, height: %.2f", recognition.getWidth(), recognition.getHeight());
             dashboardTelemetry.update();
-            if (recognition.getWidth() < 150 &&  recognition.getHeight() <  180){
+            if (recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
                 if (recognition.getLeft() > 130){
                     return 1;
                 } else {

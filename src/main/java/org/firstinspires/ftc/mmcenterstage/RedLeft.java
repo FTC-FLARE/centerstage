@@ -6,11 +6,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+@Autonomous(name = "Red: Left", group = "Red")
 
-@Autonomous(name = "Red: Right Score Yellow", group = "Red")
-
-public class MM_RightRedScoreYellow extends LinearOpMode {
+public class RedLeft extends LinearOpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     MultipleTelemetry multipleTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
     public Gamepad currentGamepad1 = new Gamepad();
@@ -35,10 +33,7 @@ public class MM_RightRedScoreYellow extends LinearOpMode {
 
         waitForStart();
 
-            robot.drivetrain.purplePixelRight(false);
-            robot.transport.runToScorePos();
-            robot.collector.score();
-            robot.transport.goHome();
+        robot.drivetrain.purplePixelLeft(false);
     }
 }
 

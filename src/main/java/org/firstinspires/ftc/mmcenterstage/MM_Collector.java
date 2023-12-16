@@ -41,7 +41,7 @@ public class MM_Collector {
     }
 
     public void score(){
-        pixelPrecisionWheel.setPower(1);
+        pixelPrecisionWheel.setPower(.6);
         opMode.sleep(2000);
         pixelPrecisionWheel.setPower(0);
     }
