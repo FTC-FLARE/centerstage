@@ -10,7 +10,7 @@ public class MM_Collector {
     private final LinearOpMode opMode;
 
     public static double RIGHT_WHEEL_POWER = 1;
-    public static double LEFT_WHEEL_POWER = 0.5;
+    public static double LEFT_WHEEL_POWER = 0.65;
     public static double PIXEL_PRECISION_WHEEL_POWER = 1;
 
     private CRServo rightWheel = null;

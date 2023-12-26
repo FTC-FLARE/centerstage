@@ -71,6 +71,7 @@ public class MM_VisionPortal {
                 // to load a predefined calibration for your camera.
                 //.setLensIntrinsics(578.272, 578.272, 402.145, 221.506)
 
+
                 // ... these parameters are fx, fy, cx, cy.
 
                 .build();
@@ -93,6 +94,7 @@ public class MM_VisionPortal {
                 //.setIsModelQuantized(true)
                 //.setModelInputSize(300)
                 //.setModelAspectRatio(16.0 / 9.0)
+
 
                 .build();
 

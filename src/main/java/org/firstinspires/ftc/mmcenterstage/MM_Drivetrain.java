@@ -158,7 +158,7 @@ public class MM_Drivetrain {
             } else {
                 detectAttemptCount++;
                 if (detectAttemptCount >= MAX_DETECT_ATTEMPTS) {
-                    driveInches(-35, .6);
+                    driveInches(-37, .6);
                     keepGoing = false;
                 }
                 opMode.sleep(1);
@@ -236,6 +236,13 @@ public class MM_Drivetrain {
             brPower /= rawMaxPower;
         }
 
+    }
+
+    public void strafe(){
+        flMotor.setPower(-.5);
+        frMotor.setPower(.5);
+        blMotor.setPower(-.5);
+        brMotor.setPower(.5);
     }
 
     private double getErrorY(double targetDistance, AprilTagDetection tagId) {
