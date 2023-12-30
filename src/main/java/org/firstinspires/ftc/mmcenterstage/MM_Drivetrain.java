@@ -39,7 +39,7 @@ public class MM_Drivetrain {
     public static  double MIN_TURN_POWER = .15;
     public final double WHEEL_DIAMETER = 4;
     public final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
-    public final double TICKS_PER_REVELUTION = 537.7; // for drivetrain only(5202-0002-0027 "753.2" TPR), change for the real robot
+    public final double TICKS_PER_REVELUTION = 537.7; // for drivetrain only(5202-0002-0027 "753.2" TPR), change for the real robot ("537.7" TPR)
     public final double TICKS_PER_INCH = TICKS_PER_REVELUTION / WHEEL_CIRCUMFERENCE;
     public static double inchesToDrive = 48;
     public static int TURN_THRESHOLD = 2;
@@ -238,11 +238,28 @@ public class MM_Drivetrain {
 
     }
 
-    public void strafe(){
-        flMotor.setPower(-.5);
-        frMotor.setPower(.5);
-        blMotor.setPower(-.5);
-        brMotor.setPower(.5);
+    public void cruiseUnderTruss(){   //DO NOT RENAME; IF RENAMED THIS WILL BECOME A WAR!!!
+
+    }
+
+    public void strafeInches(double inches, double power) {
+        int ticks = (int) (TICKS_PER_INCH * (inches * 1.23));
+
+        flMotor.setTargetPosition(ticks + flMotor.getCurrentPosition());
+        frMotor.setTargetPosition(-ticks + frMotor.getCurrentPosition());
+        blMotor.setTargetPosition(-ticks + blMotor.getCurrentPosition());
+        brMotor.setTargetPosition(ticks + brMotor.getCurrentPosition());
+
+        flMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        frMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        blMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        brMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        flMotor.setPower(power);
+        frMotor.setPower(power);
+        blMotor.setPower(power);
+        brMotor.setPower(power);
+        while (opMode.opModeIsActive() && (flMotor.isBusy() || brMotor.isBusy())) { }
     }
 
     private double getErrorY(double targetDistance, AprilTagDetection tagId) {
@@ -475,10 +492,10 @@ public class MM_Drivetrain {
 
         visionPortal = new MM_VisionPortal(opMode, dashboardTelemetry);
 
-        dashboardTelemetry.addData("detect attempts", detectAttemptCount);
-        dashboardTelemetry.addData("errorX", errorX);
-        dashboardTelemetry.update();
-
+//        dashboardTelemetry.addData("detect attempts", detectAttemptCount);
+//        dashboardTelemetry.addData("errorX", errorX);
+//        dashboardTelemetry.update();
+//
     }
 }
 
