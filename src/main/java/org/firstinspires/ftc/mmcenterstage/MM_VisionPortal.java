@@ -139,12 +139,12 @@ public class MM_VisionPortal {
 
        while(visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING){ }
 
-       ExposureControl exposure = visionPortal.getCameraControl(ExposureControl.class);
-       exposure.setMode(ExposureControl.Mode.Manual);
-       exposure.setExposure(EXPOSURE, TimeUnit.MILLISECONDS);
-
-        GainControl gain = visionPortal.getCameraControl(GainControl.class);
-        gain.setGain(GAIN);
+//       ExposureControl exposure = visionPortal.getCameraControl(ExposureControl.class);
+//       exposure.setMode(ExposureControl.Mode.Manual);
+//       exposure.setExposure(EXPOSURE, TimeUnit.MILLISECONDS);
+//
+//        GainControl gain = visionPortal.getCameraControl(GainControl.class);
+//        gain.setGain(GAIN);
     }
 
     public static class CameraStreamProcessor implements VisionProcessor, CameraStreamSource {

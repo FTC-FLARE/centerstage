@@ -31,10 +31,17 @@ public class BlueLeft extends LinearOpMode {
 
         waitForStart();
 
-        robot.drivetrain.purplePixelLeft(true);
+        int propPos = robot.drivetrain.purplePixelLeft(true);
         robot.transport.runToScorePos();
         robot.collector.score();
         robot.transport.goHome();
+        if (propPos == 1){
+            robot.drivetrain.strafeInches(21.5, .3);
+        } else if (propPos == 2){
+            robot.drivetrain.strafeInches(26, .4);
+        } else {
+            robot.drivetrain.strafeInches(31, .6);
+        }
 
     }
 }
