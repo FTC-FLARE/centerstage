@@ -34,7 +34,19 @@ public class BlueRight extends LinearOpMode {
 
         waitForStart();
 
-        robot.drivetrain.purplePixelRight(true);
+        int propPos = robot.drivetrain.purplePixelRight(true);
+
+        if (propPos == 1) {
+            robot.drivetrain.strafeInches(-11.5, .3);
+            robot.drivetrain.rotateToAngle(-45);
+            robot.drivetrain.driveToAprilTag(10, 8, 27);
+            robot.drivetrain.rotateToAngle(-90);
+        } else if(propPos == 0) {
+
+        } else {
+
+        }
+
     }
 }
 

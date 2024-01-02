@@ -30,7 +30,7 @@ public class MM_Drivetrain {
 
     public static double MAX_DRIVE_POWER = .5;
     public static double MAX_TURN_POWER = .5;
-    public static double APRIL_TAG_THRESHOLD = 2;
+    public static double APRIL_TAG_THRESHOLD = 1;
     public static double DRIVE_P_COEFF = .0166;
     public static double STRAFE_P_COEFF = .05;
     public static double TURN_P_COEFF = .016;
@@ -93,7 +93,7 @@ public class MM_Drivetrain {
         brMotor.setPower(brPower);
     }
 
-    public void driveToAprilTag(int tagToFind) {
+    public void driveToAprilTag(int tagToFind, double targetX, double targetY) {
         flMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         frMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         blMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -116,8 +116,8 @@ public class MM_Drivetrain {
             getTfodId();
 
             if (tagId != null) {
-                errorY = -getErrorY(4.5, tagId);
-                errorX = -getErrorX(0, tagId);
+                errorY = -getErrorY(targetY, tagId);
+                errorX = -getErrorX(targetX, tagId);
                 detectAttemptCount = 0;
 
                 if(opMode.gamepad2.left_stick_x < .3) {
@@ -370,14 +370,14 @@ public class MM_Drivetrain {
 //            driveInches(12, 0.5);
             rotateToAngle(90);
             if (isBlue){
-                driveToAprilTag(1);
+                driveToAprilTag(1, 0, 4.5);
             }
         } else if (propPos == 1){
             driveInches(-30, 0.5);
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (isBlue) {
-                driveToAprilTag(2);
+                driveToAprilTag(2, 0, 4.5);
             }
         } else {
             driveInches(-20, 0.5);
@@ -386,7 +386,7 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (isBlue) {
-                driveToAprilTag(3);
+                driveToAprilTag(3, 0, 4.5);
             }
         }
         return propPos;
@@ -404,14 +404,14 @@ public class MM_Drivetrain {
             driveInches(-10, 0.5);
             rotateToAngle(-90);
             if (!isBlue){
-                driveToAprilTag(4);
+                driveToAprilTag(4, 0, 4.5);
             }
         } else if (propPos == 1){
             driveInches(-30, 0.5);
             driveInches(10, 0.5);
             rotateToAngle(-90);
             if (!isBlue) {
-                driveToAprilTag(5);
+                driveToAprilTag(5, 0, 4.5);
             }
         } else {
             driveInches(-20, 0.5);
@@ -421,7 +421,7 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(-90);
             if (!isBlue) {
-                driveToAprilTag(6);
+                driveToAprilTag(6, 0, 4.5);
             }
         }
         return propPos;
