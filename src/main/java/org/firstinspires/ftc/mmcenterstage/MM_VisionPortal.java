@@ -32,13 +32,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Config
 public class MM_VisionPortal {
-    private final LinearOpMode opMode;
+    private final MM_OpMode opMode;
 
     public AprilTagProcessor aprilTagProcessor;
     public TfodProcessor tfod;
     public VisionPortal visionPortal;
 
-    private MultipleTelemetry multipleTelemetry = null;
     private static final String TFOD_MODEL_ASSET = "BallsCombined.tflite";
     public static int GAIN = 255;
     public static int EXPOSURE = 15;
@@ -47,9 +46,8 @@ public class MM_VisionPortal {
             "prop"
     };
 
-    public MM_VisionPortal(LinearOpMode opMode, MultipleTelemetry multipleTelemetry) {
+    public MM_VisionPortal(MM_OpMode opMode) {
         this.opMode = opMode;
-        this.multipleTelemetry = multipleTelemetry;
 
         initVisionPortal();
     }

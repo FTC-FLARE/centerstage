@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class MM_LiftLift {
-    LinearOpMode opMode;
+    MM_OpMode opMode;
 
 //    public MM_Launch launch;
 
@@ -20,7 +20,6 @@ public class MM_LiftLift {
     private Servo liftRelease = null;
 
     private final ElapsedTime dangerTimer = new ElapsedTime();
-    Telemetry dashboardTelemetry;
 
     static final int LAUNCH_POS_TARGET_TICKS = 1000;
     public static final int HANG_POS_TARGET_TICKS = 200;
@@ -34,9 +33,8 @@ public class MM_LiftLift {
     boolean liftIsVertical = false;
     int targetTicks = 0;
 
-    public MM_LiftLift(LinearOpMode opMode, Telemetry dashboardTelemetry) {
+    public MM_LiftLift(MM_OpMode opMode) {
         this.opMode = opMode;
-        this.dashboardTelemetry = dashboardTelemetry;
         init();
     }
 
@@ -81,10 +79,10 @@ public class MM_LiftLift {
             }
 //        }
 
-        dashboardTelemetry.addData("robot lift current ticks", robotLift.getCurrentPosition());
+        opMode.multipleTelemetry.addData("robot lift current ticks", robotLift.getCurrentPosition());
 //        dashboardTelemetry.addData("lift lift current ticks", liftArm.getCurrentPosition());
-        dashboardTelemetry.addData("danger timer", dangerTimer.time());
-        dashboardTelemetry.update();
+        opMode.multipleTelemetry.addData("danger timer", dangerTimer.time());
+        opMode.multipleTelemetry.update();
     }
 
     public void init() {

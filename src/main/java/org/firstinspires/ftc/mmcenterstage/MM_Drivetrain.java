@@ -18,7 +18,7 @@ import java.util.List;
 
 @Config
 public class MM_Drivetrain {
-    private final LinearOpMode opMode;
+    private final MM_OpMode opMode;
     private final ElapsedTime timer = new ElapsedTime();
 
     private DcMotorEx flMotor = null;
@@ -46,7 +46,6 @@ public class MM_Drivetrain {
 
     public MM_VisionPortal visionPortal;
 
-    private final MultipleTelemetry dashboardTelemetry;
     boolean isSlow = false;
 
     private double flPower = 0;
@@ -58,9 +57,8 @@ public class MM_Drivetrain {
     double errorY = 0;
     double errorX = 0;
 
-    public MM_Drivetrain(LinearOpMode opMode, MultipleTelemetry multipleTelemetry) {
+    public MM_Drivetrain(MM_OpMode opMode) {
         this.opMode = opMode;
-        this.dashboardTelemetry = multipleTelemetry;
         init();
     }
 
@@ -164,15 +162,15 @@ public class MM_Drivetrain {
                 opMode.sleep(1);
             }
 
-            dashboardTelemetry.addData("errorY", errorY);
-            dashboardTelemetry.addData("errorX", errorX);
-            dashboardTelemetry.addData("detect attempts", detectAttemptCount);
-            dashboardTelemetry.addData("powers", " drive: %.2f  :)  strafe: %.2f", drivePower, strafePower);
-            dashboardTelemetry.addData("aa fl normalize powers", flPower);
-            dashboardTelemetry.addData("ab fr normalize powers", frPower);
-            dashboardTelemetry.addData("ac bl normalize powers", blPower);
-            dashboardTelemetry.addData("ad br normalize powers", brPower);
-            dashboardTelemetry.update();
+            opMode.multipleTelemetry.addData("errorY", errorY);
+            opMode.multipleTelemetry.addData("errorX", errorX);
+            opMode.multipleTelemetry.addData("detect attempts", detectAttemptCount);
+            opMode.multipleTelemetry.addData("powers", " drive: %.2f  :)  strafe: %.2f", drivePower, strafePower);
+            opMode.multipleTelemetry.addData("aa fl normalize powers", flPower);
+            opMode.multipleTelemetry.addData("ab fr normalize powers", frPower);
+            opMode.multipleTelemetry.addData("ac bl normalize powers", blPower);
+            opMode.multipleTelemetry.addData("ad br normalize powers", brPower);
+            opMode.multipleTelemetry.update();
         }//end while keep going
 
         flMotor.setPower(0);
@@ -275,7 +273,7 @@ public class MM_Drivetrain {
 
         for (AprilTagDetection detection : currentDetections) {
             if (opMode.opModeInInit()) {
-                dashboardTelemetry.addLine(String.format("XY (ID %d) %6.1f %6.1f  (inch)", detection.id, detection.ftcPose.x, detection.ftcPose.y));
+                opMode.multipleTelemetry.addLine(String.format("XY (ID %d) %6.1f %6.1f  (inch)", detection.id, detection.ftcPose.x, detection.ftcPose.y));
             }
             if (detection.id == id) {
                 return detection;
@@ -292,8 +290,8 @@ public class MM_Drivetrain {
             double y = (recognition.getTop() + recognition.getBottom()) / 2;
 
             if (opMode.opModeInInit()) {
-                dashboardTelemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-                dashboardTelemetry.addData("- Position", "%.0f / %.0f", x, y);
+                opMode.multipleTelemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+                opMode.multipleTelemetry.addData("- Position", "%.0f / %.0f", x, y);
             }
         }   // end for() loop
     }
@@ -312,8 +310,8 @@ public class MM_Drivetrain {
         heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
 
-        dashboardTelemetry.addData("current angle", heading);
-        dashboardTelemetry.update();
+        opMode.multipleTelemetry.addData("current angle", heading);
+        opMode.multipleTelemetry.update();
 
         double error = getYawError(targetAngle, heading);
 
@@ -339,10 +337,10 @@ public class MM_Drivetrain {
 
             error = getYawError(targetAngle, heading);
 
-            dashboardTelemetry.addData("power", power);
-            dashboardTelemetry.addData("error", error);
-            dashboardTelemetry.addData("Z", heading);
-            dashboardTelemetry.update();
+            opMode.multipleTelemetry.addData("power", power);
+            opMode.multipleTelemetry.addData("error", error);
+            opMode.multipleTelemetry.addData("Z", heading);
+            opMode.multipleTelemetry.update();
         }
         flMotor.setPower(0);
         frMotor.setPower(0);
@@ -446,8 +444,8 @@ public class MM_Drivetrain {
         List <Recognition> recognitions = visionPortal.tfod.getRecognitions();
 
         for (Recognition recognition : recognitions){
-            dashboardTelemetry.addData("Prop", "width: %.2f, height: %.2f", recognition.getWidth(), recognition.getHeight());
-            dashboardTelemetry.update();
+            opMode.multipleTelemetry.addData("Prop", "width: %.2f, height: %.2f", recognition.getWidth(), recognition.getHeight());
+            opMode.multipleTelemetry.update();
             if (recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
                 if (recognition.getLeft() > 130){
                     return 1;
@@ -469,8 +467,7 @@ public class MM_Drivetrain {
         flMotor.setDirection(DcMotorEx.Direction.REVERSE);
         blMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
-        if (MM_Robot.IS_AUTO) {
-
+        if (!opMode.getClass().getSimpleName().equals("MM_TeleOp") ) {
             initExtraForAutos();
         }
     }
@@ -490,7 +487,7 @@ public class MM_Drivetrain {
         imu.initialize(new IMU.Parameters(orientationOnRobot));
         imu.resetYaw();
 
-        visionPortal = new MM_VisionPortal(opMode, dashboardTelemetry);
+        visionPortal = new MM_VisionPortal(opMode);
 
 //        dashboardTelemetry.addData("detect attempts", detectAttemptCount);
 //        dashboardTelemetry.addData("errorX", errorX);

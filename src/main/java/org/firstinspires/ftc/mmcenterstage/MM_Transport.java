@@ -1,24 +1,19 @@
 package org.firstinspires.ftc.mmcenterstage;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 @Config
 public class MM_Transport {
-    private final LinearOpMode opMode;
-    private final Telemetry dashboardTelemetry;
+    private final MM_OpMode opMode;
 
     private DcMotorEx slide = null;
     private DcMotorEx mtrBoxFlip = null;
     private TouchSensor bottomLimit = null;
 //    private DistanceSensor boxSensor = null;
 
-    public static int TICK_INCREMENT = 30;
+    public static int SLIDE_TICK_INCREMENT = 30;
 //    public static double BOX_COLLECT = .14;
 //    public static double BOX_SCORE = .41;
 //    public static double BOX_TRANSPORT = .1256;
@@ -40,15 +35,14 @@ public class MM_Transport {
     int slideTargetTicks = 0;
     int boxFlipTargetTicks = 0;
 
-    public MM_Transport(LinearOpMode opMode, Telemetry dashboardTelemetry) {
+    public MM_Transport(MM_OpMode opMode) {
         this.opMode = opMode;
-        this.dashboardTelemetry = dashboardTelemetry;
         init();
     }
 
     public void transport() {
-        dashboardTelemetry.addData("slide pos", slide.getCurrentPosition());
-        dashboardTelemetry.update();
+        opMode.multipleTelemetry.addData("slide pos", slide.getCurrentPosition());
+        opMode.multipleTelemetry.update();
 
         rightStickPower = -opMode.gamepad2.right_stick_y;
         leftStickPower = -opMode.gamepad2.left_stick_y;
@@ -80,9 +74,9 @@ public class MM_Transport {
             isHoming = true;
         } else if ((!bottomLimit.isPressed() || rightStickPower > 0.1) && !isHoming) {// not trigger or i'm trying to go up
             if (rightStickPower < -0.1) {
-                slideTargetTicks = Math.max(slideTargetTicks - TICK_INCREMENT, 0);
+                slideTargetTicks = Math.max(slideTargetTicks - SLIDE_TICK_INCREMENT, 0);
             } else if (rightStickPower > 0.1) {
-                slideTargetTicks = Math.min(slideTargetTicks + TICK_INCREMENT, UPPER_LIMIT);
+                slideTargetTicks = Math.min(slideTargetTicks + SLIDE_TICK_INCREMENT, UPPER_LIMIT);
             }
 
             slide.setTargetPosition(slideTargetTicks);
@@ -130,7 +124,7 @@ public class MM_Transport {
 //        }
 
 //        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-        dashboardTelemetry.addData("Box pos", mtrBoxFlip.getCurrentPosition());
+        opMode.multipleTelemetry.addData("Box pos", mtrBoxFlip.getCurrentPosition());
     }
 
     public void runToScorePos(){

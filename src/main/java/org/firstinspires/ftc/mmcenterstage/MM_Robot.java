@@ -1,41 +1,20 @@
 package org.firstinspires.ftc.mmcenterstage;
 
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.Gamepad;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 public class MM_Robot {
-    private final LinearOpMode opMode;
-    public final Gamepad currentGamepad1;
-    public final Gamepad previousGamepad1;
-    private final Gamepad currentGamepad2;
-    private final Gamepad previousGamepad2;
-    private MultipleTelemetry dashboardTelemetry;
-    public static boolean IS_AUTO = true;
-
+    private final MM_OpMode opMode;
     public MM_Drivetrain drivetrain;
     public MM_Collector collector;
     public MM_Transport transport;
     public MM_LiftLift liftLift;
 
-    public MM_Robot(LinearOpMode opMode, Gamepad currentGamepad1, Gamepad previousGamepad1,
-                    Gamepad currentGamepad2, Gamepad previousGamepad2, MultipleTelemetry dashboardTelemetry, boolean isAuto) {
+    public MM_Robot(MM_OpMode opMode) {
         this.opMode = opMode;
-        this.currentGamepad1 = currentGamepad1;
-        this.previousGamepad1 = previousGamepad1;
-        this.currentGamepad2 = currentGamepad2;
-        this.previousGamepad2 = previousGamepad2;
-        this.dashboardTelemetry = dashboardTelemetry;
-
-        IS_AUTO = isAuto;
     }
 
     public void init() {
-        drivetrain = new MM_Drivetrain(opMode, dashboardTelemetry);
+        drivetrain = new MM_Drivetrain(opMode);
         collector = new MM_Collector(opMode);
-        transport = new MM_Transport(opMode, dashboardTelemetry);
-        liftLift = new MM_LiftLift(opMode, dashboardTelemetry);
+        transport = new MM_Transport(opMode);
+        liftLift = new MM_LiftLift(opMode);
     }
 }
