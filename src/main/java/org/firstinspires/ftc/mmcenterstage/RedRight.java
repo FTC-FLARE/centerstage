@@ -7,10 +7,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 public class RedRight extends MM_OpMode {
     @Override
     public void runProcedures() {
-        setIsAuto(true);
         int propPos = robot.drivetrain.purplePixelRight(false);
         robot.transport.runToScorePos();
-        robot.collector.score();
+        robot.collector.deposit();
         robot.transport.goHome();
         if (propPos == 4) {
             robot.drivetrain.strafeInches(-31, .3);

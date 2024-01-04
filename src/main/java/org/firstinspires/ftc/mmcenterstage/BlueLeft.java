@@ -3,13 +3,12 @@ package org.firstinspires.ftc.mmcenterstage;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "Blue: Left", group = "Blue")
-
 public class BlueLeft extends MM_OpMode {
     @Override
     public void runProcedures() {
         int propPos = robot.drivetrain.purplePixelLeft(true);
         robot.transport.runToScorePos();
-        robot.collector.score();
+        robot.collector.deposit();
         robot.transport.goHome();
         if (propPos == 0){
             robot.drivetrain.strafeInches(21.5, .3);

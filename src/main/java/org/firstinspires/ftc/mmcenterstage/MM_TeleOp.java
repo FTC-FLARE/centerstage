@@ -9,7 +9,7 @@ public class MM_TeleOp extends MM_OpMode {
     public void runProcedures() {
         while(opModeIsActive()){
             robot.drivetrain.driveWithSticks();
-            robot.collector.collect();
+            robot.collector.control();
             robot.transport.transport();
             robot.liftLift.liftLift();
 
