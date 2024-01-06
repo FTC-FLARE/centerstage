@@ -14,13 +14,10 @@ public class MM_Transport {
 //    private DistanceSensor boxSensor = null;
 
     public static int SLIDE_TICK_INCREMENT = 30;
-//    public static double BOX_COLLECT = .14;
-//    public static double BOX_SCORE = .41;
-//    public static double BOX_TRANSPORT = .1256;
+
     public static final int UPPER_LIMIT = 2900;
     public static final int MIN_SCORE_HEIGHT = 1560;
     public static final int SLIDE_SLOW_DOWN_TICKS = 800;
-    public static final int MAX_COLLECT_HEIGHT = 350;
     public static final int BOX_SCORE_TICKS = 300;
     public static final int BOX_TICK_INCREMENT = 8;
     public static final double BOX_FLIP_POWER = 0.3;
@@ -40,7 +37,7 @@ public class MM_Transport {
         init();
     }
 
-    public void transport() {
+    public void control() {
         opMode.multipleTelemetry.addData("slide pos", slide.getCurrentPosition());
         opMode.multipleTelemetry.update();
 
@@ -51,39 +48,43 @@ public class MM_Transport {
             isHoming = false;
         }
 
-        if (bottomLimit.isPressed() && !isLimitHandled) {  // reset both slide & box_flip encoders
+        if (bottomLimit.isPressed() && !isLimitHandled) {
+            // reset slide encoder
             slide.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
             slide.setPower(0);
             slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
             slideTargetTicks = 0;
-            mtrBoxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            mtrBoxFlip.setPower(0);
-            mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+            // reset box flip encoder
+            boxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            boxFlip.setPower(0);
+            boxFlip.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
             boxFlipTargetTicks = 0;
 
             isLimitHandled = true;
             isHoming = false;
-        } else if ((MM_TeleOp.currentGamepad2.y && !MM_TeleOp.previousGamepad2.y) && !bottomLimit.isPressed()) {
-            // make sure box is at least started back down first
-            mtrBoxFlip.setTargetPosition(0);
-            boxFlipTargetTicks = 0;
-            readyToScore = false;
+        } else if (!isHoming) {
+            if ((MM_TeleOp.currentGamepad2.y && !MM_TeleOp.previousGamepad2.y) && !bottomLimit.isPressed()) { // start homing
+                boxFlip.setTargetPosition(0);
+                boxFlipTargetTicks = 0;
+                readyToScore = false;
 
-            slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-            slide.setPower(slide.getCurrentPosition() < SLIDE_SLOW_DOWN_TICKS ? SLIDE_HOME_POWER_SLOW : SLIDE_HOME_POWER);
-            isHoming = true;
-        } else if ((!bottomLimit.isPressed() || rightStickPower > 0.1) && !isHoming) {// not trigger or i'm trying to go up
-            if (rightStickPower < -0.1) {
-                slideTargetTicks = Math.max(slideTargetTicks - SLIDE_TICK_INCREMENT, 0);
-            } else if (rightStickPower > 0.1) {
-                slideTargetTicks = Math.min(slideTargetTicks + SLIDE_TICK_INCREMENT, UPPER_LIMIT);
-            }
+                slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+                slide.setPower(slide.getCurrentPosition() < SLIDE_SLOW_DOWN_TICKS ? SLIDE_HOME_POWER_SLOW : SLIDE_HOME_POWER);
+                isHoming = true;
+            } else if (!bottomLimit.isPressed() || rightStickPower > 0.1) { // limit not triggered or i'm trying to go up
+                if (rightStickPower < -0.1) {
+                    slideTargetTicks = Math.max(slideTargetTicks - SLIDE_TICK_INCREMENT, 0);
+                } else if (rightStickPower > 0.1) {
+                    slideTargetTicks = Math.min(slideTargetTicks + SLIDE_TICK_INCREMENT, UPPER_LIMIT);
+                }
 
-            slide.setTargetPosition(slideTargetTicks);
-            slide.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            slide.setPower(1);
-            if (!bottomLimit.isPressed()) {
-                isLimitHandled = false;
+                slide.setTargetPosition(slideTargetTicks);
+                slide.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+                slide.setPower(1);
+                if (!bottomLimit.isPressed()) {
+                    isLimitHandled = false;
+                }
             }
         }
 
@@ -98,41 +99,44 @@ public class MM_Transport {
                 boxFlipTargetTicks -= BOX_TICK_INCREMENT;
             }
 
-            mtrBoxFlip.setTargetPosition(boxFlipTargetTicks);
-            mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            mtrBoxFlip.setPower(BOX_FLIP_POWER);
+            boxFlip.setTargetPosition(boxFlipTargetTicks);
+            boxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            boxFlip.setPower(BOX_FLIP_POWER);
         } else {
-            mtrBoxFlip.setPower(0);
+            boxFlip.setPower(0);
         }
         opMode.multipleTelemetry.addData("Box pos", boxFlip.getCurrentPosition());
     }
 
-    public void runToScorePos(){
-        mtrBoxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        mtrBoxFlip.setTargetPosition(0);
-        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-        mtrBoxFlip.setPower(BOX_FLIP_POWER);
+    public void runToScorePos() {
+        boxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        boxFlip.setTargetPosition(0);
+        boxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        boxFlip.setPower(BOX_FLIP_POWER);
+
         slide.setTargetPosition(MIN_SCORE_HEIGHT);
         slide.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         slide.setPower(.5);
-        while (slide.isBusy()){
+        while (slide.isBusy()) {
             opMode.telemetry.addData("Slide running", slide.getCurrentPosition());
             opMode.telemetry.update();
         }
-        mtrBoxFlip.setTargetPosition(BOX_SCORE_TICKS);
+        boxFlip.setTargetPosition(BOX_SCORE_TICKS);
 
-        while(mtrBoxFlip.isBusy()){
-            opMode.telemetry.addData("Box Flipping", mtrBoxFlip.getCurrentPosition());
+        while (boxFlip.isBusy()) {
+            opMode.telemetry.addData("Box Flipping", boxFlip.getCurrentPosition());
             opMode.telemetry.update();
         }
     }
 
-    public void goHome(){
-        mtrBoxFlip.setTargetPosition(0);
-        while (mtrBoxFlip.isBusy()){ }
+    public void goHome() {
+        boxFlip.setTargetPosition(0);
+        while (boxFlip.isBusy()) {
+        }
         slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         slide.setPower(slide.getCurrentPosition() < SLIDE_SLOW_DOWN_TICKS ? SLIDE_HOME_POWER_SLOW : SLIDE_HOME_POWER);
-        while(!bottomLimit.isPressed()){ }
+        while (!bottomLimit.isPressed()) {
+        }
         slide.setPower(0);
     }
 
