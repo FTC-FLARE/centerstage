@@ -7,7 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 public class BlueRight extends MM_OpMode {
     @Override
     public void runProcedures() {
-        int propPos = robot.drivetrain.purplePixelRight(true);
+        alliance = BLUE;
+        int propPos = robot.drivetrain.purplePixelRight();
 
         if (propPos == 1) {
             robot.drivetrain.strafeInches(-11.5, .3);

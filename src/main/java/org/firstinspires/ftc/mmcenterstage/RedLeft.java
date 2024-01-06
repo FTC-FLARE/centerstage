@@ -7,7 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 public class RedLeft extends MM_OpMode {
     @Override
     public void runProcedures() {
-        robot.drivetrain.purplePixelLeft(false);
+        alliance = RED;
+        robot.drivetrain.purplePixelLeft();
     }
 
     @Override
