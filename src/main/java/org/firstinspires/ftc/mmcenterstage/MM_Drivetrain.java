@@ -103,12 +103,12 @@ public class MM_Drivetrain {
 
         timer.reset();
         while (opMode.opModeIsActive() && keepGoing) {
-            tagId = getAprilTagId(tagToFind);
-            getTfodId();
+            tagId = visionPortal.getAprilTagId(tagToFind);
+            visionPortal.getTfodId();
 
             if (tagId != null) {
-                aprilTagErrorY = -getErrorY(targetY, tagId);
-                aprilTagErrorX = -getErrorX(targetX, tagId);
+                aprilTagErrorY = visionPortal.getErrorY(targetY, tagId);
+                aprilTagErrorX = visionPortal.getErrorX(targetX, tagId);
                 detectAttemptCount = 0;
 
                 if(opMode.gamepad2.left_stick_x < .3) {
@@ -152,7 +152,15 @@ public class MM_Drivetrain {
             opMode.multipleTelemetry.update();
         }//end while keep going
 
-        setSameDrivePowers(0);
+        setDrivePowers(0);
+    }
+
+
+    private void setDrivePowers(double power) {
+        flMotor.setPower(power);
+        frMotor.setPower(power);
+        blMotor.setPower(power);
+        brMotor.setPower(power);
     }
 
     private void setDrivePowers() {
@@ -162,49 +170,17 @@ public class MM_Drivetrain {
         brMotor.setPower(brPower);
     }
 
-    public void driveInches(double inches, double power){
-        int ticks = (int) (TICKS_PER_INCH * inches);
-        
-        flMotor.setTargetPosition(ticks + flMotor.getCurrentPosition());
-        frMotor.setTargetPosition(ticks + frMotor.getCurrentPosition());
-        blMotor.setTargetPosition(ticks + blMotor.getCurrentPosition());
-        brMotor.setTargetPosition(ticks + brMotor.getCurrentPosition());
-
-        setDriveMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-
-        setSameDrivePowers(power);
-        while(opMode.opModeIsActive() && (flMotor.isBusy() || brMotor.isBusy())){
-
-        }
-    }
-
-    private void setSameDrivePowers(double power) {
-        flMotor.setPower(power);
-        frMotor.setPower(power);
-        blMotor.setPower(power);
-        brMotor.setPower(power);
-    }
-
     private void normalizeForMin(double minPower) {
         if (flPower < minPower && frPower < minPower && blPower < minPower && brPower < minPower) {
             double rawMaxPower = Math.max(Math.max(Math.abs(flPower), Math.abs(frPower)),
                     Math.max(Math.abs(blPower), Math.abs(brPower)));
+
             double multiplier = minPower / rawMaxPower;
             flPower *= multiplier;
             frPower *= multiplier;
             blPower *= multiplier;
             brPower *= multiplier;
         }
-    }
-    private double updateForMinPower(double motorPower) {
-        if (Math.abs(motorPower) < MIN_DRIVE_POWER) {
-            if (motorPower < 0) {
-                return -MIN_DRIVE_POWER;
-            } else {
-                return MIN_DRIVE_POWER;
-            }
-        }
-        return motorPower;
     }
 
     private void normalize(double upperPowerLimit) {
@@ -217,11 +193,24 @@ public class MM_Drivetrain {
             blPower /= rawMaxPower;
             brPower /= rawMaxPower;
         }
-
     }
 
     public void cruiseUnderTruss(){   //DO NOT RENAME; IF RENAMED THIS WILL BECOME A WAR!!!
     // TODO
+    }
+
+    public void driveInches(double inches, double power){
+        int ticks = (int) (TICKS_PER_INCH * inches);
+
+        flMotor.setTargetPosition(ticks + flMotor.getCurrentPosition());
+        frMotor.setTargetPosition(ticks + frMotor.getCurrentPosition());
+        blMotor.setTargetPosition(ticks + blMotor.getCurrentPosition());
+        brMotor.setTargetPosition(ticks + brMotor.getCurrentPosition());
+
+        setDriveMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        setDrivePowers(power);
+        while(opMode.opModeIsActive() && (flMotor.isBusy() || brMotor.isBusy())){ }
     }
 
     public void strafeInches(double inches, double power) {
@@ -234,8 +223,8 @@ public class MM_Drivetrain {
 
         setDriveMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
-        setSameDrivePowers(power);
-        while (opMode.opModeIsActive() && (flMotor.isBusy() || brMotor.isBusy())) { }
+        setDrivePowers(power);
+        while (opMode.opModeIsActive() && (flMotor.isBusy() || frMotor.isBusy())) { }
     }
 
     private void setDriveMode(DcMotor.RunMode runToPosition) {
@@ -245,56 +234,10 @@ public class MM_Drivetrain {
         brMotor.setMode(runToPosition);
     }
 
-    private double getErrorY(double targetDistance, AprilTagDetection tagId) {
-        return tagId.ftcPose.y - targetDistance;
-    }
-
-    private double getErrorX(double targetDistance, AprilTagDetection tagId) {
-        return tagId.ftcPose.x - targetDistance;
-    }
-
-    public AprilTagDetection getAprilTagId(int id) {
-        List<AprilTagDetection> currentDetections = visionPortal.aprilTagProcessor.getDetections();
-
-        for (AprilTagDetection detection : currentDetections) {
-            if (opMode.opModeInInit()) {
-                opMode.multipleTelemetry.addLine(String.format("XY (ID %d) %6.1f %6.1f  (inch)", detection.id, detection.ftcPose.x, detection.ftcPose.y));
-            }
-            if (detection.id == id) {
-                return detection;
-            }
-        }
-        return null;
-    }
-
-    public void getTfodId() {
-        List<Recognition> currentRecognitions = visionPortal.tfod.getRecognitions();
-        // Step through the list of recognitions and display info for each one.
-        for (Recognition recognition : currentRecognitions) {
-            double x = (recognition.getLeft() + recognition.getRight()) / 2;
-            double y = (recognition.getTop() + recognition.getBottom()) / 2;
-
-            if (opMode.opModeInInit()) {
-                opMode.multipleTelemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-                opMode.multipleTelemetry.addData("- Position", "%.0f / %.0f", x, y);
-            }
-        }   // end for() loop
-    }
-
     public void rotateToAngle(int targetAngle) {
-        flMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        frMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        blMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        brMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-
         setDriveMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-
-
-        opMode.multipleTelemetry.addData("current angle", heading);
-        opMode.multipleTelemetry.update();
-
         double error = getYawError(targetAngle, heading);
 
         while (opMode.opModeIsActive() && Math.abs(error) > HEADING_ERROR_THRESHOLD) {
@@ -305,23 +248,20 @@ public class MM_Drivetrain {
             blPower = -(power);
             brPower = power;
 
-            //
-
             normalizeForMin(MIN_TURN_POWER);
             normalize(MAX_TURN_POWER);
 
             setDrivePowers();
 
             heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-
             error = getYawError(targetAngle, heading);
 
             opMode.multipleTelemetry.addData("power", power);
             opMode.multipleTelemetry.addData("error", error);
-            opMode.multipleTelemetry.addData("Z", heading);
+            opMode.multipleTelemetry.addData("heading", heading);
             opMode.multipleTelemetry.update();
         }
-        setSameDrivePowers(0);
+        setDrivePowers(0);
     }
 
     private double getYawError(int targetAngle, double currentAngle) {
@@ -332,7 +272,7 @@ public class MM_Drivetrain {
     }
 
     public int purplePixelLeft(boolean isBlue){
-        int propPos = propPositionLeft();
+        int propPos = visionPortal.propPositionLeft();
 
         if (propPos == 0){
             driveInches(-20, 0.5);
@@ -367,7 +307,7 @@ public class MM_Drivetrain {
     }
 
     public int purplePixelRight(boolean isBlue){
-        int propPos = propPositionRight();
+        int propPos = visionPortal.propPositionRight();
 
         if (propPos == 0){
             driveInches(-20, 0.5);
@@ -399,39 +339,6 @@ public class MM_Drivetrain {
             }
         }
         return propPos;
-    }
-
-    private int propPositionRight(){
-        List <Recognition> recognitions = visionPortal.tfod.getRecognitions();
-
-        for (Recognition recognition : recognitions){
-            if (recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
-                if (recognition.getLeft() > 450){
-                    return 2;
-                } else {
-                    return 1;
-                }
-            }
-        }
-        return 0;
-    }
-
-    private int propPositionLeft(){
-        List <Recognition> recognitions = visionPortal.tfod.getRecognitions();
-
-        for (Recognition recognition : recognitions){
-            opMode.multipleTelemetry.addData("Prop", "width: %.2f, height: %.2f", recognition.getWidth(), recognition.getHeight());
-            opMode.multipleTelemetry.update();
-            if (recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
-                if (recognition.getLeft() > 130){
-                    return 1;
-                } else {
-                    return 0;
-                }
-
-            }
-        }
-        return 2;
     }
 
     public void init() {

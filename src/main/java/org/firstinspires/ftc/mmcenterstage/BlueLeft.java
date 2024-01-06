@@ -10,7 +10,8 @@ public class BlueLeft extends MM_OpMode {
         robot.transport.runToScorePos();
         robot.collector.deposit();
         robot.transport.goHome();
-        if (propPos == 0){
+
+        if (propPos == 0){ //TODO determine parking area
             robot.drivetrain.strafeInches(21.5, .3);
         } else if (propPos == 1){
             robot.drivetrain.strafeInches(26, .4);

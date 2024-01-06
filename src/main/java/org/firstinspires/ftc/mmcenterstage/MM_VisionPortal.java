@@ -5,15 +5,10 @@ import android.graphics.Canvas;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
@@ -21,13 +16,14 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
+
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Config
@@ -52,90 +48,101 @@ public class MM_VisionPortal {
         initVisionPortal();
     }
 
+    public int propPositionLeft(){
+        List<Recognition> recognitions = tfod.getRecognitions();
 
-    public List getRecognitions() {
-         List<Recognition> currentRecognitions = tfod.getRecognitions();
-         return currentRecognitions;
+        for (Recognition recognition : recognitions){
+            opMode.multipleTelemetry.addData("Prop", "width: %.2f, height: %.2f", recognition.getWidth(), recognition.getHeight());
+            opMode.multipleTelemetry.update();
+            if (recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
+                if (recognition.getLeft() > 130){
+                    return 1;
+                } else {
+                    return 0;
+                }
+
+            }
+        }
+        return 2;
     }
 
-    /**
-     * Initialize the AprilTag processor.
-     */
+    public int propPositionRight(){
+        List <Recognition> recognitions = tfod.getRecognitions();
+
+        for (Recognition recognition : recognitions){
+            if (recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
+                if (recognition.getLeft() > 450){
+                    return 2;
+                } else {
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    }
+
+    public void getTfodId() {
+        List<Recognition> currentRecognitions = tfod.getRecognitions();
+        // Step through the list of recognitions and display info for each one.
+        for (Recognition recognition : currentRecognitions) {
+            double x = (recognition.getLeft() + recognition.getRight()) / 2;
+            double y = (recognition.getTop() + recognition.getBottom()) / 2;
+
+            if (opMode.opModeInInit()) {
+                opMode.multipleTelemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+                opMode.multipleTelemetry.addData("- Position", "%.0f / %.0f", x, y);
+            }
+        }   // end for() loop
+    }
+
+    public double getErrorY(double targetDistance, AprilTagDetection tagId) {
+        return targetDistance - tagId.ftcPose.y;
+    }
+
+    public double getErrorX(double targetDistance, AprilTagDetection tagId) {
+        return targetDistance - tagId.ftcPose.x;
+    }
+
+    public AprilTagDetection getAprilTagId(int id) {
+        List<AprilTagDetection> currentDetections = aprilTagProcessor.getDetections();
+
+        for (AprilTagDetection detection : currentDetections) {
+            if (opMode.opModeInInit()) {
+                opMode.multipleTelemetry.addLine(String.format("XY (ID %d) %6.1f %6.1f  (inch)", detection.id, detection.ftcPose.x, detection.ftcPose.y));
+            }
+            if (detection.id == id) {
+                return detection;
+            }
+        }
+        return null;
+    }
+
+
     private void initVisionPortal() {
-        // Create the AprilTag processor.
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
                 .setDrawCubeProjection(true)
-                //.setDrawTagOutline(true)
-                //.setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
-                //.setTagLibrary(AprilTagGameDatabase.getCenterStageTagLibrary())
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
-
-                // == CAMERA CALIBRATION ==
-                // If you do not manually specify calibration parameters, the SDK will attempt
-                // to load a predefined calibration for your camera.
-                //.setLensIntrinsics(578.272, 578.272, 402.145, 221.506)
-
-
-                // ... these parameters are fx, fy, cx, cy.
-
                 .build();
 
         tfod = new TfodProcessor.Builder()
-
-                // With the following lines commented out, the default TfodProcessor Builder
-                // will load the default model for the season. To define a custom model to load,
-                // choose one of the following:
-                //   Use setModelAssetName() if the custom TF Model is built in as an asset (AS only).
-                //   Use setModelFileName() if you have downloaded a custom team model to the Robot Controller.
-                //.setModelAssetName(TFOD_MODEL_ASSET)
-                //.setModelFileName(TFOD_MODEL_FILE)
-
-                // The following default settings are available to un-comment and edit as needed to
-                // set parameters for custom models.
                 .setModelLabels(LABELS)
                 .setModelAssetName(TFOD_MODEL_ASSET)
-                //.setIsModelTensorFlow2(true)
-                //.setIsModelQuantized(true)
-                //.setModelInputSize(300)
-                //.setModelAspectRatio(16.0 / 9.0)
-
-
                 .build();
-
 
         final CameraStreamProcessor cameraStreamProcessor = new CameraStreamProcessor();
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
 
-        builder.setCamera(opMode.hardwareMap.get(WebcamName.class, "Webcam 1"));
-        //builder.setCameraResolution(new Size(1920, 1080));
-
-        // Set and enable the processor.
-        builder.addProcessor(aprilTagProcessor);
-        builder.addProcessor(tfod);
-        builder.addProcessor(cameraStreamProcessor);
-
-        // Build the Vision Portal, using the above settings.
-        visionPortal = builder.build();
+        visionPortal = builder.setCamera(opMode.hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .addProcessor(aprilTagProcessor)
+                .addProcessor(tfod)
+                .addProcessor(cameraStreamProcessor)
+                .build();
 
         FtcDashboard.getInstance().startCameraStream(cameraStreamProcessor, 0);
 
-        // Wait for the DS start button to be touched.
-        opMode.telemetry.addData("DS preview on/off\n" +
-                "Connected Hardware\n" +
-                "\n" +
-                "\n" +
-                "Check for Updates\n" +
-                "Last check: Sat Oct 07 2023\n" +
-                "\n" +
-                "\n" +
-                "No Hardware Detected", "3 dots, Camera Stream");
-        opMode.telemetry.addData(">", "Touch Play to start OpMode");
-
-        opMode.telemetry.update();
-
-       while(visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING){ }
+        while (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) { }
 
 //       ExposureControl exposure = visionPortal.getCameraControl(ExposureControl.class);
 //       exposure.setMode(ExposureControl.Mode.Manual);
