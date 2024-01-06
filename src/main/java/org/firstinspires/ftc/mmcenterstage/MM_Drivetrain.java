@@ -7,10 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-
-import java.util.List;
 
 @Config
 public class MM_Drivetrain {
@@ -87,55 +84,102 @@ public class MM_Drivetrain {
         setDrivePowers();
     }
 
-    public void driveToAprilTag(int tagToFind, double targetX, double targetY) {
-        flMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        frMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        blMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        brMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+    public void driveInches(double inches, double power){
+        int ticks = (int) (TICKS_PER_INCH * inches);
 
+        flMotor.setTargetPosition(ticks + flMotor.getCurrentPosition());
+        frMotor.setTargetPosition(ticks + frMotor.getCurrentPosition());
+        blMotor.setTargetPosition(ticks + blMotor.getCurrentPosition());
+        brMotor.setTargetPosition(ticks + brMotor.getCurrentPosition());
+
+        setDriveMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        setDrivePowers(power);
+        while(opMode.opModeIsActive() && (flMotor.isBusy() || brMotor.isBusy())){ }
+    }
+
+    public void strafeInches(double inches, double power) {
+        int ticks = (int) (TICKS_PER_INCH * (inches * 1.23)); // multiplying to account for slippage
+
+        flMotor.setTargetPosition(ticks + flMotor.getCurrentPosition());
+        frMotor.setTargetPosition(-ticks + frMotor.getCurrentPosition());
+        blMotor.setTargetPosition(-ticks + blMotor.getCurrentPosition());
+        brMotor.setTargetPosition(ticks + brMotor.getCurrentPosition());
+
+        setDriveMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        setDrivePowers(power);
+        while (opMode.opModeIsActive() && (flMotor.isBusy() || frMotor.isBusy())) { }
+    }
+
+    public void rotateToAngle(int targetAngle) {
+        setDriveMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        double error = getYawError(targetAngle, heading);
+
+        while (opMode.opModeIsActive() && Math.abs(error) > HEADING_ERROR_THRESHOLD) {
+            double power = error * TURN_P_COEFF * MAX_TURN_POWER;
+
+            flPower = -(power);
+            frPower = power;
+            blPower = -(power);
+            brPower = power;
+
+            normalizeForMin(MIN_TURN_POWER);
+            normalize(MAX_TURN_POWER);
+
+            setDrivePowers();
+
+            heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            error = getYawError(targetAngle, heading);
+
+            opMode.multipleTelemetry.addData("power", power);
+            opMode.multipleTelemetry.addData("error", error);
+            opMode.multipleTelemetry.addData("heading", heading);
+            opMode.multipleTelemetry.update();
+        }
+        setDrivePowers(0);
+    }
+
+    public void driveToAprilTag(int tagToFind, double targetX, double targetY) {
         setDriveMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         boolean keepGoing = true;
         detectAttemptCount = 0;
         double drivePower = 0;
         double strafePower = 0;
-        AprilTagDetection tagId = null;
+        AprilTagDetection tagInfo = null;
 
-        timer.reset();
         while (opMode.opModeIsActive() && keepGoing) {
-            tagId = visionPortal.getAprilTagId(tagToFind);
-            visionPortal.getTfodId();
+            tagInfo = visionPortal.getAprilTagInfo(tagToFind);
 
-            if (tagId != null) {
-                aprilTagErrorY = visionPortal.getErrorY(targetY, tagId);
-                aprilTagErrorX = visionPortal.getErrorX(targetX, tagId);
+            if (tagInfo != null) {
+                aprilTagErrorY = visionPortal.getErrorY(targetY, tagInfo);
+                aprilTagErrorX = visionPortal.getErrorX(targetX, tagInfo);
                 detectAttemptCount = 0;
 
-                if(opMode.gamepad2.left_stick_x < .3) {
-                    drivePower = aprilTagErrorY * DRIVE_P_COEFF;
-                    strafePower = aprilTagErrorX * STRAFE_P_COEFF;
-                } else {
-                    drivePower = aprilTagErrorY * DRIVE_P_COEFF * MAX_DRIVE_POWER;
-                    strafePower = aprilTagErrorX * STRAFE_P_COEFF * MAX_DRIVE_POWER;
-                }
+                drivePower = aprilTagErrorY * DRIVE_P_COEFF * MAX_DRIVE_POWER;
+                strafePower = aprilTagErrorX * STRAFE_P_COEFF * MAX_DRIVE_POWER;
 
                 flPower = drivePower + strafePower;
                 frPower = drivePower - strafePower;
                 blPower = drivePower - strafePower;
                 brPower = drivePower + strafePower;
 
-                normalize(MAX_DRIVE_POWER);
                 normalizeForMin(MIN_DRIVE_POWER);
+                normalize(MAX_DRIVE_POWER);
 
                 setDrivePowers();
 
                 if (Math.abs(aprilTagErrorY) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorX) <= APRIL_TAG_ERROR_THRESHOLD) {
                     keepGoing = false;
                 }
-            } else {
+
+            } else { //tag not found
                 detectAttemptCount++;
                 if (detectAttemptCount >= MAX_DETECT_ATTEMPTS) {
-                    driveInches(-37, .6);
+                    driveInches(-37, .6); //TODO if tag not found
                     keepGoing = false;
                 }
                 opMode.sleep(1);
@@ -155,6 +199,85 @@ public class MM_Drivetrain {
         setDrivePowers(0);
     }
 
+    public void cruiseUnderTruss(){   //DO NOT RENAME; IF RENAMED THIS WILL BECOME A WAR!!!
+    // TODO cruise under truss
+    }
+
+    public int purplePixelLeft(){
+        int propPos = visionPortal.propPositionLeft();
+
+        if (propPos == 0){
+            driveInches(-20, 0.5);
+            rotateToAngle(45);
+            driveInches(-12, 0.5);
+            rotateToAngle(0);
+            driveInches(10, 0.5);
+            rotateToAngle(90);
+            if (MM_OpMode.alliance == MM_OpMode.BLUE){
+                driveToAprilTag(1, 0, 4.5);
+            }
+        } else if (propPos == 1){
+            driveInches(-30, 0.5);
+            driveInches(10, 0.5);
+            rotateToAngle(90);
+            if (MM_OpMode.alliance == MM_OpMode.BLUE) {
+                driveToAprilTag(2, 0, 4.5);
+            }
+        } else {
+            driveInches(-20, 0.5);
+            rotateToAngle(-45);
+            driveInches(-11, 0.5);
+            driveInches(10, 0.5);
+            rotateToAngle(90);
+            if (MM_OpMode.alliance == MM_OpMode.BLUE) {
+                driveToAprilTag(3, 0, 4.5);
+            }
+        }
+        return propPos;
+    }
+
+    public int purplePixelRight(){
+        int propPos = visionPortal.propPositionRight();
+
+        if (propPos == 0){
+            driveInches(-20, 0.5);
+            rotateToAngle(45);
+            driveInches(-12, 0.5);
+            driveInches(15, 0.5);
+            rotateToAngle(0);
+            driveInches(-10, 0.5);
+            rotateToAngle(-90);
+            if (MM_OpMode.alliance == MM_OpMode.RED){
+                driveToAprilTag(4, 0, 4.5);
+            }
+        } else if (propPos == 1){
+            driveInches(-30, 0.5);
+            driveInches(10, 0.5);
+            rotateToAngle(-90);
+            if (MM_OpMode.alliance == MM_OpMode.RED) {
+                driveToAprilTag(5, 0, 4.5);
+            }
+        } else {
+            driveInches(-20, 0.5);
+            rotateToAngle(-45);
+            driveInches(-12, 0.5);
+            rotateToAngle(0);
+            driveInches(10, 0.5);
+            rotateToAngle(-90);
+            if (MM_OpMode.alliance == MM_OpMode.RED) {
+                driveToAprilTag(6, 0, 4.5);
+            }
+        }
+        return propPos;
+    }
+
+
+    private void setDriveMode(DcMotor.RunMode runToPosition) {
+        flMotor.setMode(runToPosition);
+        frMotor.setMode(runToPosition);
+        blMotor.setMode(runToPosition);
+        brMotor.setMode(runToPosition);
+    }
 
     private void setDrivePowers(double power) {
         flMotor.setPower(power);
@@ -195,150 +318,11 @@ public class MM_Drivetrain {
         }
     }
 
-    public void cruiseUnderTruss(){   //DO NOT RENAME; IF RENAMED THIS WILL BECOME A WAR!!!
-    // TODO
-    }
-
-    public void driveInches(double inches, double power){
-        int ticks = (int) (TICKS_PER_INCH * inches);
-
-        flMotor.setTargetPosition(ticks + flMotor.getCurrentPosition());
-        frMotor.setTargetPosition(ticks + frMotor.getCurrentPosition());
-        blMotor.setTargetPosition(ticks + blMotor.getCurrentPosition());
-        brMotor.setTargetPosition(ticks + brMotor.getCurrentPosition());
-
-        setDriveMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-
-        setDrivePowers(power);
-        while(opMode.opModeIsActive() && (flMotor.isBusy() || brMotor.isBusy())){ }
-    }
-
-    public void strafeInches(double inches, double power) {
-        int ticks = (int) (TICKS_PER_INCH * (inches * 1.23)); // multiplying to account for slippage
-
-        flMotor.setTargetPosition(ticks + flMotor.getCurrentPosition());
-        frMotor.setTargetPosition(-ticks + frMotor.getCurrentPosition());
-        blMotor.setTargetPosition(-ticks + blMotor.getCurrentPosition());
-        brMotor.setTargetPosition(ticks + brMotor.getCurrentPosition());
-
-        setDriveMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-
-        setDrivePowers(power);
-        while (opMode.opModeIsActive() && (flMotor.isBusy() || frMotor.isBusy())) { }
-    }
-
-    private void setDriveMode(DcMotor.RunMode runToPosition) {
-        flMotor.setMode(runToPosition);
-        frMotor.setMode(runToPosition);
-        blMotor.setMode(runToPosition);
-        brMotor.setMode(runToPosition);
-    }
-
-    public void rotateToAngle(int targetAngle) {
-        setDriveMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-
-        heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-        double error = getYawError(targetAngle, heading);
-
-        while (opMode.opModeIsActive() && Math.abs(error) > HEADING_ERROR_THRESHOLD) {
-            double power = error * TURN_P_COEFF * MAX_TURN_POWER;
-
-            flPower = -(power);
-            frPower = power;
-            blPower = -(power);
-            brPower = power;
-
-            normalizeForMin(MIN_TURN_POWER);
-            normalize(MAX_TURN_POWER);
-
-            setDrivePowers();
-
-            heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-            error = getYawError(targetAngle, heading);
-
-            opMode.multipleTelemetry.addData("power", power);
-            opMode.multipleTelemetry.addData("error", error);
-            opMode.multipleTelemetry.addData("heading", heading);
-            opMode.multipleTelemetry.update();
-        }
-        setDrivePowers(0);
-    }
-
     private double getYawError(int targetAngle, double currentAngle) {
         double error = targetAngle - currentAngle;
 
         error = (error > 180) ? error - 360 : ((error <= -180) ? error + 360 : error); // a nested ternary to determine error
         return error;
-    }
-
-    public int purplePixelLeft(boolean isBlue){
-        int propPos = visionPortal.propPositionLeft();
-
-        if (propPos == 0){
-            driveInches(-20, 0.5);
-            rotateToAngle(45);
-            driveInches(-12, 0.5);
-            rotateToAngle(0);
-            driveInches(10, 0.5);
-//            rotateToAngle(0);
-//            driveInches(12, 0.5);
-            rotateToAngle(90);
-            if (isBlue){
-                driveToAprilTag(1, 0, 4.5);
-            }
-        } else if (propPos == 1){
-            driveInches(-30, 0.5);
-            driveInches(10, 0.5);
-            rotateToAngle(90);
-            if (isBlue) {
-                driveToAprilTag(2, 0, 4.5);
-            }
-        } else {
-            driveInches(-20, 0.5);
-            rotateToAngle(-45);
-            driveInches(-11, 0.5);
-            driveInches(10, 0.5);
-            rotateToAngle(90);
-            if (isBlue) {
-                driveToAprilTag(3, 0, 4.5);
-            }
-        }
-        return propPos;
-    }
-
-    public int purplePixelRight(boolean isBlue){
-        int propPos = visionPortal.propPositionRight();
-
-        if (propPos == 0){
-            driveInches(-20, 0.5);
-            rotateToAngle(45);
-            driveInches(-12, 0.5);
-            driveInches(15, 0.5);
-            rotateToAngle(0);
-            driveInches(-10, 0.5);
-            rotateToAngle(-90);
-            if (!isBlue){
-                driveToAprilTag(4, 0, 4.5);
-            }
-        } else if (propPos == 1){
-            driveInches(-30, 0.5);
-            driveInches(10, 0.5);
-            rotateToAngle(-90);
-            if (!isBlue) {
-                driveToAprilTag(5, 0, 4.5);
-            }
-        } else {
-            driveInches(-20, 0.5);
-            rotateToAngle(-45);
-            driveInches(-12, 0.5);
-            rotateToAngle(0);
-            driveInches(10, 0.5);
-            rotateToAngle(-90);
-            if (!isBlue) {
-                driveToAprilTag(6, 0, 4.5);
-            }
-        }
-        return propPos;
     }
 
     public void init() {
@@ -378,4 +362,3 @@ public class MM_Drivetrain {
 //
     }
 }
-
