@@ -5,7 +5,7 @@ public class MM_Robot {
     public MM_Drivetrain drivetrain;
     public MM_Collector collector;
     public MM_Transport transport;
-    public MM_LiftLift liftLift;
+    public MM_Lift liftLift;
 
     public MM_Robot(MM_OpMode opMode) {
         this.opMode = opMode;
@@ -15,6 +15,6 @@ public class MM_Robot {
         drivetrain = new MM_Drivetrain(opMode);
         collector = new MM_Collector(opMode);
         transport = new MM_Transport(opMode);
-        liftLift = new MM_LiftLift(opMode);
+        liftLift = new MM_Lift(opMode);
     }
 }
