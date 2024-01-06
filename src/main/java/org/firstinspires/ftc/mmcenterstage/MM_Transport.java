@@ -9,7 +9,7 @@ public class MM_Transport {
     private final MM_OpMode opMode;
 
     private DcMotorEx slide = null;
-    private DcMotorEx mtrBoxFlip = null;
+    private DcMotorEx boxFlip = null;
     private TouchSensor bottomLimit = null;
 //    private DistanceSensor boxSensor = null;
 
@@ -87,18 +87,6 @@ public class MM_Transport {
             }
         }
 
-//        if (slide.getCurrentPosition() > MIN_SCORE_HEIGHT) {
-//            if (!MM_TeleOp.previousGamepad2.right_stick_button && MM_TeleOp.currentGamepad2.right_stick_button) {
-//                readyToScore = !readyToScore;
-//                boxFlip.setPosition((readyToScore) ? BOX_SCORE : BOX_TRANSPORT);
-//                mtrBoxFlip.setTargetPosition((readyToScore) ? MTR_BOX_SCORE : 0);
-//            }
-//        } else {
-//            boxFlip.setPosition((slide.getCurrentPosition() > MAX_COLLECT_HEIGHT) ? BOX_TRANSPORT : BOX_COLLECT);
-        //mtrBoxFlip.setTargetPosition(0);
-        // }
-//        if (slide.getCurrentPosition() > MAX_COLLECT_HEIGHT) {
-
         if (slide.getCurrentPosition() > MIN_SCORE_HEIGHT && !MM_TeleOp.previousGamepad2.right_stick_button && MM_TeleOp.currentGamepad2.right_stick_button) {
             readyToScore = !readyToScore;
             boxFlipTargetTicks = (readyToScore) ? BOX_SCORE_TICKS : 0;
@@ -116,15 +104,7 @@ public class MM_Transport {
         } else {
             mtrBoxFlip.setPower(0);
         }
-//        else if (opMode.gamepad2.left_stick_button) {//reset mtr box flip 0
-//            mtrBoxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-//            mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-//            boxFlipTargetTicks = 0;
-//            mtrBoxFlip.setPower(1);
-//        }
-
-//        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-        opMode.multipleTelemetry.addData("Box pos", mtrBoxFlip.getCurrentPosition());
+        opMode.multipleTelemetry.addData("Box pos", boxFlip.getCurrentPosition());
     }
 
     public void runToScorePos(){
@@ -167,11 +147,9 @@ public class MM_Transport {
         slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         slide.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-        mtrBoxFlip = opMode.hardwareMap.get(DcMotorEx.class, "mtrBoxFlip");
-        mtrBoxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-//        mtrBoxFlip.setTargetPosition(0);
-//        mtrBoxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-        mtrBoxFlip.setPower(0);
+        boxFlip = opMode.hardwareMap.get(DcMotorEx.class, "mtrBoxFlip");
+        boxFlip.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        boxFlip.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        boxFlip.setPower(0);
     }
 }
