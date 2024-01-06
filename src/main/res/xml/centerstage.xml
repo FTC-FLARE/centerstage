@@ -8,8 +8,9 @@
             <goBILDA5202SeriesMotor name="slide" port="3" />
             <ContinuousRotationServo name="rightWheel" port="0" />
             <ContinuousRotationServo name="innerWheel" port="1" />
-            <Servo name="boxFlip" port="2" />
+            <Servo name="droneLift" port="2" />
             <Servo name="liftRelease" port="3" />
+            <Servo name="droneRelease" port="5" />
         </LynxModule>
         <LynxModule name="Control Hub" port="173">
             <goBILDA5202SeriesMotor name="flMotor" port="0" />

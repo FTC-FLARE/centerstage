@@ -11,7 +11,7 @@ public class MM_TeleOp extends MM_OpMode {
             robot.drivetrain.driveWithSticks();
             robot.collector.control();
             robot.transport.control();
-            robot.liftLift.liftLift();
+            robot.lift.liftLift();
 
             previousGamepad1.copy(currentGamepad1);
             currentGamepad1.copy(gamepad1);
