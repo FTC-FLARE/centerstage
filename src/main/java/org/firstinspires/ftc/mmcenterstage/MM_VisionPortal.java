@@ -81,20 +81,6 @@ public class MM_VisionPortal {
         return 0;
     }
 
-    public void getTfodId() {
-        List<Recognition> currentRecognitions = tfod.getRecognitions();
-        // Step through the list of recognitions and display info for each one.
-        for (Recognition recognition : currentRecognitions) {
-            double x = (recognition.getLeft() + recognition.getRight()) / 2;
-            double y = (recognition.getTop() + recognition.getBottom()) / 2;
-
-            if (opMode.opModeInInit()) {
-                opMode.multipleTelemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-                opMode.multipleTelemetry.addData("- Position", "%.0f / %.0f", x, y);
-            }
-        }   // end for() loop
-    }
-
     public double getErrorY(double targetDistance, AprilTagDetection tagId) {
         return targetDistance - tagId.ftcPose.y;
     }
@@ -103,7 +89,7 @@ public class MM_VisionPortal {
         return targetDistance - tagId.ftcPose.x;
     }
 
-    public AprilTagDetection getAprilTagId(int id) {
+    public AprilTagDetection getAprilTagInfo(int id) {
         List<AprilTagDetection> currentDetections = aprilTagProcessor.getDetections();
 
         for (AprilTagDetection detection : currentDetections) {

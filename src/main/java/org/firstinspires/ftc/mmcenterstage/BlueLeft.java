@@ -6,7 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 public class BlueLeft extends MM_OpMode {
     @Override
     public void runProcedures() {
-        int propPos = robot.drivetrain.purplePixelLeft(true);
+        alliance = BLUE;
+        int propPos = robot.drivetrain.purplePixelLeft();
         robot.transport.runToScorePos();
         robot.collector.deposit();
         robot.transport.goHome();
