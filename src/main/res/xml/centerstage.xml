@@ -10,6 +10,7 @@
             <ContinuousRotationServo name="innerWheel" port="1" />
             <Servo name="droneLift" port="2" />
             <Servo name="liftRelease" port="3" />
+            <Servo name="pixelKicker" port="4"/>
             <Servo name="droneRelease" port="5" />
         </LynxModule>
         <LynxModule name="Control Hub" port="173">

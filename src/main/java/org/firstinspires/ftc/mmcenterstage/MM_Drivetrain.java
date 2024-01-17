@@ -5,6 +5,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -17,10 +18,12 @@ public class MM_Drivetrain {
     private DcMotorEx frMotor = null;
     private DcMotorEx blMotor = null;
     private DcMotorEx brMotor = null;
+    private Servo pixelKicker = null;
     public MM_VisionPortal visionPortal;
     private IMU imu;
 
     private final ElapsedTime timer = new ElapsedTime();
+    ElapsedTime kickTime = new ElapsedTime();
 
     public static double MAX_DRIVE_POWER = .5;
     public static double MIN_DRIVE_POWER = .28;
@@ -42,7 +45,10 @@ public class MM_Drivetrain {
     public final double TICKS_PER_INCH = TICKS_PER_REVOLUTION / WHEEL_CIRCUMFERENCE;
 
     private boolean isSlow = false;
+    private boolean isKicking = false;
     private double heading;
+    private int kickCount = 0;
+    private boolean isConcealed = true;
 
     private double flPower = 0;
     private double frPower = 0;
@@ -82,6 +88,26 @@ public class MM_Drivetrain {
         }
 
         setDrivePowers();
+    }
+
+    public void kickPixels(){
+        if (MM_TeleOp.currentGamepad1.b && !MM_TeleOp.previousGamepad1.b){
+            kickTime.reset();
+            isKicking = true;
+        }
+        if (isKicking) {
+            if (kickTime.time() >= .6321 || kickCount == 0) {
+                if (kickCount <= 6) {
+                    pixelKicker.setPosition((isConcealed) ? 1 : 0);
+                    isConcealed = !isConcealed;
+                    kickCount++;
+                    kickTime.reset();
+                } else {
+                    isKicking = false;
+                    kickCount = 0;
+                }
+            }
+        }
     }
 
     public void driveInches(double inches, double power){
@@ -333,6 +359,9 @@ public class MM_Drivetrain {
 
         flMotor.setDirection(DcMotorEx.Direction.REVERSE);
         blMotor.setDirection(DcMotorEx.Direction.REVERSE);
+
+        pixelKicker = opMode.hardwareMap.get(Servo.class, "pixelKicker");
+        pixelKicker.setPosition(1);
 
         if (!opMode.getClass().getSimpleName().equals("MM_TeleOp") ) {
             initExtraForAutos();

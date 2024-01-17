@@ -32,6 +32,8 @@ package org.firstinspires.ftc.testarea;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoControllerEx;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -65,7 +67,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 @TeleOp(name="AprilTag Exposure Test", group = "Concept")
-@Disabled
+
 
 public class AprilTagExposure extends LinearOpMode
 {
@@ -87,6 +89,8 @@ public class AprilTagExposure extends LinearOpMode
     boolean lastExpDn = false;
     boolean lastGainUp = false;
     boolean lastGainDn = false;
+
+    private Servo test = null;
     @Override public void runOpMode()
     {
         // Initialize the Apriltag Detection process
@@ -103,6 +107,10 @@ public class AprilTagExposure extends LinearOpMode
         telemetry.addData(">", "Touch Play to start OpMode");
         telemetry.update();
         waitForStart();
+
+        sleep(2000);
+        ServoControllerEx controller = (ServoControllerEx) test.getController();
+        controller.setServoPwmDisable(test.getPortNumber());
 
         while (opModeIsActive())
         {
@@ -167,6 +175,9 @@ public class AprilTagExposure extends LinearOpMode
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .addProcessor(aprilTag)
                 .build();
+
+        test = hardwareMap.get(Servo.class, "test");
+        test.setPosition(0);
     }
 
     /*
