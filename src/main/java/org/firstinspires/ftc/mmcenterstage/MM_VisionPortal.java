@@ -89,6 +89,10 @@ public class MM_VisionPortal {
         return targetDistance - tagId.ftcPose.x;
     }
 
+    public  double getErrorYaw(double targetDistance, AprilTagDetection tagId){
+        return targetDistance - tagId.ftcPose.yaw;
+    }
+
     public AprilTagDetection getAprilTagInfo(int id) {
         List<AprilTagDetection> currentDetections = aprilTagProcessor.getDetections();
 

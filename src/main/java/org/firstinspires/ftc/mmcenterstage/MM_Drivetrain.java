@@ -58,6 +58,7 @@ public class MM_Drivetrain {
     private int detectAttemptCount = 0;
     private double aprilTagErrorX = 0;
     private double aprilTagErrorY = 0;
+    private double aprilTagErrorYaw = 0;
 
     public MM_Drivetrain(MM_OpMode opMode) {
         this.opMode = opMode;
@@ -168,13 +169,14 @@ public class MM_Drivetrain {
         setDrivePowers(0);
     }
 
-    public void driveToAprilTag(int tagToFind, double targetX, double targetY) {
+    public void driveToAprilTag(int tagToFind, double targetX, double targetY, double targetYaw) {
         setDriveMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         boolean keepGoing = true;
         detectAttemptCount = 0;
         double drivePower = 0;
         double strafePower = 0;
+        double rotatePower = 0;
         AprilTagDetection tagInfo = null;
 
         while (opMode.opModeIsActive() && keepGoing) {
@@ -183,15 +185,17 @@ public class MM_Drivetrain {
             if (tagInfo != null) {
                 aprilTagErrorY = visionPortal.getErrorY(targetY, tagInfo);
                 aprilTagErrorX = visionPortal.getErrorX(targetX, tagInfo);
+                aprilTagErrorYaw = visionPortal.getErrorYaw(targetYaw, tagInfo);
                 detectAttemptCount = 0;
 
                 drivePower = aprilTagErrorY * DRIVE_P_COEFF * MAX_DRIVE_POWER;
                 strafePower = aprilTagErrorX * STRAFE_P_COEFF * MAX_DRIVE_POWER;
+                rotatePower = aprilTagErrorYaw * TURN_P_COEFF * MAX_DRIVE_POWER;
 
-                flPower = drivePower + strafePower;
-                frPower = drivePower - strafePower;
-                blPower = drivePower - strafePower;
-                brPower = drivePower + strafePower;
+                flPower = drivePower + strafePower + rotatePower;
+                frPower = drivePower - strafePower - rotatePower;
+                blPower = drivePower - strafePower + rotatePower;
+                brPower = drivePower + strafePower - rotatePower;
 
                 normalizeForMin(MIN_DRIVE_POWER);
                 normalize(MAX_DRIVE_POWER);
@@ -240,14 +244,14 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE){
-                driveToAprilTag(1, 0, 4.5);
+                driveToAprilTag(1, 0, 4.5, 0);
             }
         } else if (propPos == 1){
             driveInches(-30, 0.5);
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE) {
-                driveToAprilTag(2, 0, 4.5);
+                driveToAprilTag(2, 0, 4.5, 0);
             }
         } else {
             driveInches(-20, 0.5);
@@ -256,7 +260,7 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE) {
-                driveToAprilTag(3, 0, 4.5);
+                driveToAprilTag(3, 0, 4.5, 0);
             }
         }
         return propPos;
@@ -274,14 +278,14 @@ public class MM_Drivetrain {
             driveInches(-10, 0.5);
             rotateToAngle(-90);
             if (MM_OpMode.alliance == MM_OpMode.RED){
-                driveToAprilTag(4, 0, 4.5);
+                driveToAprilTag(4, 0, 4.5, 0);
             }
         } else if (propPos == 1){
             driveInches(-30, 0.5);
             driveInches(10, 0.5);
             rotateToAngle(-90);
             if (MM_OpMode.alliance == MM_OpMode.RED) {
-                driveToAprilTag(5, 0, 4.5);
+                driveToAprilTag(5, 0, 4.5, 0);
             }
         } else {
             driveInches(-20, 0.5);
@@ -291,7 +295,7 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(-90);
             if (MM_OpMode.alliance == MM_OpMode.RED) {
-                driveToAprilTag(6, 0, 4.5);
+                driveToAprilTag(6, 0, 4.5, 0);
             }
         }
         return propPos;
