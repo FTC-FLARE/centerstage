@@ -202,7 +202,7 @@ public class MM_Drivetrain {
 
                 setDrivePowers();
 
-                if (Math.abs(aprilTagErrorY) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorX) <= APRIL_TAG_ERROR_THRESHOLD) {
+                if (Math.abs(aprilTagErrorY) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorX) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorYaw) <= APRIL_TAG_ERROR_THRESHOLD) {
                     keepGoing = false;
                 }
 
