@@ -21,7 +21,7 @@ public abstract class MM_OpMode extends LinearOpMode {
     public static final int LEFT = 0;
     public static final int RIGHT = 1;
     public static int startingPos = 0;
-
+    public static boolean foundApriltagScoreYellow;
     public static final int RED = 0;
     public static final int BLUE = 1;
     public static int alliance = 0;

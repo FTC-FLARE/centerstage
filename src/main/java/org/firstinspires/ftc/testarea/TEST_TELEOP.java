@@ -9,16 +9,30 @@ import org.firstinspires.ftc.mmcenterstage.MM_OpMode;
 
 public class TEST_TELEOP extends LinearOpMode {
 
-    public TEST_ROBOT Trobot = new TEST_ROBOT(this);
+    public TEST_ROBOT robot = new TEST_ROBOT(this);
 
     @Override
     public void runOpMode() {
-        Trobot.init();
+        robot.init();
         waitForStart();
 
-        while(opModeIsActive()){
-            Trobot.drivetrain.driveWithSticks();
-            Trobot.drivetrain.kickPixels();
-        }
+
+
+//        MM_OpMode.alliance = MM_OpMode.BLUE;
+//        int propPos = robot.drivetrain.purplePixelLeft();
+//
+//        if (propPos == 0){ //TODO determine parking area
+//            robot.drivetrain.strafeInches(-31.5, .3);
+//        } else if (propPos == 1){
+//            robot.drivetrain.strafeInches(25, .35);
+//        } else {
+//            robot.drivetrain.strafeInches(31, .4);
+//        }
+//
+
+//        while(opModeIsActive()){
+//            robot.drivetrain.driveWithSticks();
+//            robot.drivetrain.kickPixels();
+//        }
     }
 }

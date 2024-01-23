@@ -8,9 +8,11 @@ public class BlueLeft extends MM_OpMode {
     public void runProcedures() {
         alliance = BLUE;
         int propPos = robot.drivetrain.purplePixelLeft();
-        robot.transport.runToScorePos();
-        robot.collector.deposit();
-        robot.transport.goHome();
+
+            robot.transport.runToScorePos();
+            robot.collector.deposit();
+            robot.transport.goHome();
+
 
         if (propPos == 0){ //TODO determine parking area
             robot.drivetrain.strafeInches(21.5, .3);

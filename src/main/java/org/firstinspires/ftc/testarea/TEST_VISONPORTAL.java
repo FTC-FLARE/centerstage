@@ -40,7 +40,7 @@ public class TEST_VISONPORTAL {
     public static int EXPOSURE = 15;
 
     private static final String[] LABELS = {
-            "prop"
+            "prop", "", "", "", "", "", "", "", "", "", "prop", "prop"
     };
 
     public TEST_VISONPORTAL(LinearOpMode opMode) {
