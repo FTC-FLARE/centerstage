@@ -97,8 +97,8 @@ public class MM_Drivetrain {
         }
         if (isKicking) {
             if (kickTime.time() >= .6321 || kickCount == 0) {
-                if (kickCount <= 6) {
-                    pixelKicker.setPosition((isConcealed) ? 1 : 0);
+                if (kickCount < 6) {
+                    pixelKicker.setPosition((isConcealed) ? 0 : 1);
                     isConcealed = !isConcealed;
                     kickCount++;
                     kickTime.reset();

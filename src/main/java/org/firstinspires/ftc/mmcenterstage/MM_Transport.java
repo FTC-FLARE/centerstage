@@ -18,9 +18,9 @@ public class MM_Transport {
     public static final int UPPER_LIMIT = 2900;
     public static final int MIN_SCORE_HEIGHT = 1560;
     public static final int SLIDE_SLOW_DOWN_TICKS = 800;
-    public static final int BOX_SCORE_TICKS = 300;
+    public static final int BOX_SCORE_TICKS = 380;
     public static final int BOX_TICK_INCREMENT = 8;
-    public static final double BOX_FLIP_POWER = 0.3;
+    public static final double BOX_FLIP_POWER = 0.52;
     public static final double SLIDE_HOME_POWER = -0.7;
     public static final double SLIDE_HOME_POWER_SLOW = -0.3;
 

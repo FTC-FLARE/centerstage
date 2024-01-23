@@ -21,7 +21,7 @@ public class MM_Launcher {
 
     public void launchControl(){
         if (MM_TeleOp.currentGamepad1.dpad_up && !MM_TeleOp.previousGamepad1.dpad_up){
-            lift.setPosition(.55);
+            lift.setPosition(.45);
             liftTime.reset();
             liftRequested = true;
         }

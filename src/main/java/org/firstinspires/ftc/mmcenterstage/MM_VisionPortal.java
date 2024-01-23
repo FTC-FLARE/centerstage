@@ -34,12 +34,12 @@ public class MM_VisionPortal {
     public TfodProcessor tfod;
     public VisionPortal visionPortal;
 
-    private static final String TFOD_MODEL_ASSET = "BallsCombined.tflite";
+    private static final String TFOD_MODEL_ASSET = "Random.tflite";
     public static int GAIN = 255;
     public static int EXPOSURE = 15;
 
     private static final String[] LABELS = {
-            "prop"
+            "prop", "", "", "", "", "", "", "", "", "", "prop", "prop"
     };
 
     public MM_VisionPortal(MM_OpMode opMode) {
