@@ -13,7 +13,7 @@ public class BlueRight extends MM_OpMode {
         if (propPos == 1) {
             robot.drivetrain.strafeInches(-11.5, .3);
             robot.drivetrain.rotateToAngle(-45);
-            robot.drivetrain.driveToAprilTag(10, 8, 27);
+            robot.drivetrain.driveToAprilTag(10, 8, 27, 0);//TODO change targetYaw to a better number
             robot.drivetrain.rotateToAngle(-90);
         } else if(propPos == 0) {
 
