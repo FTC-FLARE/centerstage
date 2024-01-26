@@ -254,7 +254,7 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE){
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(1, 0, 4.5, 0);
+                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(1, 1, 3.4, 0);
             }
         } else if (propPos == 1){
             driveInches(-32, 0.5);
@@ -270,7 +270,7 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE) {
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(3, 0, 4.5, 0);
+                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(3, 1, 3.4, 0);
             }
         }
         return propPos;
@@ -288,14 +288,14 @@ public class MM_Drivetrain {
             driveInches(-10, 0.5);
             rotateToAngle(-90);
             if (MM_OpMode.alliance == MM_OpMode.RED){
-                driveToAprilTag(4, 0, 4.5, 0);
+                driveToAprilTag(4, 1, 3.4, 0);
             }
         } else if (propPos == 1){
-            driveInches(-30, 0.5);
+            driveInches(-32, 0.5);
             driveInches(10, 0.5);
             rotateToAngle(-90);
             if (MM_OpMode.alliance == MM_OpMode.RED) {
-                driveToAprilTag(5, 0, 4.5, 0);
+                driveToAprilTag(5, 1, 3.4, 0);
             }
         } else {
             driveInches(-20, 0.5);
@@ -305,7 +305,7 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(-90);
             if (MM_OpMode.alliance == MM_OpMode.RED) {
-                driveToAprilTag(6, 0, 4.5, 0);
+                driveToAprilTag(6, 1, 3.4, 0);
             }
         }
         return propPos;

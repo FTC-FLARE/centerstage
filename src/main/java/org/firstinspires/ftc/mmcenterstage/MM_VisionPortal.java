@@ -39,7 +39,7 @@ public class MM_VisionPortal {
     public static int EXPOSURE = 15;
 
     private static final String[] LABELS = {
-            "prop", "", "", "", "", "", "", "", "", "", "prop", "prop"
+            "", "", "", "", "", "", "", "", "", "", "prop", "prop"
     };
 
     public MM_VisionPortal(MM_OpMode opMode) {
