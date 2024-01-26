@@ -9,17 +9,18 @@ public class BlueLeft extends MM_OpMode {
         alliance = BLUE;
         int propPos = robot.drivetrain.purplePixelLeft();
 
+        if (MM_OpMode.foundApriltagScoreYellow) {
             robot.transport.runToScorePos();
             robot.collector.deposit();
             robot.transport.goHome();
-
-
-        if (propPos == 0){ //TODO determine parking area
-            robot.drivetrain.strafeInches(21.5, .3);
-        } else if (propPos == 1){
-            robot.drivetrain.strafeInches(26, .4);
-        } else {
-            robot.drivetrain.strafeInches(31, .6);
         }
+
+//        if (propPos == 0){ //TODO determine parking area
+//            robot.drivetrain.strafeInches(21.5, .3);
+//        } else if (propPos == 1){
+//            robot.drivetrain.strafeInches(26, .4);
+//        } else {
+//            robot.drivetrain.strafeInches(31, .6);
+//        }
     }
 }

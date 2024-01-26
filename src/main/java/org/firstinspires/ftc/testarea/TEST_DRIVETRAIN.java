@@ -38,12 +38,12 @@ public class TEST_DRIVETRAIN {
     public static double MAX_TURN_POWER = .5;
     public static double MIN_TURN_POWER = .15;
     public static double GYRO_TURN_P_COEFF = .016;
-    public static double APRIL_TAG_TURN_P_COEFF = .013;
+    public static double APRIL_TAG_TURN_P_COEFF = .007;
 
     public static double HEADING_ERROR_THRESHOLD = 2;
 
     public static double APRIL_TAG_ERROR_THRESHOLD = 1;
-    public static double APRIL_TAG_ERROR_THRESHOLD_YAW = 5;
+    public static double APRIL_TAG_ERROR_THRESHOLD_YAW = 7;
 
     public static double MAX_DETECT_ATTEMPTS = 150;
 
