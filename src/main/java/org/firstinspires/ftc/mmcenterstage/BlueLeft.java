@@ -13,16 +13,17 @@ public class BlueLeft extends MM_OpMode {
             robot.transport.runToScorePos();
             robot.collector.deposit();
             robot.transport.goHome();
+            robot.drivetrain.driveInches(2, .4);
 
             if (propPos == 0) { //TODO determine parking area
-                robot.drivetrain.strafeInches(21.5, .3);
+                robot.drivetrain.strafeInches(-31, .3);
             } else if (propPos == 1) {
-                robot.drivetrain.strafeInches(26, .4);
+                robot.drivetrain.strafeInches(24, .4);
             } else {
-                robot.drivetrain.strafeInches(-21, .3);
+                robot.drivetrain.strafeInches(31, .3);
             }
         }else {
-            robot.drivetrain.strafeInches(26, .4);
+            robot.drivetrain.strafeInches(24, .4);
         }
     }
 }
