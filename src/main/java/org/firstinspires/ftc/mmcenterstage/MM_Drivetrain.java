@@ -247,11 +247,9 @@ public class MM_Drivetrain {
         int propPos = visionPortal.propPositionLeft();
 
         if (propPos == 0){
-            driveInches(-20, 0.3);
-            rotateToAngle(45);
-            driveInches(-7, 0.5); // was-12
-//            rotateToAngle(0);
-            driveInches(9, 0.5);
+            strafeInches(10, .7);
+            driveInches(-20, 0.5);
+            driveInches(7, .7);
             rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE){
                 MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(1, 1, 3.4, 0);
@@ -282,30 +280,39 @@ public class MM_Drivetrain {
         if (propPos == 0){
             driveInches(-20, 0.5);
             rotateToAngle(45);
-            driveInches(-11, 0.5);
-            driveInches(10, 0.5);
+            driveInches(-12.5, 0.5);
+            driveInches(11.5, 0.5);
 //            rotateToAngle(0);
 //            driveInches(-10, 0.5);
-            rotateToAngle(-90);
             if (MM_OpMode.alliance == MM_OpMode.RED){
+                rotateToAngle(-90);
                 MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(4, 0, 3.4, 0);
+            } else {
+                rotateToAngle(90);
             }
         } else if (propPos == 1){
             driveInches(-32, 0.5);
             driveInches(8, 0.5);
-            rotateToAngle(-90);
             if (MM_OpMode.alliance == MM_OpMode.RED) {
-                MM_OpMode.foundApriltagScoreYellow = MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(5, 0, 3.4, 0);
+                rotateToAngle(90);
+
+                MM_OpMode.foundApriltagScoreYellow =  driveToAprilTag(5, 0, 3.4, 0);
+            } else {
+                rotateToAngle(90);
             }
         } else {
+            strafeInches(-8, .7);
             driveInches(-20, 0.5);
-            rotateToAngle(-45);
-            driveInches(-7, 0.5);
-//            rotateToAngle(0);
-            driveInches(9, 0.5);
-            rotateToAngle(-90);
+            driveInches(7, .7);
+//            rotateToAngle(-45);
+//            driveInches(-5.5, 0.5);
+////            rotateToAngle(0);
+//            driveInches(7.5, 0.5);
             if (MM_OpMode.alliance == MM_OpMode.RED) {
+                rotateToAngle(-90);
                 MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(6, 0, 3.4, 0);
+            } else {
+                rotateToAngle(90);
             }
         }
         return propPos;

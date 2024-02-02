@@ -22,6 +22,7 @@ public class BlueLeft extends MM_OpMode {
             } else {
                 robot.drivetrain.strafeInches(31, .3);
             }
+            robot.drivetrain.driveInches(-12, .5);
         }else {
             robot.drivetrain.strafeInches(24, .4);
         }

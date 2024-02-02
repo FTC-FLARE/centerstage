@@ -17,12 +17,13 @@ public class MM_Transport {
 
     public static final int UPPER_LIMIT = 2900;
     public static int MIN_SCORE_HEIGHT = 1330;
-    public static final int SLIDE_SLOW_DOWN_TICKS = 800;
-    public static final int BOX_SCORE_TICKS = 380;
+    public static final int SLIDE_SLOW_DOWN_TICKS = 1000;
+    public static final int BOX_SCORE_TICKS = 390;
     public static final int BOX_TICK_INCREMENT = 8;
     public static final double BOX_FLIP_POWER = 0.52;
-    public static final double SLIDE_HOME_POWER = -0.7;
+    public static final double SLIDE_HOME_POWER = -1;
     public static final double SLIDE_HOME_POWER_SLOW = -0.3;
+    public static double SLIDE_HOME_P_COEFF = -0.001;
 
     boolean readyToScore = false;
     boolean isLimitHandled = false;
@@ -106,6 +107,10 @@ public class MM_Transport {
             boxFlip.setPower(0);
         }
         opMode.multipleTelemetry.addData("Box pos", boxFlip.getCurrentPosition());
+        if (isHoming){
+            slide.setPower(slide.getCurrentPosition() < SLIDE_SLOW_DOWN_TICKS ? Math.min(SLIDE_HOME_P_COEFF * slide.getCurrentPosition(), -.4): SLIDE_HOME_POWER);
+        }
+
     }
 
     public void runToScorePos() {

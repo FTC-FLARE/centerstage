@@ -22,6 +22,7 @@ public class RedRight extends MM_OpMode {
             } else {
                 robot.drivetrain.strafeInches(31, .3);
             }
+            robot.drivetrain.driveInches(-12, .4);
         }else {
 //            robot.drivetrain.strafeInches(-24, .4);
         }
