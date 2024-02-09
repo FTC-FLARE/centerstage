@@ -54,13 +54,12 @@ public class MM_VisionPortal {
         for (Recognition recognition : recognitions){
             opMode.multipleTelemetry.addData("Prop", "width: %.2f, height: %.2f", recognition.getWidth(), recognition.getHeight());
             opMode.multipleTelemetry.update();
-            if (recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
+            if (recognition.getLabel().equals("prop") && recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
                 if (recognition.getLeft() > 130){
                     return 1;
                 } else {
                     return 0;
                 }
-
             }
         }
         return 2;
@@ -70,7 +69,7 @@ public class MM_VisionPortal {
         List <Recognition> recognitions = tfod.getRecognitions();
 
         for (Recognition recognition : recognitions){
-            if (recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
+            if (recognition.getLabel().equals("prop") && recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
                 if (recognition.getLeft() > 450){
                     return 2;
                 } else {
@@ -82,7 +81,7 @@ public class MM_VisionPortal {
     }
 
     public double getErrorY(double targetDistance, AprilTagDetection tagId) {
-        return targetDistance - tagId.ftcPose.y;
+        return targetDistance - tagId.ftcPose.y - 2.7;
     }
 
     public double getErrorX(double targetDistance, AprilTagDetection tagId) {
@@ -101,6 +100,8 @@ public class MM_VisionPortal {
                 opMode.multipleTelemetry.addLine(String.format("XY (ID %d) %6.1f %6.1f  (inch)", detection.id, detection.ftcPose.x, detection.ftcPose.y));
             }
             if (detection.id == id) {
+                opMode.multipleTelemetry.addData("detection", detection.ftcPose.y);
+                opMode.multipleTelemetry.update();
                 return detection;
             }
         }

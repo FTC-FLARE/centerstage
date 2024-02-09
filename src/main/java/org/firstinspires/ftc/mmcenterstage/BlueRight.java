@@ -11,7 +11,7 @@ public class BlueRight extends MM_OpMode {
         int propPos = robot.drivetrain.purplePixelRight();
 
         if (propPos == 1) {
-            robot.drivetrain.strafeInches(18, .3);
+            robot.drivetrain.strafeInches(19, .3);
 //            robot.drivetrain.rotateToAngle(-60); //was -45
 //            robot.drivetrain.driveToAprilTag(10, 8, 27, -42);//TODO change targetYaw to a better number
             robot.drivetrain.rotateToAngle(90);
@@ -37,8 +37,6 @@ public class BlueRight extends MM_OpMode {
             robot.transport.runToScorePos();
             robot.collector.deposit();
             robot.transport.goHome();
-
-
         } else {
 
         }

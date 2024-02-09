@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
+import java.util.List;
+
 @Config
 public class MM_Drivetrain {
     private final MM_OpMode opMode;
@@ -147,7 +149,7 @@ public class MM_Drivetrain {
         setDriveMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-        double error = getYawError(targetAngle, heading);
+        double error = getHeadingError(targetAngle, heading);
 
         while (opMode.opModeIsActive() && Math.abs(error) > HEADING_ERROR_THRESHOLD) {
             double power = error * GYRO_TURN_P_COEFF * MAX_TURN_POWER;
@@ -163,7 +165,7 @@ public class MM_Drivetrain {
             setDrivePowers();
 
             heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-            error = getYawError(targetAngle, heading);
+            error = getHeadingError(targetAngle, heading);
 
             opMode.multipleTelemetry.addData("power", power);
             opMode.multipleTelemetry.addData("error", error);
@@ -187,6 +189,7 @@ public class MM_Drivetrain {
             tagInfo = visionPortal.getAprilTagInfo(tagToFind);
 
             if (tagInfo != null) {
+                opMode.multipleTelemetry.addLine("seeing tag");
                 aprilTagErrorY = visionPortal.getErrorY(targetY, tagInfo);
                 aprilTagErrorX = visionPortal.getErrorX(targetX, tagInfo);
                 aprilTagErrorYaw = visionPortal.getErrorYaw(targetYaw, tagInfo);
@@ -209,24 +212,25 @@ public class MM_Drivetrain {
                 if (Math.abs(aprilTagErrorY) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorX) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorYaw) <= APRIL_TAG_ERROR_THRESHOLD_YAW) {
                     setDrivePowers(0);
                     opMode.multipleTelemetry.addLine("Goal reached.");
-                    opMode.multipleTelemetry.update();
                     return true;
                 }
 
             } else { //tag not found
+                opMode.multipleTelemetry.addLine("looking for tag");
                 detectAttemptCount++;
+
                 if (detectAttemptCount >= MAX_DETECT_ATTEMPTS) {//TODO if tag not found
                     setDrivePowers(0);
                     opMode.multipleTelemetry.addLine("lost aprilTag");
-                    opMode.multipleTelemetry.update();
-
                     return false;
+                    //driveToFindAprilTag(tagToFind);
                 }
                 opMode.sleep(2);
             }
 
             opMode.multipleTelemetry.addData("errorY", aprilTagErrorY);
             opMode.multipleTelemetry.addData("errorX", aprilTagErrorX);
+            opMode.multipleTelemetry.addData("error yaw", aprilTagErrorYaw);
             opMode.multipleTelemetry.addData("detect attempts", detectAttemptCount);
             opMode.multipleTelemetry.addData("powers", " drive: %.2f  :)  strafe: %.2f", drivePower, strafePower);
             opMode.multipleTelemetry.addData("aa fl normalize powers", flPower);
@@ -237,6 +241,25 @@ public class MM_Drivetrain {
         }//end while keep going
 
         return false;
+    }
+
+    public void driveToFindAprilTag(int tagId){
+        setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        setDrivePowers(.45);
+        boolean foundTag = false;
+        while (opMode.opModeIsActive() && !foundTag ) {
+            List<AprilTagDetection> currentDetections = visionPortal.aprilTagProcessor.getDetections();
+            for (AprilTagDetection detection : currentDetections) {
+                if (opMode.opModeInInit()) {
+                    opMode.multipleTelemetry.addLine(String.format("XY (ID %d) %6.1f %6.1f  (inch)", detection.id, detection.ftcPose.x, detection.ftcPose.y));
+                }
+                if (detection.id == tagId) {
+                    foundTag = true;
+                    break;
+                }
+            }
+        }
+        setDrivePowers(0);
     }
 
     public void cruiseUnderTruss(){   //DO NOT RENAME; IF RENAMED THIS WILL BECOME A WAR!!!
@@ -252,14 +275,14 @@ public class MM_Drivetrain {
             driveInches(7, .7);
             rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE){
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(1, 1, 3.4, 0);
+                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(1, 1, 6.8, 0);
             }
         } else if (propPos == 1){
             driveInches(-32, 0.5);
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE) {
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(2, 1, 3.4, 0);
+                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(2, 1, 6.8, 0);
             }
         } else {
             driveInches(-20, 0.5);
@@ -268,7 +291,7 @@ public class MM_Drivetrain {
             driveInches(10, 0.5);
             rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE) {
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(3, 0, 3.4, 0);
+                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(3, 0, 6.8, 0);
             }
         }
         return propPos;
@@ -286,7 +309,8 @@ public class MM_Drivetrain {
 //            driveInches(-10, 0.5);
             if (MM_OpMode.alliance == MM_OpMode.RED){
                 rotateToAngle(-90);
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(4, 0, 3.4, 0);
+                driveInches(-6, .5); //TODO change the rest of the positions
+                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(4, 0, 6.8, 0);
             } else {
                 rotateToAngle(90);
             }
@@ -294,9 +318,9 @@ public class MM_Drivetrain {
             driveInches(-32, 0.5);
             driveInches(8, 0.5);
             if (MM_OpMode.alliance == MM_OpMode.RED) {
-                rotateToAngle(90);
+                rotateToAngle(-90);
 
-                MM_OpMode.foundApriltagScoreYellow =  driveToAprilTag(5, 0, 3.4, 0);
+                MM_OpMode.foundApriltagScoreYellow =  driveToAprilTag(5, 0, 6.8, 0);
             } else {
                 rotateToAngle(90);
             }
@@ -310,7 +334,7 @@ public class MM_Drivetrain {
 //            driveInches(7.5, 0.5);
             if (MM_OpMode.alliance == MM_OpMode.RED) {
                 rotateToAngle(-90);
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(6, 0, 3.4, 0);
+                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(6, 0, 6.8, 0);
             } else {
                 rotateToAngle(90);
             }
@@ -365,7 +389,7 @@ public class MM_Drivetrain {
         }
     }
 
-    private double getYawError(int targetAngle, double currentAngle) {
+    private double getHeadingError(int targetAngle, double currentAngle) {
         double error = targetAngle - currentAngle;
 
         error = (error > 180) ? error - 360 : ((error <= -180) ? error + 360 : error); // a nested ternary to determine error

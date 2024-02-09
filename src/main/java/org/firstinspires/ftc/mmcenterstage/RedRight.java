@@ -14,7 +14,7 @@ public class RedRight extends MM_OpMode {
             robot.collector.deposit();
             robot.transport.goHome();
             robot.drivetrain.driveInches(2, .4);
-
+        }
             if (propPos == 0) {
                 robot.drivetrain.strafeInches(-31, .3);
             } else if (propPos == 1) {
@@ -23,9 +23,7 @@ public class RedRight extends MM_OpMode {
                 robot.drivetrain.strafeInches(31, .3);
             }
             robot.drivetrain.driveInches(-12, .4);
-        }else {
-//            robot.drivetrain.strafeInches(-24, .4);
-        }
+
     }
 }
 

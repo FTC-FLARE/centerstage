@@ -18,16 +18,16 @@ public class TEST_TELEOP extends LinearOpMode {
 
 
         MM_OpMode.alliance = MM_OpMode.BLUE;
-        int propPos = robot.drivetrain.purplePixelRight();
+        //int propPos = robot.drivetrain.purplePixelRight();
 
-        if (propPos == 1) {
-            robot.drivetrain.strafeInches(-13, .3);
-            robot.drivetrain.rotateToAngle(-45);
-            robot.drivetrain.driveToAprilTag(10, 8, 27, -42);//TODO change targetYaw to a better number
-            robot.drivetrain.rotateToAngle(90);
-            robot.drivetrain.driveInches(-76, .5);
-            robot.drivetrain.strafeInches(-22, .5);
-            robot.drivetrain.driveToAprilTag(2, 0, 4.5, 0);
+        //if (propPos == 1) {
+//            robot.drivetrain.strafeInches(-13, .3);
+//            robot.drivetrain.rotateToAngle(-45);
+//            robot.drivetrain.driveToAprilTag(10, 8, 27, -42);//TODO change targetYaw to a better number
+//            robot.drivetrain.rotateToAngle(90);
+//            robot.drivetrain.driveInches(-76, .5);
+//            robot.drivetrain.strafeInches(-22, .5);
+//            robot.drivetrain.driveToAprilTag(2, 0, 4.5, 0);
 
 
 //        MM_OpMode.alliance = MM_OpMode.BLUE;
@@ -42,10 +42,10 @@ public class TEST_TELEOP extends LinearOpMode {
 //        }
 //
 
-//        while(opModeIsActive()){
-//            robot.drivetrain.driveWithSticks();
-//            robot.drivetrain.kickPixels();
-//        }
+        while(opModeIsActive()){
+            robot.drivetrain.driveWithSticks();
+            robot.drivetrain.kickPixels();
         }
+        //}
     }
 }

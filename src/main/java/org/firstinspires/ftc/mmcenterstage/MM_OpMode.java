@@ -25,6 +25,7 @@ public abstract class MM_OpMode extends LinearOpMode {
     public static final int RED = 0;
     public static final int BLUE = 1;
     public static int alliance = 0;
+    public boolean dpadPressed = false;
 
     @Override
     public void runOpMode() {

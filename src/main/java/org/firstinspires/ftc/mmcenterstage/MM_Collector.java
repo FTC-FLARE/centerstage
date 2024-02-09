@@ -29,7 +29,7 @@ public class MM_Collector {
         } else if (opMode.gamepad2.left_trigger > 0.1) {
             leftWheel.setPower(-LEFT_WHEEL_POWER);
             rightWheel.setPower(-RIGHT_WHEEL_POWER);
-            innertakeStar.setPower(-INNERTAKE_STAR_POWER);
+            innertakeStar.setPower(opMode.robot.transport.atBottom() ? -INNERTAKE_STAR_POWER : -.2);
         } else {
             leftWheel.setPower(0);
             rightWheel.setPower(0);

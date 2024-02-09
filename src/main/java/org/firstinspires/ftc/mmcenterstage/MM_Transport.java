@@ -38,14 +38,19 @@ public class MM_Transport {
         init();
     }
 
+    public boolean atBottom() {
+        return bottomLimit.isPressed();
+    }
+
     public void control() {
+
         opMode.multipleTelemetry.addData("slide pos", slide.getCurrentPosition());
         opMode.multipleTelemetry.update();
 
         rightStickPower = -opMode.gamepad2.right_stick_y;
         leftStickPower = -opMode.gamepad2.left_stick_y;
 
-        if (rightStickPower > .1) {
+        if (rightStickPower > .1 || dpadPressed()) {
             isHoming = false;
         }
 
@@ -73,11 +78,16 @@ public class MM_Transport {
                 slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
                 slide.setPower(slide.getCurrentPosition() < SLIDE_SLOW_DOWN_TICKS ? SLIDE_HOME_POWER_SLOW : SLIDE_HOME_POWER);
                 isHoming = true;
-            } else if (!bottomLimit.isPressed() || rightStickPower > 0.1) { // limit not triggered or i'm trying to go up
+            } else if (!bottomLimit.isPressed() || rightStickPower > 0.1 || dpadPressed()) { // limit not triggered or i'm trying to go up
                 if (rightStickPower < -0.1) {
                     slideTargetTicks = Math.max(slideTargetTicks - SLIDE_TICK_INCREMENT, 0);
                 } else if (rightStickPower > 0.1) {
                     slideTargetTicks = Math.min(slideTargetTicks + SLIDE_TICK_INCREMENT, UPPER_LIMIT);
+                }
+                if (!MM_TeleOp.previousGamepad2.dpad_down && MM_TeleOp.currentGamepad2.dpad_down) {
+                    slideTargetTicks = MIN_SCORE_HEIGHT + 100; //TODO change set line 1 to real number
+                } else if ((!MM_TeleOp.previousGamepad2.dpad_left && MM_TeleOp.currentGamepad2.dpad_left) || !MM_TeleOp.previousGamepad2.dpad_right && MM_TeleOp.currentGamepad2.dpad_right) {
+                    slideTargetTicks = (MIN_SCORE_HEIGHT + 100) * 2; //TODO change set line 2 to real number
                 }
 
                 slide.setTargetPosition(slideTargetTicks);
@@ -87,6 +97,7 @@ public class MM_Transport {
                     isLimitHandled = false;
                 }
             }
+
         }
 
         if (slide.getCurrentPosition() > MIN_SCORE_HEIGHT && !MM_TeleOp.previousGamepad2.right_stick_button && MM_TeleOp.currentGamepad2.right_stick_button) {
@@ -107,10 +118,14 @@ public class MM_Transport {
             boxFlip.setPower(0);
         }
         opMode.multipleTelemetry.addData("Box pos", boxFlip.getCurrentPosition());
-        if (isHoming){
-            slide.setPower(slide.getCurrentPosition() < SLIDE_SLOW_DOWN_TICKS ? Math.min(SLIDE_HOME_P_COEFF * slide.getCurrentPosition(), -.4): SLIDE_HOME_POWER);
+        if (isHoming) {
+            slide.setPower(slide.getCurrentPosition() < SLIDE_SLOW_DOWN_TICKS ? Math.min(SLIDE_HOME_P_COEFF * slide.getCurrentPosition(), -.4) : SLIDE_HOME_POWER);
         }
 
+    }
+
+    public double getSlidePos() {
+        return slide.getCurrentPosition();
     }
 
     public void runToScorePos() {
@@ -132,6 +147,10 @@ public class MM_Transport {
             opMode.telemetry.addData("Box Flipping", boxFlip.getCurrentPosition());
             opMode.telemetry.update();
         }
+    }
+
+    private boolean dpadPressed() {
+        return (MM_TeleOp.currentGamepad2.dpad_right || MM_TeleOp.currentGamepad2.dpad_left || MM_TeleOp.currentGamepad2.dpad_down || MM_TeleOp.currentGamepad2.dpad_up);
     }
 
     public void goHome() {
