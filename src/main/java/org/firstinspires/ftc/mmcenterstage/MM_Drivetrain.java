@@ -43,7 +43,7 @@ public class MM_Drivetrain {
     public static double APRIL_TAG_ERROR_THRESHOLD_YAW = 7;
 
 
-    public static double MAX_DETECT_ATTEMPTS = 250;
+    public static double MAX_DETECT_ATTEMPTS = 500;
 
     public final double WHEEL_DIAMETER = 4;
     public final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
@@ -120,10 +120,10 @@ public class MM_Drivetrain {
     public void driveInches(double inches, double power){
         int ticks = (int) (TICKS_PER_INCH * inches);
 
-        flMotor.setTargetPosition(ticks + flMotor.getCurrentPosition());
-        frMotor.setTargetPosition(ticks + frMotor.getCurrentPosition());
-        blMotor.setTargetPosition(ticks + blMotor.getCurrentPosition());
-        brMotor.setTargetPosition(ticks + brMotor.getCurrentPosition());
+        flMotor.setTargetPosition(flMotor.getCurrentPosition() + ticks);
+        frMotor.setTargetPosition(frMotor.getCurrentPosition() + ticks);
+        blMotor.setTargetPosition(blMotor.getCurrentPosition() + ticks);
+        brMotor.setTargetPosition(brMotor.getCurrentPosition() + ticks);
 
         setDriveMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
@@ -178,6 +178,7 @@ public class MM_Drivetrain {
     public boolean driveToAprilTag(int tagToFind, double targetX, double targetY, double targetYaw) {
         setDriveMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
+        boolean iSawIt = false;
         boolean keepGoing = true;
         detectAttemptCount = 0;
         double drivePower = 0;
@@ -189,6 +190,7 @@ public class MM_Drivetrain {
             tagInfo = visionPortal.getAprilTagInfo(tagToFind);
 
             if (tagInfo != null) {
+                iSawIt = true;
                 opMode.multipleTelemetry.addLine("seeing tag");
                 aprilTagErrorY = visionPortal.getErrorY(targetY, tagInfo);
                 aprilTagErrorX = visionPortal.getErrorX(targetX, tagInfo);
@@ -218,6 +220,9 @@ public class MM_Drivetrain {
             } else { //tag not found
                 opMode.multipleTelemetry.addLine("looking for tag");
                 detectAttemptCount++;
+                if(!iSawIt){
+                    setDrivePowers(-.15);
+                }
 
                 if (detectAttemptCount >= MAX_DETECT_ATTEMPTS) {//TODO if tag not found
                     setDrivePowers(0);
@@ -266,55 +271,53 @@ public class MM_Drivetrain {
     // TODO cruise under truss
     }
 
-    public int purplePixelLeft(){
+    public int purplePixelLeft(){  // blue backdrop & red audience
         int propPos = visionPortal.propPositionLeft();
 
-        if (propPos == 0){
-            strafeInches(10, .7);
-            driveInches(-20, 0.5);
-            driveInches(7, .7);
+        if (propPos == 0){  // left - away from truss
+            strafeInches(8.5, .7);
+            driveInches(-23, 0.5);
+            driveInches(8, .7);
             rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE){
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(1, 1, 6.8, 0);
+                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(1, 1.5, 6.8, 0);
             }
-        } else if (propPos == 1){
+        } else if (propPos == 1){  // center
             driveInches(-32, 0.5);
-            driveInches(10, 0.5);
+            driveInches(8, 0.5);
             rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE) {
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(2, 1, 6.8, 0);
+                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(2, 0, 6.8, 0);
             }
-        } else {
+        } else {  // right - by truss
             driveInches(-20, 0.5);
             rotateToAngle(-45);
             driveInches(-11, 0.5);
             driveInches(10, 0.5);
-            rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE) {
+                rotateToAngle(85);
                 MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(3, 0, 6.8, 0);
             }
         }
         return propPos;
     }
 
-    public int purplePixelRight(){
+    public int purplePixelRight(){  // red backdrop & blue audience
         int propPos = visionPortal.propPositionRight();
 
-        if (propPos == 0){
+        if (propPos == 0){   // left - by truss
             driveInches(-20, 0.5);
             rotateToAngle(45);
             driveInches(-12.5, 0.5);
-            driveInches(11.5, 0.5);
-//            rotateToAngle(0);
-//            driveInches(-10, 0.5);
+            driveInches(11, 0.5);
             if (MM_OpMode.alliance == MM_OpMode.RED){
-                rotateToAngle(-90);
-                driveInches(-6, .5); //TODO change the rest of the positions
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(4, 0, 6.8, 0);
+                rotateToAngle(-85);
+                //used to be drive 6 inches
+                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(4, 1.5, 6.8, 0);
             } else {
                 rotateToAngle(90);
             }
-        } else if (propPos == 1){
+        } else if (propPos == 1){   // center
             driveInches(-32, 0.5);
             driveInches(8, 0.5);
             if (MM_OpMode.alliance == MM_OpMode.RED) {
@@ -324,14 +327,10 @@ public class MM_Drivetrain {
             } else {
                 rotateToAngle(90);
             }
-        } else {
-            strafeInches(-8, .7);
-            driveInches(-20, 0.5);
-            driveInches(7, .7);
-//            rotateToAngle(-45);
-//            driveInches(-5.5, 0.5);
-////            rotateToAngle(0);
-//            driveInches(7.5, 0.5);
+        } else {  // right - away from truss
+            strafeInches(-8.5, .7);
+            driveInches(-23, 0.5);
+            driveInches(8, .7);
             if (MM_OpMode.alliance == MM_OpMode.RED) {
                 rotateToAngle(-90);
                 MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(6, 0, 6.8, 0);
@@ -429,6 +428,8 @@ public class MM_Drivetrain {
         imu.resetYaw();
 
         visionPortal = new MM_VisionPortal(opMode);
+        opMode.sleep(8000);
+
 
 //        dashboardTelemetry.addData("detect attempts", detectAttemptCount);
 //        dashboardTelemetry.addData("errorX", errorX);
