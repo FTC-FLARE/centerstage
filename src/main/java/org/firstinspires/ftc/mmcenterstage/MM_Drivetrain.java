@@ -278,16 +278,20 @@ public class MM_Drivetrain {
             strafeInches(8.5, .7);
             driveInches(-23, 0.5);
             driveInches(8, .7);
-            rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE){
+                rotateToAngle(90);
                 MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(1, 1.5, 6.8, 0);
+            } else {
+                rotateToAngle(-90);
             }
         } else if (propPos == 1){  // center
             driveInches(-32, 0.5);
             driveInches(8, 0.5);
-            rotateToAngle(90);
             if (MM_OpMode.alliance == MM_OpMode.BLUE) {
+                rotateToAngle(90);
                 MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(2, 0, 6.8, 0);
+            } else {
+                rotateToAngle(-90);
             }
         } else {  // right - by truss
             driveInches(-20, 0.5);

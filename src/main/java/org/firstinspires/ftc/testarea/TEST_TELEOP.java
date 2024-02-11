@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.testarea;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.mmcenterstage.MM_OpMode;
 
 @TeleOp(name = "Test BOB", group = "mm")
-
+@Disabled
 public class TEST_TELEOP extends LinearOpMode {
 
     public TEST_ROBOT robot = new TEST_ROBOT(this);

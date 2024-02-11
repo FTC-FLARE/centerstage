@@ -38,7 +38,6 @@ public class BlueRight extends MM_OpMode {
             robot.collector.deposit();
             robot.transport.goHome();
         } else {
-
         }
     }
 }

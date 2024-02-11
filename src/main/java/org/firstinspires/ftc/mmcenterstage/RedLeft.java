@@ -8,7 +8,38 @@ public class RedLeft extends MM_OpMode {
     @Override
     public void runProcedures() {
         alliance = RED;
-        robot.drivetrain.purplePixelLeft();
+        int propPos = robot.drivetrain.purplePixelLeft();
+
+        if (propPos == 1) {
+            robot.drivetrain.strafeInches(-19, .3);
+//            robot.drivetrain.rotateToAngle(-60); //was -45
+//            robot.drivetrain.driveToAprilTag(10, 8, 27, -42);//TODO change targetYaw to a better number
+            robot.drivetrain.rotateToAngle(-90);
+            robot.drivetrain.driveInches(-76, .5);
+            robot.drivetrain.strafeInches(22, .5);
+            robot.drivetrain.driveToAprilTag(2, 0, 3.4, 0);
+
+//            robot.drivetrain.strafeInches(-15.5, .3);
+//            robot.drivetrain.rotateToAngle(-45); // Was -45
+//            robot.drivetrain.driveToAprilTag(10, 8, 27, -42);//TODO change targetYaw to a better number
+//            robot.drivetrain.driveInches(-76, .5);
+//            robot.drivetrain.driveToAprilTag(2, 0, 4.5, 0);
+            robot.transport.runToScorePos();
+            robot.collector.deposit();
+            robot.transport.goHome();
+
+        } else if (propPos == 0) {
+            robot.drivetrain.strafeInches(-17.7, .5);
+            robot.drivetrain.driveInches(-76, .5);
+            robot.drivetrain.strafeInches(22, .5);
+            robot.drivetrain.driveToAprilTag(1, 0, 3.4, 0);
+
+            robot.transport.runToScorePos();
+            robot.collector.deposit();
+            robot.transport.goHome();
+        } else {
+        }
+
     }
 
     @Override
