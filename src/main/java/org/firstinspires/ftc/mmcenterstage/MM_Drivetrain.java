@@ -289,7 +289,7 @@ public class MM_Drivetrain {
             driveInches(8, 0.5);
             if (MM_OpMode.alliance == MM_OpMode.BLUE) {
                 rotateToAngle(90);
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(2, 0, 6.8, 0);
+                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(2, -1, 6.8, 0);
             } else {
                 rotateToAngle(-90);
             }

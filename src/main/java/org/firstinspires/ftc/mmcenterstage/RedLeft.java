@@ -17,7 +17,7 @@ public class RedLeft extends MM_OpMode {
             robot.drivetrain.rotateToAngle(-90);
             robot.drivetrain.driveInches(-76, .5);
             robot.drivetrain.strafeInches(22, .5);
-            robot.drivetrain.driveToAprilTag(2, 0, 3.4, 0);
+            robot.drivetrain.driveToAprilTag(2, 0, 6.8, 0);
 
 //            robot.drivetrain.strafeInches(-15.5, .3);
 //            robot.drivetrain.rotateToAngle(-45); // Was -45
@@ -29,10 +29,10 @@ public class RedLeft extends MM_OpMode {
             robot.transport.goHome();
 
         } else if (propPos == 0) {
-            robot.drivetrain.strafeInches(-17.7, .5);
+            robot.drivetrain.strafeInches(-9.5, .5);
             robot.drivetrain.driveInches(-76, .5);
             robot.drivetrain.strafeInches(22, .5);
-            robot.drivetrain.driveToAprilTag(1, 0, 3.4, 0);
+            robot.drivetrain.driveToAprilTag(1, 0, 6.8, 0);
 
             robot.transport.runToScorePos();
             robot.collector.deposit();

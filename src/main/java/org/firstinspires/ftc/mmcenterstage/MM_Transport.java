@@ -134,7 +134,7 @@ public class MM_Transport {
         boxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         boxFlip.setPower(BOX_FLIP_POWER);
 
-        slide.setTargetPosition(MIN_SCORE_HEIGHT);
+        slide.setTargetPosition(MIN_SCORE_HEIGHT - 20);
         slide.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         slide.setPower(.5);
         while (slide.isBusy()) {
