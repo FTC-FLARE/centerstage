@@ -279,19 +279,19 @@ public class MM_Drivetrain {
             driveInches(-23, 0.5);
             driveInches(8, .7);
             if (MM_OpMode.alliance == MM_OpMode.BLUE){
-                rotateToAngle(90);
+                rotateToAngle(85);
                 MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(1, 1.5, 6.8, 0);
             } else {
-                rotateToAngle(-90);
+                rotateToAngle(-85);
             }
         } else if (propPos == 1){  // center
             driveInches(-32, 0.5);
             driveInches(8, 0.5);
             if (MM_OpMode.alliance == MM_OpMode.BLUE) {
-                rotateToAngle(90);
+                rotateToAngle(85);
                 MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(2, -1, 6.8, 0);
             } else {
-                rotateToAngle(-90);
+                rotateToAngle(-85);
             }
         } else {  // right - by truss
             driveInches(-20, 0.5);
@@ -319,27 +319,27 @@ public class MM_Drivetrain {
                 //used to be drive 6 inches
                 MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(4, 1.5, 6.8, 0);
             } else {
-                rotateToAngle(90);
+                rotateToAngle(85);
             }
         } else if (propPos == 1){   // center
             driveInches(-32, 0.5);
             driveInches(8, 0.5);
             if (MM_OpMode.alliance == MM_OpMode.RED) {
-                rotateToAngle(-90);
+                rotateToAngle(-85);
 
                 MM_OpMode.foundApriltagScoreYellow =  driveToAprilTag(5, 0, 6.8, 0);
             } else {
-                rotateToAngle(90);
+                rotateToAngle(85);
             }
         } else {  // right - away from truss
             strafeInches(-8.5, .7);
             driveInches(-23, 0.5);
             driveInches(8, .7);
             if (MM_OpMode.alliance == MM_OpMode.RED) {
-                rotateToAngle(-90);
+                rotateToAngle(-85);
                 MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(6, 0, 6.8, 0);
             } else {
-                rotateToAngle(90);
+                rotateToAngle(85);
             }
         }
         return propPos;
