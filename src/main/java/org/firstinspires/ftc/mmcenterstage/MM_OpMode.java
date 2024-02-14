@@ -18,14 +18,16 @@ public abstract class MM_OpMode extends LinearOpMode {
 
     public MM_Robot robot = new MM_Robot(this);
 
-    public static final int LEFT = 0;
+    public static final int LEFT = -1;
     public static final int RIGHT = 1;
-    public static int startingPos = 0;
-    public static boolean foundApriltagScoreYellow = false;
-    public static final int RED = 0;
+    public static int leftOrRight = LEFT;
+    public static final int RED = -1;
     public static final int BLUE = 1;
-    public static int alliance = 0;
-    public boolean dpadPressed = false;
+    public static int alliance = RED;
+    public static final int BACKDROP = -1;
+    public static final int AUDIENCE = 1;
+    public static int startingPos = BACKDROP;
+    public static boolean foundApriltagScoreYellow = false;
 
     @Override
     public void runOpMode() {

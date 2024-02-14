@@ -7,6 +7,8 @@ public class RedRight extends MM_OpMode {
     @Override
     public void runProcedures() {
         alliance = RED;
+        leftOrRight = RIGHT;
+        startingPos = Math.abs(alliance + leftOrRight) - 1 ;
         int propPos = robot.drivetrain.purplePixelRight();
 
         if (MM_OpMode.foundApriltagScoreYellow) {

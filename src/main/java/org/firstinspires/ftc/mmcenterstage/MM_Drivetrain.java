@@ -272,7 +272,7 @@ public class MM_Drivetrain {
     }
 
     public int purplePixelLeft(){  // blue backdrop & red audience
-        int propPos = visionPortal.propPositionLeft();
+        int propPos = visionPortal.propPosition();
 
         if (propPos == 0){  // left - away from truss
             strafeInches(8.5, .7);
@@ -307,7 +307,7 @@ public class MM_Drivetrain {
     }
 
     public int purplePixelRight(){  // red backdrop & blue audience
-        int propPos = visionPortal.propPositionRight();
+        int propPos = visionPortal.propPosition();
 
         if (propPos == 0){   // left - by truss
             driveInches(-20, 0.5);

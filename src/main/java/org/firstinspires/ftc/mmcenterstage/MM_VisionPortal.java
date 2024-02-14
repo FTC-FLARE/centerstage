@@ -48,37 +48,23 @@ public class MM_VisionPortal {
         initVisionPortal();
     }
 
-    public int propPositionLeft(){
-        List<Recognition> recognitions = tfod.getRecognitions();
-
-        for (Recognition recognition : recognitions){
-            opMode.multipleTelemetry.addData("Prop", "width: %.2f, height: %.2f", recognition.getWidth(), recognition.getHeight());
-            opMode.multipleTelemetry.update();
-            if (recognition.getLabel().equals("prop") && recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
-                if (recognition.getLeft() > 130){
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        }
-        return 2;
-    }
-
-    public int propPositionRight(){
+    public int propPosition(){
         List <Recognition> recognitions = tfod.getRecognitions();
 
         for (Recognition recognition : recognitions){
             if (recognition.getLabel().equals("prop") && recognition.getWidth() < 150 &&  recognition.getHeight() < 180){
                 if (recognition.getLeft() > 450){
                     return 2;
+                } else if (recognition.getLeft() < 130){
+                    return 0;
                 } else {
                     return 1;
                 }
             }
         }
-        return 0;
+        return Math.abs(MM_OpMode.leftOrRight - 1);
     }
+
 
     public double getErrorY(double targetDistance, AprilTagDetection tagId) {
         return targetDistance - tagId.ftcPose.y - 2.7;

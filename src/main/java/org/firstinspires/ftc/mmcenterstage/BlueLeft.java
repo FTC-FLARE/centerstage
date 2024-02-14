@@ -7,6 +7,8 @@ public class BlueLeft extends MM_OpMode {
     @Override
     public void runProcedures() {
         alliance = BLUE;
+        leftOrRight = LEFT;
+        startingPos = Math.abs(alliance + leftOrRight) - 1 ;
         int propPos = robot.drivetrain.purplePixelLeft();
 
         if (MM_OpMode.foundApriltagScoreYellow) {
