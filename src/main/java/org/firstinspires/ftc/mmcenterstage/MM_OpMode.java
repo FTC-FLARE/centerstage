@@ -100,7 +100,7 @@ public abstract class MM_OpMode extends LinearOpMode {
                 }
                 if(currentGamepad1.a && !previousGamepad1.a){
                     colorChosen = true;
-                    finalColor = currentColor;
+                    alliance = currentColor;
                 }
             } else if (!locationChosen){
                 telemetry.addData("location", currentLocation);
@@ -111,7 +111,7 @@ public abstract class MM_OpMode extends LinearOpMode {
                 }
                 if(currentGamepad1.a && !previousGamepad1.a){
                     locationChosen = true;
-                    finalLocation = currentLocation;
+                    startingPos = currentLocation;
                 }
             } else {
                 telemetry.addData("parking location", currentPark);
