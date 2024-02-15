@@ -32,6 +32,9 @@ public abstract class MM_OpMode extends LinearOpMode {
     public static int alliance = RED;
     public static final int BACKDROP = -1;
     public static final int AUDIENCE = 1;
+
+    public static final int MIDDLE = -1;
+    public static final int CORNER = 1;
     public static int startingPos = BACKDROP;
     public static boolean foundApriltagScoreYellow = false;
     public static int finalColor;
@@ -40,7 +43,8 @@ public abstract class MM_OpMode extends LinearOpMode {
     public static int finalLocation;
     public static boolean locationChosen = false;
 
-
+    public static int finalPark;
+    public static boolean parkChosen = false;
 
 
 
@@ -52,7 +56,12 @@ public abstract class MM_OpMode extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        initProcedures();
+        if (!getClass().getSimpleName().equals("MM_TeleOp") ) {
+            initProcedures(true);
+        } else {
+            initProcedures();
+        }
+
         matchTimer.reset();
         runProcedures();
     }
@@ -74,7 +83,12 @@ public abstract class MM_OpMode extends LinearOpMode {
 
         int currentLocation = locationList[0];
 
+        int[] parkingList = new int[2];
 
+        parkingList[0] = MIDDLE;
+       parkingList[1] = CORNER;
+
+        int currentPark = parkingList[0];
 
         while (opModeInInit()){
             if (!colorChosen) {
@@ -98,6 +112,17 @@ public abstract class MM_OpMode extends LinearOpMode {
                 if(currentGamepad1.a && !previousGamepad1.a){
                     locationChosen = true;
                     finalLocation = currentLocation;
+                }
+            } else {
+                telemetry.addData("parking location", currentPark);
+                telemetry.update();
+
+                if ((currentGamepad1.dpad_up && !previousGamepad1.dpad_up) || currentGamepad1.dpad_down && !previousGamepad1.dpad_down){
+                    currentPark = currentPark == parkingList[1]? parkingList[0]: parkingList[1];
+                }
+                if(currentGamepad1.a && !previousGamepad1.a){
+                    parkChosen = true;
+                    finalPark = currentPark;
                 }
             }
 
