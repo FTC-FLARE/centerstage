@@ -10,7 +10,7 @@ public class RedRight extends MM_OpMode {
         leftOrRight = RIGHT;
         startingPos = Math.abs(alliance + leftOrRight) - 1;
 
-        int propPos = robot.drivetrain.purplePixelRight();
+        int propPos = robot.drivetrain.purplePixel();
         robot.drivetrain.rotateToAngle(85 * alliance);
 
         int targetX = propPos == 2 ? -1 : 1;
@@ -20,15 +20,8 @@ public class RedRight extends MM_OpMode {
         if (MM_OpMode.foundApriltagScoreYellow) {
             robot.autoScoreOnBackDrop();
         }
-        if (propPos == 0) {
-            robot.drivetrain.strafeInches(-31, .3);
-        } else if (propPos == 1) {
-            robot.drivetrain.strafeInches(-24, .4);
-        } else {
-            robot.drivetrain.strafeInches(31, .3);
-        }
-        robot.drivetrain.driveInches(-12, .4);
 
+        robot.drivetrain.park(propPos);
     }
 }
 

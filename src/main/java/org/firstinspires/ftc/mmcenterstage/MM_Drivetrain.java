@@ -272,90 +272,26 @@ public class MM_Drivetrain {
         }
         setDrivePowers(0);
     }
+    public void park (int propPos) {
+        if (propPos == 0) {
+            strafeInches(-31, .3);
+        } else if (propPos == 1) {
+            strafeInches(-24, .3);
+        } else {
+            strafeInches(31, .3);
+        }
+        driveInches(-12, .3);
+    }
 
     public void cruiseUnderTruss(){   //DO NOT RENAME; IF RENAMED THIS WILL BECOME A WAR!!!
     // TODO cruise under truss
     }
 
-    public int purplePixelLeft(){  // blue backdrop & red audience
-        int propPos = visionPortal.propPosition();
-
-        if (propPos == 0){  // left - away from truss
-            strafeInches(8.5, .7);
-            driveInches(-23, 0.5);
-            driveInches(8, .7);
-            if (MM_OpMode.alliance == MM_OpMode.BLUE){
-                rotateToAngle(85);
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(1, 1.5, 6.8, 0);
-            } else {
-                rotateToAngle(-85);
-            }
-        } else if (propPos == 1){  // center
-            driveInches(-32, 0.5);
-            driveInches(8, 0.5);
-            if (MM_OpMode.alliance == MM_OpMode.BLUE) {
-                rotateToAngle(85);
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(2, -1, 6.8, 0);
-            } else {
-                rotateToAngle(-85);
-            }
-        } else {  // right - by truss
-            driveInches(-20, 0.5);
-            rotateToAngle(-45);
-            driveInches(-11, 0.5);
-            driveInches(10, 0.5);
-            if (MM_OpMode.alliance == MM_OpMode.BLUE) {
-                rotateToAngle(85);
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(3, 0, 6.8, 0);
-            }
-        }
-        return propPos;
-    }
-
-    public int purplePixelRight(){  // red backdrop & blue audience
-        int propPos = visionPortal.propPosition();
-
-        if (propPos == 0){   // left - by truss
-            driveInches(-20, 0.5);
-            rotateToAngle(45);
-            driveInches(-12.5, 0.5);
-            driveInches(11, 0.5);
-            if (MM_OpMode.alliance == MM_OpMode.RED){
-                rotateToAngle(-85);
-                //used to be drive 6 inches
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(4, 1.5, 6.8, 0);
-            } else {
-                rotateToAngle(85);
-            }
-        } else if (propPos == 1){   // center
-            driveInches(-32, 0.5);
-            driveInches(8, 0.5);
-            if (MM_OpMode.alliance == MM_OpMode.RED) {
-                rotateToAngle(-85);
-
-                MM_OpMode.foundApriltagScoreYellow =  driveToAprilTag(5, 0, 6.8, 0);
-            } else {
-                rotateToAngle(85);
-            }
-        } else {  // right - away from truss
-            strafeInches(-8.5, .7);
-            driveInches(-23, 0.5);
-            driveInches(8, .7);
-            if (MM_OpMode.alliance == MM_OpMode.RED) {
-                rotateToAngle(-85);
-                MM_OpMode.foundApriltagScoreYellow = driveToAprilTag(6, 0, 6.8, 0);
-            } else {
-                rotateToAngle(85);
-            }
-        }
-        return propPos;
-    }
-
     public int purplePixel(){
         int propPos = visionPortal.propPosition();
 
-        if (propPos == 0){  // left - away from truss
-            strafeInches(8.5, .7);
+        if ((propPos == 0 && MM_OpMode.leftOrRight == MM_OpMode.LEFT) || (propPos == 2 && MM_OpMode.leftOrRight == MM_OpMode.RIGHT)){  // away from truss
+            strafeInches(-8.5 * MM_OpMode.alliance, .7);
             driveInches(-23, 0.5);
             driveInches(8, .7);
         } else if (propPos == 1){  // center
@@ -363,7 +299,7 @@ public class MM_Drivetrain {
             driveInches(8, 0.5);
         } else {  // right - by truss
             driveInches(-20, 0.5);
-            rotateToAngle(-45);
+            rotateToAngle(45 * MM_OpMode.alliance);
             driveInches(-11, 0.5);
             driveInches(10, 0.5);
         }

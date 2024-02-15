@@ -11,12 +11,12 @@ public class RedLeft extends MM_OpMode {
         leftOrRight = LEFT;
         startingPos = Math.abs(alliance + leftOrRight) - 1;
 
-        int propPos = robot.drivetrain.purplePixelLeft();
+        int propPos = robot.drivetrain.purplePixel();
         int targetX = propPos == 2? -1: 1;
         int tagToFind = alliance == BLUE? propPos + 1: propPos + 4;
 
         robot.drivetrain.rotateToAngle(85 * alliance);
-        MM_OpMode.foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(tagToFind, targetX);
+        //MM_OpMode.foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(tagToFind, targetX);
 
 
         if (propPos == 1) {
@@ -26,9 +26,9 @@ public class RedLeft extends MM_OpMode {
             robot.drivetrain.strafeInches(22, .5);
             robot.drivetrain.driveToAprilTag(2, 0, 6.8, 0);
 
-            robot.transport.runToScorePos();
-            robot.collector.deposit();
-            robot.transport.goHome();
+            if (foundApriltagScoreYellow) {
+                robot.autoScoreOnBackDrop();
+            }
 
         } else if (propPos == 0) {
             robot.drivetrain.strafeInches(-9.5, .5);
@@ -36,9 +36,9 @@ public class RedLeft extends MM_OpMode {
             robot.drivetrain.strafeInches(22, .5);
             robot.drivetrain.driveToAprilTag(1, 0, 6.8, 0);
 
-            robot.transport.runToScorePos();
-            robot.collector.deposit();
-            robot.transport.goHome();
+            if (foundApriltagScoreYellow) {
+                robot.autoScoreOnBackDrop();
+            }
         } else {
 
         }
