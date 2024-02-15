@@ -291,7 +291,7 @@ public class MM_Drivetrain {
         int propPos = visionPortal.propPosition();
 
         if ((propPos == 0 && MM_OpMode.leftOrRight == MM_OpMode.LEFT) || (propPos == 2 && MM_OpMode.leftOrRight == MM_OpMode.RIGHT)){  // away from truss
-            strafeInches(-8.5 * MM_OpMode.alliance, .7);
+            strafeInches(8.5 * MM_OpMode.alliance, .7);
             driveInches(-23, 0.5);
             driveInches(8, .7);
         } else if (propPos == 1){  // center
@@ -299,7 +299,7 @@ public class MM_Drivetrain {
             driveInches(8, 0.5);
         } else {  // right - by truss
             driveInches(-20, 0.5);
-            rotateToAngle(45 * MM_OpMode.alliance);
+            rotateToAngle(-45 * MM_OpMode.alliance);
             driveInches(-11, 0.5);
             driveInches(10, 0.5);
         }
