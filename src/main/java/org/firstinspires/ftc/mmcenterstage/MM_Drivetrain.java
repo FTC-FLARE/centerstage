@@ -45,10 +45,12 @@ public class MM_Drivetrain {
 
     public static double MAX_DETECT_ATTEMPTS = 500;
 
-    public final double WHEEL_DIAMETER = 4;
-    public final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
-    public final double TICKS_PER_REVOLUTION = 537.7; // for drivetrain only(5202-0002-0027 "753.2" TPR), change for the real robot ("537.7" TPR)
-    public final double TICKS_PER_INCH = TICKS_PER_REVOLUTION / WHEEL_CIRCUMFERENCE;
+    private final double WHEEL_DIAMETER = 4;
+    private final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
+    private final double TICKS_PER_REVOLUTION = 537.7; // for drivetrain only(5202-0002-0027 "753.2" TPR), change for the real robot ("537.7" TPR)
+    private final double TICKS_PER_INCH = TICKS_PER_REVOLUTION / WHEEL_CIRCUMFERENCE;
+
+    public final double BACKDROP_APRILTAG_DISTANCE = 6.8;
 
     private boolean isSlow = false;
     private boolean isKicking = false;
@@ -173,6 +175,10 @@ public class MM_Drivetrain {
             opMode.multipleTelemetry.update();
         }
         setDrivePowers(0);
+    }
+
+    public boolean driveToAprilTag(int tagToFind, double targetX){
+        return driveToAprilTag(tagToFind, targetX, BACKDROP_APRILTAG_DISTANCE, 0);
     }
 
     public boolean driveToAprilTag(int tagToFind, double targetX, double targetY, double targetYaw) {
@@ -344,6 +350,26 @@ public class MM_Drivetrain {
         }
         return propPos;
     }
+
+    public int purplePixel(){
+        int propPos = visionPortal.propPosition();
+
+        if (propPos == 0){  // left - away from truss
+            strafeInches(8.5, .7);
+            driveInches(-23, 0.5);
+            driveInches(8, .7);
+        } else if (propPos == 1){  // center
+            driveInches(-32, 0.5);
+            driveInches(8, 0.5);
+        } else {  // right - by truss
+            driveInches(-20, 0.5);
+            rotateToAngle(-45);
+            driveInches(-11, 0.5);
+            driveInches(10, 0.5);
+        }
+        return propPos;
+    }
+
 
 
     private void setDriveMode(DcMotor.RunMode runToPosition) {

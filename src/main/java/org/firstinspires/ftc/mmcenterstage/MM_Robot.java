@@ -19,4 +19,11 @@ public class MM_Robot {
         lift = new MM_Lift(opMode);
         launcher = new MM_Launcher(opMode);
     }
+
+    public void autoScoreOnBackDrop(){
+        transport.runToScorePos();
+        collector.deposit();
+        transport.goHome();
+        drivetrain.driveInches(2, .4);
+    }
 }
