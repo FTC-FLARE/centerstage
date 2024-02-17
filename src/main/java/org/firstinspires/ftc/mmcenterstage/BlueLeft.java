@@ -15,6 +15,10 @@ public class BlueLeft extends MM_OpMode {
         int tagToFind = alliance == BLUE ? propPos + 1 : propPos + 4;
 
         robot.drivetrain.rotateToAngle(85 * alliance);
+
+        if (robot.drivetrain.visionPortal.getAprilTagInfo(tagToFind) == null){
+
+        }
         MM_OpMode.foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(tagToFind, targetX);
 
         if (MM_OpMode.foundApriltagScoreYellow) {

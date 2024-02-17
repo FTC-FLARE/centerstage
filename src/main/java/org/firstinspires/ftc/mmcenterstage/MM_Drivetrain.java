@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Config
 public class MM_Drivetrain {
@@ -44,6 +45,7 @@ public class MM_Drivetrain {
 
 
     public static double MAX_DETECT_ATTEMPTS = 500;
+    public static double MAX_EXPOSURE = 37;
 
     private final double WHEEL_DIAMETER = 4;
     private final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
@@ -64,14 +66,24 @@ public class MM_Drivetrain {
     private double brPower = 0;
 
     private int detectAttemptCount = 0;
+    public int currentExposure = 32;
+
     private double aprilTagErrorX = 0;
     private double aprilTagErrorY = 0;
     private double aprilTagErrorYaw = 0;
 
+    private double exposureIterator = 1;
+
+    private boolean increaseExposure = false;
+
+
+
     public MM_Drivetrain(MM_OpMode opMode) {
         this.opMode = opMode;
         init();
+
     }
+
 
     public void driveWithSticks() {
         double drivePower = -opMode.gamepad1.left_stick_y;
@@ -193,6 +205,7 @@ public class MM_Drivetrain {
         AprilTagDetection tagInfo = null;
 
         while (opMode.opModeIsActive() && keepGoing) {
+            opMode.multipleTelemetry.addData("current gain", visionPortal.gain.getGain());
             tagInfo = visionPortal.getAprilTagInfo(tagToFind);
 
             if (tagInfo != null) {
@@ -226,14 +239,28 @@ public class MM_Drivetrain {
             } else { //tag not found
                 opMode.multipleTelemetry.addLine("looking for tag");
                 detectAttemptCount++;
+
+                opMode.multipleTelemetry.addData("current exposure", currentExposure);
                 if(!iSawIt){
                     setDrivePowers(-.15);
+                }
+
+                if (currentExposure >= MAX_EXPOSURE){
+                    increaseExposure = false;
+                } else if (currentExposure < 2){
+                    increaseExposure = true;
+                }
+
+                if (detectAttemptCount % 1 == 0) {
+                    visionPortal.exposure.setExposure(increaseExposure ? (long) (currentExposure + exposureIterator) : (long) (currentExposure - exposureIterator), TimeUnit.MILLISECONDS);
+                    currentExposure = (int) (increaseExposure ? (currentExposure + exposureIterator) : (currentExposure - exposureIterator));
                 }
 
                 if (detectAttemptCount >= MAX_DETECT_ATTEMPTS) {//TODO if tag not found
                     setDrivePowers(0);
                     opMode.multipleTelemetry.addLine("lost aprilTag");
                     return false;
+
                     //driveToFindAprilTag(tagToFind);
                 }
                 opMode.sleep(2);

@@ -36,6 +36,9 @@ public class MM_VisionPortal {
     public AprilTagProcessor aprilTagProcessor;
     public TfodProcessor tfod;
     public VisionPortal visionPortal;
+    public ExposureControl exposure;
+    public GainControl gain;
+
 
     private static final String TFOD_MODEL_ASSET = "Random.tflite";
     public static int GAIN = 11;
@@ -50,6 +53,7 @@ public class MM_VisionPortal {
 
         initVisionPortal();
     }
+
 
     public int propPosition(){
         List <Recognition> recognitions = tfod.getRecognitions();
@@ -123,13 +127,10 @@ public class MM_VisionPortal {
         FtcDashboard.getInstance().startCameraStream(cameraStreamProcessor, 0);
 
         while (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) { }
+        exposure = visionPortal.getCameraControl(ExposureControl.class);
 
-       ExposureControl exposure = visionPortal.getCameraControl(ExposureControl.class);
-       exposure.setMode(ExposureControl.Mode.Manual);
-       exposure.setExposure(EXPOSURE, TimeUnit.MILLISECONDS);
+        gain = visionPortal.getCameraControl(GainControl.class);
 
-        GainControl gain = visionPortal.getCameraControl(GainControl.class);
-        gain.setGain(GAIN);
     }
 
     public static class CameraStreamProcessor implements VisionProcessor, CameraStreamSource {
