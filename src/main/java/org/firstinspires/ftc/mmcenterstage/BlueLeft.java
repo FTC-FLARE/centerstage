@@ -2,6 +2,8 @@ package org.firstinspires.ftc.mmcenterstage;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+
 @Autonomous(name = "Blue: Left", group = "Blue")
 public class BlueLeft extends MM_OpMode {
     @Override
@@ -15,10 +17,8 @@ public class BlueLeft extends MM_OpMode {
         int tagToFind = alliance == BLUE ? propPos + 1 : propPos + 4;
 
         robot.drivetrain.rotateToAngle(85 * alliance);
+        robot.drivetrain.visionPortal.exposure.setMode(ExposureControl.Mode.Manual);
 
-        if (robot.drivetrain.visionPortal.getAprilTagInfo(tagToFind) == null){
-
-        }
         MM_OpMode.foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(tagToFind, targetX);
 
         if (MM_OpMode.foundApriltagScoreYellow) {

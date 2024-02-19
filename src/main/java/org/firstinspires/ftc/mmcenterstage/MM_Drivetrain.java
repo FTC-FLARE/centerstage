@@ -196,6 +196,8 @@ public class MM_Drivetrain {
     public boolean driveToAprilTag(int tagToFind, double targetX, double targetY, double targetYaw) {
         setDriveMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
+        ElapsedTime refreshTime = new ElapsedTime();
+
         boolean iSawIt = false;
         boolean keepGoing = true;
         detectAttemptCount = 0;
@@ -245,17 +247,6 @@ public class MM_Drivetrain {
                     setDrivePowers(-.15);
                 }
 
-                if (currentExposure >= MAX_EXPOSURE){
-                    increaseExposure = false;
-                } else if (currentExposure < 2){
-                    increaseExposure = true;
-                }
-
-                if (detectAttemptCount % 1 == 0) {
-                    visionPortal.exposure.setExposure(increaseExposure ? (long) (currentExposure + exposureIterator) : (long) (currentExposure - exposureIterator), TimeUnit.MILLISECONDS);
-                    currentExposure = (int) (increaseExposure ? (currentExposure + exposureIterator) : (currentExposure - exposureIterator));
-                }
-
                 if (detectAttemptCount >= MAX_DETECT_ATTEMPTS) {//TODO if tag not found
                     setDrivePowers(0);
                     opMode.multipleTelemetry.addLine("lost aprilTag");
@@ -263,7 +254,19 @@ public class MM_Drivetrain {
 
                     //driveToFindAprilTag(tagToFind);
                 }
-                opMode.sleep(2);
+
+                refreshTime.reset();
+                while(opMode.opModeIsActive() && refreshTime.milliseconds() <= 2 && tagInfo == null){
+                    if (currentExposure >= MAX_EXPOSURE){
+                        increaseExposure = false;
+                    } else if (currentExposure < 2){
+                        increaseExposure = true;
+                    }
+
+                    visionPortal.exposure.setExposure(increaseExposure ? (long) (currentExposure + exposureIterator) : (long) (currentExposure - exposureIterator), TimeUnit.MILLISECONDS);
+                    currentExposure = (int) (increaseExposure ? (currentExposure + exposureIterator) : (currentExposure - exposureIterator));
+                    tagInfo = visionPortal.getAprilTagInfo(tagToFind);
+                }
             }
 
             opMode.multipleTelemetry.addData("errorY", aprilTagErrorY);
