@@ -6,7 +6,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 
 @Autonomous(name = "Red: Left", group = "Red")
 
-public class RedLeft extends MM_OpMode {
+public class RedLeft extends MM_Autos {
     @Override
     public void runProcedures() {
         alliance = RED;

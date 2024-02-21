@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.mmcenterstage;
 
+import static org.firstinspires.ftc.mmcenterstage.MM_Autos.leftOrRight;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
@@ -69,7 +71,7 @@ public class MM_VisionPortal {
                 }
             }
         }
-        return Math.abs(MM_OpMode.leftOrRight - 1);
+        return Math.abs(leftOrRight - 1);
     }
 
 
@@ -130,6 +132,7 @@ public class MM_VisionPortal {
         exposure = visionPortal.getCameraControl(ExposureControl.class);
 
         gain = visionPortal.getCameraControl(GainControl.class);
+
 
     }
 

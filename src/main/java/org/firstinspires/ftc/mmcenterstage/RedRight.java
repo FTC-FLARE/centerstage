@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 
 @Autonomous(name = "Red: Right", group = "Red")
-public class RedRight extends MM_OpMode {
+public class RedRight extends MM_Autos {
     @Override
     public void runProcedures() {
         alliance = RED;
@@ -20,9 +20,9 @@ public class RedRight extends MM_OpMode {
 
         int targetX = propPos == 2 ? -1 : 1;
         int tagToFind = alliance == BLUE ? propPos + 1 : propPos + 4;
-        MM_OpMode.foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(tagToFind, targetX);
+        foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(tagToFind, targetX);
 
-        if (MM_OpMode.foundApriltagScoreYellow) {
+        if (foundApriltagScoreYellow) {
             robot.autoScoreOnBackDrop();
         }
 

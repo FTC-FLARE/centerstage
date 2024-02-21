@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.mmcenterstage;
 
+import static org.firstinspires.ftc.mmcenterstage.MM_Autos.LEFT;
+import static org.firstinspires.ftc.mmcenterstage.MM_Autos.RIGHT;
+import static org.firstinspires.ftc.mmcenterstage.MM_Autos.leftOrRight;
+import static org.firstinspires.ftc.mmcenterstage.MM_Autos.propPos;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -323,10 +328,10 @@ public class MM_Drivetrain {
     }
 
     public int purplePixel(){
-        int propPos = visionPortal.propPosition();
+        propPos = visionPortal.propPosition();
 
-        if ((propPos == 0 && MM_OpMode.leftOrRight == MM_OpMode.LEFT) || (propPos == 2 && MM_OpMode.leftOrRight == MM_OpMode.RIGHT)){  // away from truss
-            strafeInches(-8.5 * MM_OpMode.leftOrRight, .7);
+        if ((propPos == 0 && leftOrRight == LEFT) || (propPos == 2 && leftOrRight == RIGHT)){  // away from truss
+            strafeInches(-8.5 * leftOrRight, .7);
             driveInches(-23, 0.6);
             driveInches(8, .7);
         } else if (propPos == 1){  // center
@@ -334,7 +339,7 @@ public class MM_Drivetrain {
             driveInches(8, 0.7);
         } else {  // by truss
             driveInches(-20, 0.6);
-            rotateToAngle(45 * MM_OpMode.leftOrRight);
+            rotateToAngle(45 * leftOrRight);
             driveInches(-11, 0.5);
             driveInches(10, 0.7);
         }
