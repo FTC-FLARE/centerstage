@@ -20,6 +20,7 @@
             <goBILDA5202SeriesMotor name="brMotor" port="3" />
             <RevTouchSensor name="bottomLimit" port="1" />
             <ControlHubImuBHI260AP name="imu" port="0" bus="0" />
+            <AnalogInput name="sonarLeft" port="0" />
            <!-- <REV_VL53L0X_RANGE_SENSOR name="boxSensor" port="1" bus="0"/ -->
         </LynxModule>
     </LynxUsbDevice>

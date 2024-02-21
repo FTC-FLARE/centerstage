@@ -16,7 +16,7 @@ public class RedRight extends MM_OpMode {
         robot.drivetrain.visionPortal.exposure.setMode(ExposureControl.Mode.Manual);
         //robot.drivetrain.visionPortal.gain.setGain(11);
 
-        robot.drivetrain.rotateToAngle(85 * alliance);
+        robot.drivetrain.rotateToAngle(85 * leftOrRight);
 
         int targetX = propPos == 2 ? -1 : 1;
         int tagToFind = alliance == BLUE ? propPos + 1 : propPos + 4;

@@ -22,7 +22,7 @@ public class MM_Lift {
     }
 
     public void liftLift() {
-            if (opMode.gamepad1.right_bumper ){//&& MM_OpMode.matchTimer.time() > 87) {
+            if (opMode.gamepad1.right_bumper && MM_OpMode.matchTimer.time() > 87) {
                 liftRelease.setPosition(LIFT_RELEASE_POS);
                 liftIsVertical = true;
             }

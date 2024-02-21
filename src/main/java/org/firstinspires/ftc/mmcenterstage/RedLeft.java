@@ -17,7 +17,7 @@ public class RedLeft extends MM_OpMode {
         int targetX = propPos == 2? -1: 1;
         int tagToFind = alliance == BLUE? propPos + 1: propPos + 4;
 
-        robot.drivetrain.rotateToAngle(85 * alliance);
+        robot.drivetrain.rotateToAngle(85 * leftOrRight);
         robot.drivetrain.visionPortal.exposure.setMode(ExposureControl.Mode.Manual);
 
         //MM_OpMode.foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(tagToFind, targetX);
@@ -28,7 +28,7 @@ public class RedLeft extends MM_OpMode {
             robot.drivetrain.rotateToAngle(-90);
             robot.drivetrain.driveInches(-76, .5);
             robot.drivetrain.strafeInches(22, .5);
-            robot.drivetrain.driveToAprilTag(2, 0, 6.8, 0);
+            foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(5, 0);
 
             if (foundApriltagScoreYellow) {
                 robot.autoScoreOnBackDrop();
@@ -38,7 +38,7 @@ public class RedLeft extends MM_OpMode {
             robot.drivetrain.strafeInches(-9.5, .5);
             robot.drivetrain.driveInches(-76, .5);
             robot.drivetrain.strafeInches(22, .5);
-            robot.drivetrain.driveToAprilTag(1, 0, 6.8, 0);
+            foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(4, 0);
 
             if (foundApriltagScoreYellow) {
                 robot.autoScoreOnBackDrop();

@@ -57,7 +57,7 @@ public class AprilTagTest extends LinearOpMode {
                 telemetry.addData("current gain", visionPortal.getCameraControl(GainControl.class).getGain());
                 telemetry.update();
 
-                //telemetryAprilTag();
+                telemetryAprilTag();
 
                 // Push telemetry to the Driver Station.
                 //telemetry.update();

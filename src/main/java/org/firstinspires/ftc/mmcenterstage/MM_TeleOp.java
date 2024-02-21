@@ -20,6 +20,9 @@ public class MM_TeleOp extends MM_OpMode {
             previousGamepad2.copy(currentGamepad2);
             currentGamepad2.copy(gamepad2);
 
+
+            multipleTelemetry.addData("Distance", robot.drivetrain.getDistance());
+
             telemetry.update();
             multipleTelemetry.update();
         }

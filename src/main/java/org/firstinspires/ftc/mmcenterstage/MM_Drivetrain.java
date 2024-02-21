@@ -2,6 +2,7 @@ package org.firstinspires.ftc.mmcenterstage;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -22,6 +23,7 @@ public class MM_Drivetrain {
     private DcMotorEx blMotor = null;
     private DcMotorEx brMotor = null;
     private Servo pixelKicker = null;
+    private AnalogInput sonarLeft = null;
     public MM_VisionPortal visionPortal;
     private IMU imu;
 
@@ -84,6 +86,9 @@ public class MM_Drivetrain {
 
     }
 
+    public double getDistance(){ //TODO remove getDistance from here and tele-op
+        return sonarLeft.getVoltage() * 87.13491 - 12.0424;
+    }
 
     public void driveWithSticks() {
         double drivePower = -opMode.gamepad1.left_stick_y;
@@ -321,17 +326,17 @@ public class MM_Drivetrain {
         int propPos = visionPortal.propPosition();
 
         if ((propPos == 0 && MM_OpMode.leftOrRight == MM_OpMode.LEFT) || (propPos == 2 && MM_OpMode.leftOrRight == MM_OpMode.RIGHT)){  // away from truss
-            strafeInches(8.5 * MM_OpMode.alliance, .7);
-            driveInches(-23, 0.5);
+            strafeInches(-8.5 * MM_OpMode.leftOrRight, .7);
+            driveInches(-23, 0.6);
             driveInches(8, .7);
         } else if (propPos == 1){  // center
-            driveInches(-32, 0.5);
-            driveInches(8, 0.5);
-        } else {  // right - by truss
-            driveInches(-20, 0.5);
-            rotateToAngle(-45 * MM_OpMode.alliance);
+            driveInches(-32, 0.6);
+            driveInches(8, 0.7);
+        } else {  // by truss
+            driveInches(-20, 0.6);
+            rotateToAngle(45 * MM_OpMode.leftOrRight);
             driveInches(-11, 0.5);
-            driveInches(10, 0.5);
+            driveInches(10, 0.7);
         }
         return propPos;
     }
@@ -402,6 +407,8 @@ public class MM_Drivetrain {
 
         pixelKicker = opMode.hardwareMap.get(Servo.class, "pixelKicker");
         pixelKicker.setPosition(1);
+
+        sonarLeft = opMode.hardwareMap.get(AnalogInput.class, "sonarLeft"); //TODO remove sonarLeft from teleop
 
         if (!opMode.getClass().getSimpleName().equals("MM_TeleOp") ) {
             initExtraForAutos();
