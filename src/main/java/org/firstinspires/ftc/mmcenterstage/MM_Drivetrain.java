@@ -2,6 +2,7 @@ package org.firstinspires.ftc.mmcenterstage;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -11,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Config
 public class MM_Drivetrain {
@@ -21,6 +23,7 @@ public class MM_Drivetrain {
     private DcMotorEx blMotor = null;
     private DcMotorEx brMotor = null;
     private Servo pixelKicker = null;
+    private AnalogInput sonarLeft = null;
     public MM_VisionPortal visionPortal;
     private IMU imu;
 
@@ -44,6 +47,7 @@ public class MM_Drivetrain {
 
 
     public static double MAX_DETECT_ATTEMPTS = 500;
+    public static double MAX_EXPOSURE = 37;
 
     private final double WHEEL_DIAMETER = 4;
     private final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
@@ -64,13 +68,26 @@ public class MM_Drivetrain {
     private double brPower = 0;
 
     private int detectAttemptCount = 0;
+    public int currentExposure = 32;
+
     private double aprilTagErrorX = 0;
     private double aprilTagErrorY = 0;
     private double aprilTagErrorYaw = 0;
 
+    private double exposureIterator = 1;
+
+    private boolean increaseExposure = false;
+
+
+
     public MM_Drivetrain(MM_OpMode opMode) {
         this.opMode = opMode;
         init();
+
+    }
+
+    public double getDistance(){ //TODO remove getDistance from here and tele-op
+        return sonarLeft.getVoltage() * 87.13491 - 12.0424;
     }
 
     public void driveWithSticks() {
@@ -184,6 +201,8 @@ public class MM_Drivetrain {
     public boolean driveToAprilTag(int tagToFind, double targetX, double targetY, double targetYaw) {
         setDriveMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
+        ElapsedTime refreshTime = new ElapsedTime();
+
         boolean iSawIt = false;
         boolean keepGoing = true;
         detectAttemptCount = 0;
@@ -193,6 +212,7 @@ public class MM_Drivetrain {
         AprilTagDetection tagInfo = null;
 
         while (opMode.opModeIsActive() && keepGoing) {
+            opMode.multipleTelemetry.addData("current gain", visionPortal.gain.getGain());
             tagInfo = visionPortal.getAprilTagInfo(tagToFind);
 
             if (tagInfo != null) {
@@ -226,6 +246,8 @@ public class MM_Drivetrain {
             } else { //tag not found
                 opMode.multipleTelemetry.addLine("looking for tag");
                 detectAttemptCount++;
+
+                opMode.multipleTelemetry.addData("current exposure", currentExposure);
                 if(!iSawIt){
                     setDrivePowers(-.15);
                 }
@@ -234,9 +256,22 @@ public class MM_Drivetrain {
                     setDrivePowers(0);
                     opMode.multipleTelemetry.addLine("lost aprilTag");
                     return false;
+
                     //driveToFindAprilTag(tagToFind);
                 }
-                opMode.sleep(2);
+
+                refreshTime.reset();
+                while(opMode.opModeIsActive() && refreshTime.milliseconds() <= 2 && tagInfo == null){
+                    if (currentExposure >= MAX_EXPOSURE){
+                        increaseExposure = false;
+                    } else if (currentExposure < 2){
+                        increaseExposure = true;
+                    }
+
+                    visionPortal.exposure.setExposure(increaseExposure ? (long) (currentExposure + exposureIterator) : (long) (currentExposure - exposureIterator), TimeUnit.MILLISECONDS);
+                    currentExposure = (int) (increaseExposure ? (currentExposure + exposureIterator) : (currentExposure - exposureIterator));
+                    tagInfo = visionPortal.getAprilTagInfo(tagToFind);
+                }
             }
 
             opMode.multipleTelemetry.addData("errorY", aprilTagErrorY);
@@ -291,17 +326,17 @@ public class MM_Drivetrain {
         int propPos = visionPortal.propPosition();
 
         if ((propPos == 0 && MM_OpMode.leftOrRight == MM_OpMode.LEFT) || (propPos == 2 && MM_OpMode.leftOrRight == MM_OpMode.RIGHT)){  // away from truss
-            strafeInches(-8.5 * MM_OpMode.alliance, .7);
-            driveInches(-23, 0.5);
+            strafeInches(-8.5 * MM_OpMode.leftOrRight, .7);
+            driveInches(-23, 0.6);
             driveInches(8, .7);
         } else if (propPos == 1){  // center
-            driveInches(-32, 0.5);
-            driveInches(8, 0.5);
-        } else {  // right - by truss
-            driveInches(-20, 0.5);
-            rotateToAngle(45 * MM_OpMode.alliance);
+            driveInches(-32, 0.6);
+            driveInches(8, 0.7);
+        } else {  // by truss
+            driveInches(-20, 0.6);
+            rotateToAngle(45 * MM_OpMode.leftOrRight);
             driveInches(-11, 0.5);
-            driveInches(10, 0.5);
+            driveInches(10, 0.7);
         }
         return propPos;
     }
@@ -372,6 +407,8 @@ public class MM_Drivetrain {
 
         pixelKicker = opMode.hardwareMap.get(Servo.class, "pixelKicker");
         pixelKicker.setPosition(1);
+
+        sonarLeft = opMode.hardwareMap.get(AnalogInput.class, "sonarLeft"); //TODO remove sonarLeft from teleop
 
         if (!opMode.getClass().getSimpleName().equals("MM_TeleOp") ) {
             initExtraForAutos();

@@ -13,7 +13,7 @@ public class MM_Collector {
     private CRServo innertakeStar = null;
 
     public static double RIGHT_WHEEL_POWER = 1;
-    public static double LEFT_WHEEL_POWER = 0.65;
+    public static double LEFT_WHEEL_POWER = 1;
     public static double INNERTAKE_STAR_POWER = 1;
 
     public MM_Collector(MM_OpMode opMode) {

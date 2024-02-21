@@ -9,6 +9,8 @@ import com.acmerobotics.dashboard.config.Config;
 import org.firstinspires.ftc.robotcore.external.function.Consumer;
 import org.firstinspires.ftc.robotcore.external.function.Continuation;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
@@ -24,6 +26,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Config
@@ -33,10 +36,13 @@ public class MM_VisionPortal {
     public AprilTagProcessor aprilTagProcessor;
     public TfodProcessor tfod;
     public VisionPortal visionPortal;
+    public ExposureControl exposure;
+    public GainControl gain;
+
 
     private static final String TFOD_MODEL_ASSET = "Random.tflite";
-    public static int GAIN = 255;
-    public static int EXPOSURE = 15;
+    public static int GAIN = 11;
+    public static int EXPOSURE = 32;
 
     private static final String[] LABELS = {
             "", "", "", "", "", "", "", "", "", "", "prop", "prop"
@@ -47,6 +53,7 @@ public class MM_VisionPortal {
 
         initVisionPortal();
     }
+
 
     public int propPosition(){
         List <Recognition> recognitions = tfod.getRecognitions();
@@ -120,13 +127,10 @@ public class MM_VisionPortal {
         FtcDashboard.getInstance().startCameraStream(cameraStreamProcessor, 0);
 
         while (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) { }
+        exposure = visionPortal.getCameraControl(ExposureControl.class);
 
-//       ExposureControl exposure = visionPortal.getCameraControl(ExposureControl.class);
-//       exposure.setMode(ExposureControl.Mode.Manual);
-//       exposure.setExposure(EXPOSURE, TimeUnit.MILLISECONDS);
-//
-//        GainControl gain = visionPortal.getCameraControl(GainControl.class);
-//        gain.setGain(GAIN);
+        gain = visionPortal.getCameraControl(GainControl.class);
+
     }
 
     public static class CameraStreamProcessor implements VisionProcessor, CameraStreamSource {
