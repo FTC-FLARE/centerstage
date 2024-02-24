@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 public class MM_Collector {
     private final MM_OpMode opMode;
 
-    private CRServo rightWheel = null;
     private DcMotorEx leftWheel = null;
     private CRServo innertakeStar = null;
 
@@ -24,15 +23,14 @@ public class MM_Collector {
     public void control() {
         if (opMode.gamepad2.left_bumper) {
             leftWheel.setPower(LEFT_WHEEL_POWER);
-            rightWheel.setPower(RIGHT_WHEEL_POWER);
             innertakeStar.setPower(INNERTAKE_STAR_POWER);
         } else if (opMode.gamepad2.left_trigger > 0.1) {
             leftWheel.setPower(-LEFT_WHEEL_POWER);
-            rightWheel.setPower(-RIGHT_WHEEL_POWER);
-            innertakeStar.setPower(opMode.robot.transport.atBottom() ? -INNERTAKE_STAR_POWER : -.4);
+            innertakeStar.setPower(opMode.robot.transport.atBottom() ? -INNERTAKE_STAR_POWER : -.2);
         } else {
             leftWheel.setPower(0);
-            rightWheel.setPower(0);
+
+
             innertakeStar.setPower(0);
         }
     }
@@ -44,7 +42,6 @@ public class MM_Collector {
     }
 
     public void init() {
-        rightWheel = opMode.hardwareMap.get(CRServo.class, "rightWheel");
         leftWheel = opMode.hardwareMap.get(DcMotorEx.class, "leftWheel");
         innertakeStar = opMode.hardwareMap.get(CRServo.class, "innerWheel");
 

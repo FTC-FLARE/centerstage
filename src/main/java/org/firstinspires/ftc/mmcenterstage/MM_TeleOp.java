@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.mmcenterstage;
 
+import static org.firstinspires.ftc.mmcenterstage.MM_Drivetrain.sonarLeft;
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Tele-op", group = "mm")
@@ -21,7 +23,7 @@ public class MM_TeleOp extends MM_OpMode {
             currentGamepad2.copy(gamepad2);
 
 
-            multipleTelemetry.addData("Distance", robot.drivetrain.getDistance());
+            multipleTelemetry.addData("Distance", robot.drivetrain.getDistance(sonarLeft));
 
             telemetry.update();
             multipleTelemetry.update();

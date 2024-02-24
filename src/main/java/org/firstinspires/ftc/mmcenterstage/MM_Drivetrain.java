@@ -28,7 +28,8 @@ public class MM_Drivetrain {
     private DcMotorEx blMotor = null;
     private DcMotorEx brMotor = null;
     private Servo pixelKicker = null;
-    private AnalogInput sonarLeft = null;
+    public static AnalogInput sonarLeft = null;
+    public static AnalogInput sonarRight = null;
     public MM_VisionPortal visionPortal;
     private IMU imu;
 
@@ -50,6 +51,7 @@ public class MM_Drivetrain {
     public static double APRIL_TAG_ERROR_THRESHOLD = 2;
     public static double APRIL_TAG_ERROR_THRESHOLD_YAW = 7;
 
+    private static double DISTANCE_THRESHOLD = 1;
 
     public static double MAX_DETECT_ATTEMPTS = 500;
     public static double MAX_EXPOSURE = 37;
@@ -91,8 +93,8 @@ public class MM_Drivetrain {
 
     }
 
-    public double getDistance(){ //TODO remove getDistance from here and tele-op
-        return sonarLeft.getVoltage() * 87.13491 - 12.0424;
+    public double getDistance(AnalogInput rightLeft){ //TODO remove getDistance from here and tele-op
+        return rightLeft.getVoltage() * 87.13491 - 12.0424;
     }
 
     public void driveWithSticks() {
@@ -232,14 +234,6 @@ public class MM_Drivetrain {
                 strafePower = aprilTagErrorX * STRAFE_P_COEFF * MAX_DRIVE_POWER;
                 rotatePower = aprilTagErrorYaw * APRIL_TAG_TURN_P_COEFF * MAX_DRIVE_POWER;
 
-                flPower = drivePower + strafePower + rotatePower;
-                frPower = drivePower - strafePower - rotatePower;
-                blPower = drivePower - strafePower + rotatePower;
-                brPower = drivePower + strafePower - rotatePower;
-
-                normalizeForMin(MIN_DRIVE_POWER);
-                normalize(MAX_DRIVE_POWER);
-
                 setDrivePowers();
 
                 if (Math.abs(aprilTagErrorY) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorX) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorYaw) <= APRIL_TAG_ERROR_THRESHOLD_YAW) {
@@ -325,6 +319,26 @@ public class MM_Drivetrain {
 
     public void cruiseUnderTruss(){   //DO NOT RENAME; IF RENAMED THIS WILL BECOME A WAR!!!
     // TODO cruise under truss
+    }
+
+    public void strafeToDistance (AnalogInput rightLeft, double target){
+        double power = 0;
+        double error = target - getDistance(rightLeft);
+
+        while (Math.abs(error) >= DISTANCE_THRESHOLD){
+            power = error * STRAFE_P_COEFF * MAX_DRIVE_POWER;
+
+            flPower = power;
+            frPower = -power;
+            blPower = -power;
+            brPower = power;
+
+            normalizeForMin(MIN_DRIVE_POWER);
+            normalize(MAX_DRIVE_POWER);
+
+            error = target - getDistance(rightLeft);
+        }
+
     }
 
     public int purplePixel(){
@@ -414,6 +428,8 @@ public class MM_Drivetrain {
         pixelKicker.setPosition(1);
 
         sonarLeft = opMode.hardwareMap.get(AnalogInput.class, "sonarLeft"); //TODO remove sonarLeft from teleop
+
+        sonarRight = opMode.hardwareMap.get(AnalogInput.class, "sonarRight"); //TODO remove sonarLeft from teleop
 
         if (!opMode.getClass().getSimpleName().equals("MM_TeleOp") ) {
             initExtraForAutos();

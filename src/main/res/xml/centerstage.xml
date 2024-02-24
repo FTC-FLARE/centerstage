@@ -6,7 +6,7 @@
             <NeveRest60Gearmotor name="mtrBoxFlip" port="1" />
             <TetrixMotor name="leftWheel" port="2" />
             <goBILDA5202SeriesMotor name="slide" port="3" />
-            <ContinuousRotationServo name="rightWheel" port="0" />
+            <Servo name="droneLock" port="0" />
             <ContinuousRotationServo name="innerWheel" port="1" />
             <Servo name="droneLift" port="2" />
             <Servo name="liftRelease" port="3" />
@@ -21,6 +21,7 @@
             <RevTouchSensor name="bottomLimit" port="1" />
             <ControlHubImuBHI260AP name="imu" port="0" bus="0" />
             <AnalogInput name="sonarLeft" port="0" />
+            <AnalogInput name="sonarRight" port="2"/>
            <!-- <REV_VL53L0X_RANGE_SENSOR name="boxSensor" port="1" bus="0"/ -->
         </LynxModule>
     </LynxUsbDevice>
