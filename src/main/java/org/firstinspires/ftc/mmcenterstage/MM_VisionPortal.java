@@ -3,6 +3,7 @@ package org.firstinspires.ftc.mmcenterstage;
 import static org.firstinspires.ftc.mmcenterstage.MM_Autos.leftOrRight;
 
 import android.graphics.Bitmap;
+import android.graphics.Camera;
 import android.graphics.Canvas;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -89,6 +90,7 @@ public class MM_VisionPortal {
 
     public AprilTagDetection getAprilTagInfo(int id) {
         List<AprilTagDetection> currentDetections = aprilTagProcessor.getDetections();
+
 
         for (AprilTagDetection detection : currentDetections) {
             if (opMode.opModeInInit()) {
