@@ -97,7 +97,7 @@ public class MM_Autos extends MM_OpMode {
         if (startingPos == AUDIENCE) {
             robot.drivetrain.driveToAprilTag(tagToFindOnWall, -9.25, 25.3, 0);
         } else {
-            foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(targetX, tagToFindOnBackdrop);
+            foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(tagToFindOnBackdrop, targetX);
             if (foundApriltagScoreYellow) {
                 robot.autoScoreOnBackDrop();
             }
@@ -113,6 +113,4 @@ public class MM_Autos extends MM_OpMode {
         robot.drivetrain.rotateToAngle(-85 * leftOrRight);
         robot.drivetrain.visionPortal.exposure.setMode(ExposureControl.Mode.Manual);
     }
-
-
 }
