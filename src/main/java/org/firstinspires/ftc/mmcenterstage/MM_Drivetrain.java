@@ -234,6 +234,14 @@ public class MM_Drivetrain {
                 strafePower = aprilTagErrorX * STRAFE_P_COEFF * MAX_DRIVE_POWER;
                 rotatePower = aprilTagErrorYaw * APRIL_TAG_TURN_P_COEFF * MAX_DRIVE_POWER;
 
+                flPower = drivePower + strafePower + rotatePower;
+                frPower = drivePower - strafePower - rotatePower;
+                blPower = drivePower - strafePower + rotatePower;
+                brPower = drivePower + strafePower - rotatePower;
+
+                normalizeForMin(MIN_DRIVE_POWER);
+                normalize(MAX_DRIVE_POWER);
+
                 setDrivePowers();
 
                 if (Math.abs(aprilTagErrorY) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorX) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorYaw) <= APRIL_TAG_ERROR_THRESHOLD_YAW) {

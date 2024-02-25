@@ -7,12 +7,12 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 @Autonomous(name = "Autos", group = "MM")
 public class MM_Autos extends MM_OpMode {
 
-    public static final int LEFT = -1;
-    public static final int RIGHT = 1;
-    public static int leftOrRight = RIGHT;
     public static final int RED = -1;
     public static final int BLUE = 1;
     public static int alliance = BLUE;
+    public static final int LEFT = -1;
+    public static final int RIGHT = 1;
+    public static int leftOrRight = LEFT;
     public static final int BACKDROP = -1;
     public static final int AUDIENCE = 1;
 
@@ -92,11 +92,12 @@ public class MM_Autos extends MM_OpMode {
 
         propPos = robot.drivetrain.purplePixel();
 
-        prepareForAprilTag();
+        // prepareForAprilTag();
 
         if (startingPos == AUDIENCE) {
-            robot.drivetrain.driveToAprilTag(tagToFindOnWall, -9.25, 25.3, 0);
+            // robot.drivetrain.driveToAprilTag(tagToFindOnWall, -9.25, 25.3, 0);
         } else {
+            prepareForAprilTag();  // temporarily only do on backdrop side
             foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(tagToFindOnBackdrop, targetX);
             if (foundApriltagScoreYellow) {
                 robot.autoScoreOnBackDrop();
@@ -107,6 +108,7 @@ public class MM_Autos extends MM_OpMode {
 
     public void prepareForAprilTag() {
         targetX = propPos == 2 ? -1 : 1;
+        targetX = 0; // ToDo temporary - move camera back for non-0 x target
         tagToFindOnBackdrop = alliance == BLUE ? propPos + 1 : propPos + 4;
         tagToFindOnWall = alliance == BLUE ? 10 : 8;
 
