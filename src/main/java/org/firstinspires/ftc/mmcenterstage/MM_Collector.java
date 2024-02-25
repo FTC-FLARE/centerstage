@@ -36,7 +36,7 @@ public class MM_Collector {
     }
 
     public void deposit() {
-        innertakeStar.setPower(-.2);
+        innertakeStar.setPower(-.13);
         opMode.sleep(2000);
         innertakeStar.setPower(0);
     }
