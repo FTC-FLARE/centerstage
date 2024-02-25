@@ -93,8 +93,8 @@ public class MM_Drivetrain {
 
     }
 
-    public double getDistance(AnalogInput rightLeft){ //TODO remove getDistance from here and tele-op
-        return rightLeft.getVoltage() * 87.13491 - 12.0424;
+    public double  getDistance(int rightLeft){ //TODO remove getDistance from here and tele-op
+        return ((rightLeft == 1? sonarLeft.getVoltage(): sonarRight.getVoltage()) * 87.13491 - 12.0424);
     }
 
     public void driveWithSticks() {
@@ -329,11 +329,11 @@ public class MM_Drivetrain {
     // TODO cruise under truss
     }
 
-    public void strafeToDistance (AnalogInput rightLeft, double target){
+    public void strafeToDistance (int rightLeft, double target){
         double power = 0;
-        double error = target - getDistance(rightLeft);
+        double error = (target - getDistance(rightLeft)) * rightLeft;
 
-        while (Math.abs(error) >= DISTANCE_THRESHOLD){
+        while (Math.abs(error) >= DISTANCE_THRESHOLD && opMode.opModeIsActive()){
             power = error * STRAFE_P_COEFF * MAX_DRIVE_POWER;
 
             flPower = power;
@@ -344,8 +344,15 @@ public class MM_Drivetrain {
             normalizeForMin(MIN_DRIVE_POWER);
             normalize(MAX_DRIVE_POWER);
 
-            error = target - getDistance(rightLeft);
+            setDrivePowers();
+
+            error = (target - getDistance(rightLeft) * rightLeft);
+
+            opMode.multipleTelemetry.addData("distance error", error);
+            opMode.multipleTelemetry.update();
         }
+
+        setDrivePowers(0);
 
     }
 
