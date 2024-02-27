@@ -186,6 +186,21 @@ public class MM_Drivetrain {
         setDrivePowers(power);
         while (opMode.opModeIsActive() && (flMotor.isBusy() || frMotor.isBusy())) { }
     }
+    public void strafeInchesAndLowerSlide(double inches, double power) {
+        int ticks = (int) (TICKS_PER_INCH * (inches * 1.23)); // multiplying to account for slippage
+
+        flMotor.setTargetPosition(ticks + flMotor.getCurrentPosition());
+        frMotor.setTargetPosition(-ticks + frMotor.getCurrentPosition());
+        blMotor.setTargetPosition(-ticks + blMotor.getCurrentPosition());
+        brMotor.setTargetPosition(ticks + brMotor.getCurrentPosition());
+
+        setDriveMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        setDrivePowers(power);
+        while (opMode.opModeIsActive() && (flMotor.isBusy() || frMotor.isBusy())) {
+            opMode.robot.transport.goHome();
+        }
+    }
 
     public void rotateToAngle(int targetAngle) {
         setDriveMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
@@ -332,11 +347,11 @@ public class MM_Drivetrain {
     }
     public void park (int propPos) {
         if (propPos == 0) {
-            strafeInches(-31, .3);
+            strafeInchesAndLowerSlide(-31, .3);
         } else if (propPos == 1) {
-            strafeInches(-24, .3);
+            strafeInchesAndLowerSlide(-24, .3);
         } else {
-            strafeInches(31, .3);
+            strafeInchesAndLowerSlide(31, .3);
         }
         driveInches(-12, .3);
     }
