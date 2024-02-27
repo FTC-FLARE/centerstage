@@ -155,13 +155,17 @@ public class MM_Transport {
 
     public void goHome() {
         boxFlip.setTargetPosition(0);
-        while (boxFlip.isBusy()) {
+        if(bottomLimit.isPressed()) {
+            boxFlip.setPower(0);
+            slide.setPower(0);
+        } else if (boxIsDown()) {
+                slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+                slide.setPower(slide.getCurrentPosition() < SLIDE_SLOW_DOWN_TICKS ? SLIDE_HOME_POWER_SLOW : SLIDE_HOME_POWER);
         }
-        slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        slide.setPower(slide.getCurrentPosition() < SLIDE_SLOW_DOWN_TICKS ? SLIDE_HOME_POWER_SLOW : SLIDE_HOME_POWER);
-        while (!bottomLimit.isPressed()) {
-        }
-        slide.setPower(0);
+    }
+
+    public boolean boxIsDown(){
+        return !boxFlip.isBusy();
     }
 
     public void init() {

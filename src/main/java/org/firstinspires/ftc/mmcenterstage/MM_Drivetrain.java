@@ -157,6 +157,22 @@ public class MM_Drivetrain {
         while(opMode.opModeIsActive() && (flMotor.isBusy() || brMotor.isBusy())){ }
     }
 
+    public void driveInchesAndLowerSlide(double inches, double power){
+        int ticks = (int) (TICKS_PER_INCH * inches);
+
+        flMotor.setTargetPosition(flMotor.getCurrentPosition() + ticks);
+        frMotor.setTargetPosition(frMotor.getCurrentPosition() + ticks);
+        blMotor.setTargetPosition(blMotor.getCurrentPosition() + ticks);
+        brMotor.setTargetPosition(brMotor.getCurrentPosition() + ticks);
+
+        setDriveMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        setDrivePowers(power);
+        while(opMode.opModeIsActive() && (flMotor.isBusy() || brMotor.isBusy())){
+            opMode.robot.transport.goHome();
+        }
+    }
+
     public void strafeInches(double inches, double power) {
         int ticks = (int) (TICKS_PER_INCH * (inches * 1.23)); // multiplying to account for slippage
 

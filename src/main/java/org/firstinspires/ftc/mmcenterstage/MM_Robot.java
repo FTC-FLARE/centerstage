@@ -31,8 +31,8 @@ public class MM_Robot {
     public void autoScoreOnBackDrop() {
         transport.runToScorePos();
         collector.deposit();
-        transport.goHome();
-        drivetrain.driveInches(2, .4);
+//        transport.goHome();
+        drivetrain.driveInchesAndLowerSlide(2, .4);
     }
 
     public void endGameControl() {
