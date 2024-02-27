@@ -49,7 +49,7 @@ public class MM_Drivetrain {
     public static double HEADING_ERROR_THRESHOLD = 2;
 
     public static double APRIL_TAG_ERROR_THRESHOLD = 2;
-    public static double APRIL_TAG_ERROR_THRESHOLD_YAW = 7;
+    public static double APRIL_TAG_ERROR_THRESHOLD_YAW = 6;
 
     private static double DISTANCE_THRESHOLD = 1;
 
@@ -61,7 +61,7 @@ public class MM_Drivetrain {
     private final double TICKS_PER_REVOLUTION = 537.7; // for drivetrain only(5202-0002-0027 "753.2" TPR), change for the real robot ("537.7" TPR)
     private final double TICKS_PER_INCH = TICKS_PER_REVOLUTION / WHEEL_CIRCUMFERENCE;
 
-    public final double BACKDROP_APRILTAG_DISTANCE = 6.8;
+    public final double BACKDROP_APRILTAG_DISTANCE = 7.3;
 
     private boolean isSlow = false;
     private boolean isKicking = false;
@@ -202,7 +202,7 @@ public class MM_Drivetrain {
     }
 
     public boolean driveToAprilTag(int tagToFind, double targetX){
-        return driveToAprilTag(tagToFind, targetX, BACKDROP_APRILTAG_DISTANCE, 0);
+        return driveToAprilTag(tagToFind, targetX, BACKDROP_APRILTAG_DISTANCE, -3);
     }
 
     public boolean driveToAprilTag(int tagToFind, double targetX, double targetY, double targetYaw) {

@@ -108,7 +108,7 @@ public class MM_Autos extends MM_OpMode {
 
     public void prepareForAprilTag() {
         targetX = propPos == 2 ? -1 : 1;
-        targetX = 0; // ToDo temporary - move camera back for non-0 x target
+//        targetX = 0; // ToDo temporary - move camera back for non-0 x target
         tagToFindOnBackdrop = alliance == BLUE ? propPos + 1 : propPos + 4;
         tagToFindOnWall = alliance == BLUE ? 10 : 8;
 
