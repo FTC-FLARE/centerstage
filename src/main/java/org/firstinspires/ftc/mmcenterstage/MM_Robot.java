@@ -29,7 +29,6 @@ public class MM_Robot {
     }
 
     public void autoScoreOnBackDrop() {
-        transport.runToScorePos();
         collector.deposit();
 //        transport.goHome();
         drivetrain.driveInchesAndLowerSlide(2, .4);

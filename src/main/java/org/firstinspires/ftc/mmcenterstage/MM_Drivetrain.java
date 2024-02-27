@@ -250,6 +250,7 @@ public class MM_Drivetrain {
         AprilTagDetection tagInfo = null;
 
         while (opMode.opModeIsActive() && keepGoing) {
+            opMode.robot.transport.moveBucketToScore();
             opMode.multipleTelemetry.addData("current gain", visionPortal.gain.getGain());
             tagInfo = visionPortal.getAprilTagInfo(tagToFind);
 
@@ -278,6 +279,7 @@ public class MM_Drivetrain {
                 if (Math.abs(aprilTagErrorY) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorX) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorYaw) <= APRIL_TAG_ERROR_THRESHOLD_YAW) {
                     setDrivePowers(0);
                     opMode.multipleTelemetry.addLine("Goal reached.");
+                    opMode.multipleTelemetry.update();
                     return true;
                 }
 
@@ -288,11 +290,17 @@ public class MM_Drivetrain {
                 opMode.multipleTelemetry.addData("current exposure", currentExposure);
                 if(!iSawIt){
                     setDrivePowers(-.15);
+                } else if ( Math.abs(aprilTagErrorY) <= APRIL_TAG_ERROR_THRESHOLD) {
+                    setDrivePowers(0);
+                    opMode.multipleTelemetry.addLine("eh close enough");
+                    opMode.multipleTelemetry.update();
+                    return true;
                 }
 
                 if (detectAttemptCount >= MAX_DETECT_ATTEMPTS) {//TODO if tag not found
                     setDrivePowers(0);
                     opMode.multipleTelemetry.addLine("lost aprilTag");
+                    opMode.multipleTelemetry.update();
                     return false;
 
                     //driveToFindAprilTag(tagToFind);

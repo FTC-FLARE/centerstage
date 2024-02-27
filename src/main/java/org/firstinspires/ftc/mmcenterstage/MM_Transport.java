@@ -155,17 +155,32 @@ public class MM_Transport {
 
     public void goHome() {
         boxFlip.setTargetPosition(0);
-        if(bottomLimit.isPressed()) {
+        if (bottomLimit.isPressed()) {
             boxFlip.setPower(0);
             slide.setPower(0);
-        } else if (boxIsDown()) {
-                slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-                slide.setPower(slide.getCurrentPosition() < SLIDE_SLOW_DOWN_TICKS ? SLIDE_HOME_POWER_SLOW : SLIDE_HOME_POWER);
+        } else if (!boxFlip.isBusy()) {
+            slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+            slide.setPower(slide.getCurrentPosition() < SLIDE_SLOW_DOWN_TICKS ? SLIDE_HOME_POWER_SLOW : SLIDE_HOME_POWER);
         }
     }
 
-    public boolean boxIsDown(){
-        return !boxFlip.isBusy();
+    public void moveBucketToScore() {
+        if (!slide.isBusy() && !bottomLimit.isPressed()) {
+            boxFlip.setPower(BOX_FLIP_POWER);
+        }
+    }
+
+    public void startSlideMoving() {
+        slide.setTargetPosition(MIN_SCORE_HEIGHT - 20);
+        slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        slide.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        slide.setPower(.5);
+    }
+
+    public void setBucketTarget() {
+        boxFlip.setTargetPosition(BOX_SCORE_TICKS);
+        boxFlip.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        boxFlip.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
     }
 
     public void init() {
