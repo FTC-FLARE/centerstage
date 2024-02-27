@@ -14,44 +14,27 @@ public class MM_Launcher {
 
     public static double LAUNCH_POS = .448;
 
-    ElapsedTime timeSinceLiftStart = new ElapsedTime();
-    ElapsedTime lockTime = new ElapsedTime();
-
-
-    private boolean inLaunchPosition = false;
-    private boolean liftRequested = false;
-    private boolean unlocked = false;
-
     public MM_Launcher(MM_OpMode opMode) {
         this.opMode = opMode;
         init();
     }
 
-    public void launchControl(){
-        if (!liftRequested) {
-            if (MM_TeleOp.currentGamepad1.dpad_up && !MM_TeleOp.previousGamepad1.dpad_up){ //&& MM_OpMode.matchTimer.time() > 87) { TODO add match timer back
-                droneLock.setPosition(0);
-                lockTime.reset();
-                liftRequested = true;
-            }
-        } else {
-            if (!unlocked) {
-                if (lockTime.milliseconds() > 200) {
-                    lift.setPosition(LAUNCH_POS);
-                    unlocked = true;
-                }
-            } else { // unlocked`
-                if (!inLaunchPosition && lockTime.milliseconds() >= 1200) {
-                    ServoControllerEx controller = (ServoControllerEx) lift.getController();
-                    controller.setServoPwmDisable(lift.getPortNumber());
+    public void unlock(){
+        droneLock.setPosition(.5);
+    }
 
-                    inLaunchPosition = true;
-                }
+    public void lift(){
+        lift.setPosition(LAUNCH_POS);
+    }
 
-                if (inLaunchPosition && (MM_TeleOp.currentGamepad1.dpad_down && !MM_TeleOp.previousGamepad1.dpad_down)) {
-                    droneRelease.setPosition(1);
-                }
-            }
+    public void disengageLift(){
+        ServoControllerEx controller = (ServoControllerEx) lift.getController();
+        controller.setServoPwmDisable(lift.getPortNumber());
+    }
+
+    public void launchDrone(){
+        if (MM_TeleOp.currentGamepad1.left_bumper && !MM_TeleOp.previousGamepad1.left_bumper) {
+            droneRelease.setPosition(1);
         }
     }
 

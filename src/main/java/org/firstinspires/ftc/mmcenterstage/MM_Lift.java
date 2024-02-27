@@ -14,26 +14,22 @@ public class MM_Lift {
     public static double LIFT_RELEASE_POS = 0;
     public static double LIFT_LOCK_POS = 0.23;
 
-    boolean liftIsVertical = false;
-
     public MM_Lift(MM_OpMode opMode) {
         this.opMode = opMode;
         init();
     }
 
-    public void liftLift() {
-            if (opMode.gamepad1.right_bumper && MM_OpMode.matchTimer.time() > 87) {
-                liftRelease.setPosition(LIFT_RELEASE_POS);
-                liftIsVertical = true;
-            }
-            if (liftIsVertical) {
-                if (opMode.gamepad1.right_trigger > 0.1) {
-                    lift.setPower(1);
-                } else if (opMode.gamepad1.left_trigger > 0.1) {
-                    lift.setPower(-1);
-                } else {
-                    lift.setPower(0);
-                }
+    public void release(){
+        liftRelease.setPosition(LIFT_RELEASE_POS);
+    }
+
+    public void control() {
+            if (opMode.gamepad1.right_trigger > 0.1) {
+                lift.setPower(1);
+            } else if (opMode.gamepad1.left_trigger > 0.1) {
+                lift.setPower(-1);
+            } else {
+                lift.setPower(0);
             }
     }
 
