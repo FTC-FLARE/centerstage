@@ -501,7 +501,7 @@ public class MM_Drivetrain {
 
     }
 
-    public void strafeToFIndAprilTag(int tagId, int rightLeft, double power){
+    public void strafeToFindAprilTag(int tagId, int rightLeft, double power){
         AprilTagDetection tagInfo = visionPortal.getAprilTagInfo(tagId);
 
         while (opMode.opModeIsActive() && tagInfo == null){
@@ -544,7 +544,7 @@ public class MM_Drivetrain {
         } else {  // by truss
             driveInches(-20, 0.6);
             rotateToAngle(45 * leftOrRight);
-            driveInches(-11, 0.5);
+            driveInches(-12, 0.5);
             driveInches(10, 0.7);
         }
         return propPos;

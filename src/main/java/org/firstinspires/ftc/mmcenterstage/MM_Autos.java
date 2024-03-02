@@ -99,7 +99,7 @@ public class MM_Autos extends MM_OpMode {
             robot.drivetrain.driveInches(22, .85);
             robot.drivetrain.strafeInches(12 * alliance, .85);
             robot.drivetrain.rotateToAngle(85 * leftOrRight);
-            robot.drivetrain.strafeToFIndAprilTag(tagToFindOnBackdrop, -1 * leftOrRight, -.45);
+            robot.drivetrain.strafeToFindAprilTag(tagToFindOnBackdrop, -1 * leftOrRight, -.45 * leftOrRight);
             robot.drivetrain.rotateToAngle(85 * leftOrRight);
 //            robot.drivetrain.rotateToAngle(85);
         }
@@ -127,7 +127,7 @@ public class MM_Autos extends MM_OpMode {
     public void prepareForAprilTag() {
         targetX = propPos == 2 ? -1 : 1;
         tagToFindOnBackdrop = alliance == BLUE ? propPos + 1 : propPos + 4;
-        tagToFindOnWall = alliance == BLUE ? 10 : 8;
+        tagToFindOnWall = alliance == BLUE ? 10 : 7;
 
         robot.drivetrain.rotateToAngle(startingPos == BACKDROP? -85 * leftOrRight: -90 * leftOrRight);
         robot.drivetrain.visionPortal.exposure.setMode(ExposureControl.Mode.Manual);
@@ -136,7 +136,7 @@ public class MM_Autos extends MM_OpMode {
     public void prepareForAprilTag2() {
         targetX = propPos == 2 ? -1 : 1;
         tagToFindOnBackdrop = alliance == BLUE ? propPos + 1 : propPos + 4;
-        tagToFindOnWall = alliance == BLUE ? 10 : 8;
+        tagToFindOnWall = alliance == BLUE ? 10 : 7;
 
         robot.drivetrain.rotateToAngle(90 * alliance);
         robot.drivetrain.visionPortal.exposure.setMode(ExposureControl.Mode.Manual);

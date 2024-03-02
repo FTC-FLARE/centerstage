@@ -20,7 +20,7 @@ public class MM_Launcher {
     }
 
     public void unlock(){
-        droneLock.setPosition(.5);
+        droneLock.setPosition(.25);
     }
 
     public void lift(){
