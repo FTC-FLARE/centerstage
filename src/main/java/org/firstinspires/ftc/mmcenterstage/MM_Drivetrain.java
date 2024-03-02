@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.mmcenterstage.MM_Autos.LEFT;
 import static org.firstinspires.ftc.mmcenterstage.MM_Autos.RIGHT;
 import static org.firstinspires.ftc.mmcenterstage.MM_Autos.leftOrRight;
 import static org.firstinspires.ftc.mmcenterstage.MM_Autos.propPos;
+import static org.firstinspires.ftc.mmcenterstage.MM_Autos.tagToFindOnWall;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -40,18 +41,19 @@ public class MM_Drivetrain {
     public static double MIN_DRIVE_POWER = .28;
     public static double DRIVE_P_COEFF = .0166;
 
+    public static double MAX_STRAFE_POWER = .6;
     public static double STRAFE_P_COEFF = .02;
 
     public static double MAX_TURN_POWER = .5;
     public static double MIN_TURN_POWER = .15;
     public static double GYRO_TURN_P_COEFF = .016;
     public static double APRIL_TAG_TURN_P_COEFF = .004;
-    public static double HEADING_ERROR_THRESHOLD = 2;
+    public static double HEADING_ERROR_THRESHOLD = 1;
 
     public static double APRIL_TAG_ERROR_THRESHOLD = 2;
     public static double APRIL_TAG_ERROR_THRESHOLD_YAW = 6;
 
-    private static double DISTANCE_THRESHOLD = 1;
+    public static double DISTANCE_THRESHOLD = .5;
 
     public static double MAX_DETECT_ATTEMPTS = 500;
     public static double MAX_EXPOSURE = 37;
@@ -236,6 +238,102 @@ public class MM_Drivetrain {
         return driveToAprilTag(tagToFind, targetX, BACKDROP_APRILTAG_DISTANCE, -3);
     }
 
+    public boolean driveToAprilTagNoYaw(int tagToFind, double targetX, double targetY) {
+        setDriveMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        ElapsedTime refreshTime = new ElapsedTime();
+
+        boolean iSawIt = false;
+        boolean keepGoing = true;
+        detectAttemptCount = 0;
+        double drivePower = 0;
+        double strafePower = 0;
+        AprilTagDetection tagInfo = null;
+
+        while (opMode.opModeIsActive() && keepGoing) {
+            //opMode.robot.transport.moveBucketToScore();
+            opMode.multipleTelemetry.addData("current gain", visionPortal.gain.getGain());
+            tagInfo = visionPortal.getAprilTagInfo(tagToFind);
+
+            if (tagInfo != null) {
+                iSawIt = true;
+                opMode.multipleTelemetry.addLine("seeing tag");
+                aprilTagErrorY = visionPortal.getErrorY(targetY, tagInfo);
+                aprilTagErrorX = visionPortal.getErrorX(targetX, tagInfo);
+                detectAttemptCount = 0;
+
+                drivePower = aprilTagErrorY * DRIVE_P_COEFF * MAX_DRIVE_POWER;
+                strafePower = aprilTagErrorX * STRAFE_P_COEFF * MAX_DRIVE_POWER;
+
+                flPower = drivePower + strafePower;
+                frPower = drivePower - strafePower;
+                blPower = drivePower - strafePower;
+                brPower = drivePower + strafePower;
+
+                normalizeForMin(MIN_DRIVE_POWER);
+                normalize(MAX_DRIVE_POWER);
+
+                setDrivePowers();
+
+                if (Math.abs(aprilTagErrorY) <= APRIL_TAG_ERROR_THRESHOLD && Math.abs(aprilTagErrorX) <= APRIL_TAG_ERROR_THRESHOLD) {
+                    setDrivePowers(0);
+                    opMode.multipleTelemetry.addLine("Goal reached.");
+                    opMode.multipleTelemetry.update();
+                    return true;
+                }
+
+            } else { //tag not found
+                opMode.multipleTelemetry.addLine("looking for tag");
+                detectAttemptCount++;
+
+                opMode.multipleTelemetry.addData("current exposure", currentExposure);
+                if(!iSawIt){
+                    setDrivePowers(tagToFind == tagToFindOnWall? .15: -.15);
+                } else if (Math.abs(aprilTagErrorY) <= APRIL_TAG_ERROR_THRESHOLD && tagToFind < 7) {
+                    setDrivePowers(0);
+                    opMode.multipleTelemetry.addLine("eh close enough");
+                    opMode.multipleTelemetry.update();
+                    return true;
+                }
+
+                if (detectAttemptCount >= MAX_DETECT_ATTEMPTS) {//TODO if tag not found
+                    setDrivePowers(0);
+                    opMode.multipleTelemetry.addLine("lost aprilTag");
+                    opMode.multipleTelemetry.update();
+                    return false;
+
+                    //driveToFindAprilTag(tagToFind);
+                }
+
+                refreshTime.reset();
+                while(opMode.opModeIsActive() && refreshTime.milliseconds() <= 2 && tagInfo == null){
+                    if (currentExposure >= MAX_EXPOSURE){
+                        increaseExposure = false;
+                    } else if (currentExposure < 2){
+                        increaseExposure = true;
+                    }
+
+                    visionPortal.exposure.setExposure(increaseExposure ? (long) (currentExposure + exposureIterator) : (long) (currentExposure - exposureIterator), TimeUnit.MILLISECONDS);
+                    currentExposure = (int) (increaseExposure ? (currentExposure + exposureIterator) : (currentExposure - exposureIterator));
+                    tagInfo = visionPortal.getAprilTagInfo(tagToFind);
+                }
+            }
+
+            opMode.multipleTelemetry.addData("errorY", aprilTagErrorY);
+            opMode.multipleTelemetry.addData("errorX", aprilTagErrorX);
+            opMode.multipleTelemetry.addData("error yaw", aprilTagErrorYaw);
+            opMode.multipleTelemetry.addData("detect attempts", detectAttemptCount);
+            opMode.multipleTelemetry.addData("powers", " drive: %.2f  :)  strafe: %.2f", drivePower, strafePower);
+            opMode.multipleTelemetry.addData("aa fl normalize powers", flPower);
+            opMode.multipleTelemetry.addData("ab fr normalize powers", frPower);
+            opMode.multipleTelemetry.addData("ac bl normalize powers", blPower);
+            opMode.multipleTelemetry.addData("ad br normalize powers", brPower);
+            opMode.multipleTelemetry.update();
+        }//end while keep going
+
+        return false;
+    }
+
     public boolean driveToAprilTag(int tagToFind, double targetX, double targetY, double targetYaw) {
         setDriveMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
@@ -289,8 +387,8 @@ public class MM_Drivetrain {
 
                 opMode.multipleTelemetry.addData("current exposure", currentExposure);
                 if(!iSawIt){
-                    setDrivePowers(-.15);
-                } else if ( Math.abs(aprilTagErrorY) <= APRIL_TAG_ERROR_THRESHOLD) {
+                    setDrivePowers(tagToFind == tagToFindOnWall? .15: -.15);
+                } else if (Math.abs(aprilTagErrorY) <= APRIL_TAG_ERROR_THRESHOLD && tagToFind < 7) {
                     setDrivePowers(0);
                     opMode.multipleTelemetry.addLine("eh close enough");
                     opMode.multipleTelemetry.update();
@@ -335,6 +433,7 @@ public class MM_Drivetrain {
         return false;
     }
 
+
     public void driveToFindAprilTag(int tagId){
         setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
         setDrivePowers(.45);
@@ -365,27 +464,34 @@ public class MM_Drivetrain {
     }
 
     public void cruiseUnderTruss(){   //DO NOT RENAME; IF RENAMED THIS WILL BECOME A WAR!!!
-    // TODO cruise under truss
+    // TODO finish cruise under truss
+        driveToAprilTagNoYaw(tagToFindOnWall, -7 * leftOrRight, 25.3);
+        rotateToAngle(-90 * leftOrRight);
+        strafeToDistance(leftOrRight, 4.4);
+        rotateToAngle(-90 * leftOrRight);
+        driveInches(28, .4);
+        driveToAprilTagNoYaw(tagToFindOnWall, -18 * leftOrRight, 75.5);
+//        strafeInches(24, .6);
     }
 
     public void strafeToDistance (int rightLeft, double target){
         double power = 0;
-        double error = (target - getDistance(rightLeft)) * rightLeft;
+        double error = ((target - getDistance(rightLeft)) * rightLeft);
 
         while (Math.abs(error) >= DISTANCE_THRESHOLD && opMode.opModeIsActive()){
-            power = error * STRAFE_P_COEFF * MAX_DRIVE_POWER;
+            power = error * STRAFE_P_COEFF * MAX_STRAFE_POWER;
 
             flPower = power;
             frPower = -power;
             blPower = -power;
             brPower = power;
 
-            normalizeForMin(MIN_DRIVE_POWER);
-            normalize(MAX_DRIVE_POWER);
+            normalizeForMin(.08);
+            normalize(MAX_STRAFE_POWER);
 
             setDrivePowers();
 
-            error = (target - getDistance(rightLeft) * rightLeft);
+            error = ((target - getDistance(rightLeft)) * rightLeft);
 
             opMode.multipleTelemetry.addData("distance error", error);
             opMode.multipleTelemetry.update();
@@ -395,13 +501,43 @@ public class MM_Drivetrain {
 
     }
 
+    public void strafeToFIndAprilTag(int tagId, int rightLeft, double power){
+        AprilTagDetection tagInfo = visionPortal.getAprilTagInfo(tagId);
+
+        while (opMode.opModeIsActive() && tagInfo == null){
+
+            if (currentExposure >= MAX_EXPOSURE){
+                increaseExposure = false;
+            } else if (currentExposure < 2){
+                increaseExposure = true;
+            }
+
+            visionPortal.exposure.setExposure(increaseExposure ? (long) (currentExposure + exposureIterator) : (long) (currentExposure - exposureIterator), TimeUnit.MILLISECONDS);
+            currentExposure = (int) (increaseExposure ? (currentExposure + exposureIterator) : (currentExposure - exposureIterator));
+            tagInfo = visionPortal.getAprilTagInfo(tagId);
+
+            flPower = power;
+            frPower = -power;
+            blPower = -power;
+            brPower = power;
+
+            setDrivePowers();
+
+            if (getDistance(rightLeft) >=  30.5){
+                setDrivePowers(0);
+                break;
+            }
+
+        }
+    }
+
     public int purplePixel(){
         propPos = visionPortal.propPosition();
 
         if ((propPos == 0 && leftOrRight == LEFT) || (propPos == 2 && leftOrRight == RIGHT)){  // away from truss
             strafeInches(-8.5 * leftOrRight, .7);
-            driveInches(-23, 0.6);
-            driveInches(8, .7);
+            driveInches(-27, 0.6);
+            driveInches(9, .7);
         } else if (propPos == 1){  // center
             driveInches(-32, 0.6);
             driveInches(8, 0.7);

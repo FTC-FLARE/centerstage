@@ -30,8 +30,8 @@ public class MM_Autos extends MM_OpMode {
     public static int propPos;
 
     private static int targetX;
-    private static int tagToFindOnBackdrop;
-    private static int tagToFindOnWall;
+    public static int tagToFindOnBackdrop;
+    public static int tagToFindOnWall;
 
     @Override
     public void initProcedures() {
@@ -92,28 +92,53 @@ public class MM_Autos extends MM_OpMode {
 
         propPos = robot.drivetrain.purplePixel();
 
-        // prepareForAprilTag();
+         prepareForAprilTag();
 
         if (startingPos == AUDIENCE) {
-            // robot.drivetrain.driveToAprilTag(tagToFindOnWall, -9.25, 25.3, 0);
-        } else {
-            prepareForAprilTag();  // temporarily only do on backdrop side
+            robot.drivetrain.cruiseUnderTruss();
+            robot.drivetrain.driveInches(22, .85);
+            robot.drivetrain.strafeInches(12 * alliance, .85);
+            robot.drivetrain.rotateToAngle(85 * leftOrRight);
+            robot.drivetrain.strafeToFIndAprilTag(tagToFindOnBackdrop, -1 * leftOrRight, -.45);
+            robot.drivetrain.rotateToAngle(85 * leftOrRight);
+//            robot.drivetrain.rotateToAngle(85);
+        }
+
+//        if(startingPos == BACKDROP) {
+            prepareForAprilTag2();
             robot.transport.startSlideMoving();
             robot.transport.setBucketTarget();
             foundApriltagScoreYellow = robot.drivetrain.driveToAprilTag(tagToFindOnBackdrop, targetX);
             if (foundApriltagScoreYellow) {
+                while (opModeIsActive() && !robot.transport.moveBucketToScore()){
+
+                }
                 robot.autoScoreOnBackDrop();
+
             }
-            robot.drivetrain.park(propPos);
+
+            if (startingPos == BACKDROP) {
+                robot.drivetrain.park(propPos);
+            }
         }
-    }
+
+//    }
 
     public void prepareForAprilTag() {
         targetX = propPos == 2 ? -1 : 1;
         tagToFindOnBackdrop = alliance == BLUE ? propPos + 1 : propPos + 4;
         tagToFindOnWall = alliance == BLUE ? 10 : 8;
 
-        robot.drivetrain.rotateToAngle(-85 * leftOrRight);
+        robot.drivetrain.rotateToAngle(startingPos == BACKDROP? -85 * leftOrRight: -90 * leftOrRight);
+        robot.drivetrain.visionPortal.exposure.setMode(ExposureControl.Mode.Manual);
+    }
+
+    public void prepareForAprilTag2() {
+        targetX = propPos == 2 ? -1 : 1;
+        tagToFindOnBackdrop = alliance == BLUE ? propPos + 1 : propPos + 4;
+        tagToFindOnWall = alliance == BLUE ? 10 : 8;
+
+        robot.drivetrain.rotateToAngle(90 * alliance);
         robot.drivetrain.visionPortal.exposure.setMode(ExposureControl.Mode.Manual);
     }
 }

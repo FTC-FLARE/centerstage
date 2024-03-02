@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.mmcenterstage;
 
+import static org.firstinspires.ftc.mmcenterstage.MM_Autos.BACKDROP;
+import static org.firstinspires.ftc.mmcenterstage.MM_Autos.startingPos;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -164,14 +167,16 @@ public class MM_Transport {
         }
     }
 
-    public void moveBucketToScore() {
+    public boolean moveBucketToScore() {
         if (!slide.isBusy() && !bottomLimit.isPressed()) {
             boxFlip.setPower(BOX_FLIP_POWER);
+            return true;
         }
+        return false;
     }
 
     public void startSlideMoving() {
-        slide.setTargetPosition(MIN_SCORE_HEIGHT - 20);
+        slide.setTargetPosition(startingPos == BACKDROP? MIN_SCORE_HEIGHT - 20: MIN_SCORE_HEIGHT + 270 );
         slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         slide.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         slide.setPower(.5);
